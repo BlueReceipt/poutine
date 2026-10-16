@@ -47,6 +47,8 @@ interface Props {
   selectedId: string | null;
   /** Where you are, once Near me found it. */
   me: { lat: number; lon: number } | null;
+  /** The places this visitor rated: their pins turn green. */
+  rated: ReadonlySet<string>;
   request: MapRequest | null;
   /** Add a place's pin: the map moves under it; null when no pin is being placed. */
   picking: { start: PickStart; seq: number } | null;
@@ -81,7 +83,8 @@ function nearestPin(map: MapLibreMap, x: number, y: number): MapGeoJSONFeature |
 const still = (): boolean => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 export function MapView(props: Props) {
-  const { places, groups, strings, selectedId, me, request, picking, onSelect, onFailed } = props;
+  const { places, groups, strings, selectedId, me, rated, request, picking, onSelect, onFailed } =
+    props;
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const select = useRef(onSelect);
@@ -90,6 +93,8 @@ export function MapView(props: Props) {
   picked.current = props.onPicked;
   const isPicking = useRef(false);
   isPicking.current = picking !== null;
+  const ratedNow = useRef(rated);
+  ratedNow.current = rated;
   const meNow = useRef<FeatureCollection<Point>>(meFeatures(me));
   meNow.current = meFeatures(me);
 
@@ -118,7 +123,10 @@ export function MapView(props: Props) {
         window.poutineMap = map;
         const loaded = map;
         loaded.on('load', () => {
-          loaded.addSource(PLACES, { type: 'geojson', data: pinFeatures(groups) });
+          loaded.addSource(PLACES, {
+            type: 'geojson',
+            data: pinFeatures(groups, ratedNow.current),
+          });
           for (const layer of pinLayers) loaded.addLayer(layer);
           loaded.addSource(ME, { type: 'geojson', data: meNow.current });
           loaded.addLayer(meLayer);
@@ -171,6 +179,11 @@ export function MapView(props: Props) {
   useEffect(() => {
     mapRef.current?.getSource<GeoJSONSource>(ME)?.setData(meFeatures(me));
   }, [me]);
+
+  // A place just rated turns green at once.
+  useEffect(() => {
+    mapRef.current?.getSource<GeoJSONSource>(PLACES)?.setData(pinFeatures(groups, rated));
+  }, [rated, groups]);
 
   // A place chosen in a list: fly there, close enough to see the streets around it. Near me: show
   // you and the closest places, above the list.

@@ -21,7 +21,8 @@ export function raterId(): string {
   }
 }
 
-function mine(): Record<string, number> {
+/** Every place this browser rated, with its stars. */
+export function myRatings(): Record<string, number> {
   try {
     const saved = JSON.parse(localStorage.getItem(MINE) ?? '{}') as unknown;
     return saved && typeof saved === 'object' ? (saved as Record<string, number>) : {};
@@ -31,13 +32,13 @@ function mine(): Record<string, number> {
 }
 
 export function myStars(place: string): number | null {
-  const stars = mine()[place];
+  const stars = myRatings()[place];
   return typeof stars === 'number' ? stars : null;
 }
 
 export function rememberStars(place: string, stars: number): void {
   try {
-    localStorage.setItem(MINE, JSON.stringify({ ...mine(), [place]: stars }));
+    localStorage.setItem(MINE, JSON.stringify({ ...myRatings(), [place]: stars }));
   } catch {
     // Nothing kept: the rating still counts.
   }

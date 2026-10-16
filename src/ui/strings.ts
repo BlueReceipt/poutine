@@ -38,6 +38,8 @@ export interface Strings {
     none: (query: string) => string;
     /** How many places the search found, for screen readers. */
     found: (count: number) => string;
+    /** Under the results: Add a place, named as searched. */
+    addMissing: (query: string) => string;
   };
   nearMe: {
     button: string;
@@ -83,7 +85,6 @@ export interface RatingWords {
 }
 
 export interface AddWords {
-  button: string;
   title: string;
   name: string;
   street: string;
@@ -161,6 +162,7 @@ const english: Strings = {
     clear: 'Clear the search',
     none: (query) => `Nothing matches “${query}”. Try a town or part of a name.`,
     found: (count) => (count === 1 ? '1 place found' : `${String(count)} places found`),
+    addMissing: (query) => `Can’t find it? Add “${query}”`,
   },
   nearMe: {
     button: 'Near me',
@@ -179,7 +181,7 @@ const english: Strings = {
     star: (stars) => (stars === 1 ? '1 star' : `${String(stars)} stars`),
     send: 'Send my rating',
     sending: 'Sending…',
-    thanks: 'Thanks! Your rating counts.',
+    thanks: 'Thanks! Your rating counts, and this place is now green on your map.',
     comment: 'A few words',
     reviews: 'What people say',
     report: 'Report',
@@ -196,7 +198,6 @@ const english: Strings = {
     },
   },
   add: {
-    button: 'Add a place',
     title: 'Add a place',
     name: 'Name',
     street: 'Civic number and street',
@@ -308,6 +309,7 @@ const french: Strings = {
     none: (query) =>
       `Rien ne correspond à «${NBSP}${query}${NBSP}». Essayez une ville ou une partie du nom.`,
     found: (count) => (count === 1 ? '1 place trouvée' : `${String(count)} places trouvées`),
+    addMissing: (query) => `Pas dans la liste${NBSP}? Ajouter «${NBSP}${query}${NBSP}»`,
   },
   nearMe: {
     button: 'Près de moi',
@@ -327,7 +329,7 @@ const french: Strings = {
     star: (stars) => (stars === 1 ? '1 étoile' : `${String(stars)} étoiles`),
     send: 'Envoyer ma note',
     sending: 'Envoi…',
-    thanks: `Merci${NBSP}! Votre note compte.`,
+    thanks: `Merci${NBSP}! Votre note compte, et cette place est maintenant verte sur votre carte.`,
     comment: 'Quelques mots',
     reviews: 'Ce qu’on en dit',
     report: 'Signaler',
@@ -344,7 +346,6 @@ const french: Strings = {
     },
   },
   add: {
-    button: 'Ajouter une place',
     title: 'Ajouter une place',
     name: 'Nom',
     street: 'Numéro civique et rue',

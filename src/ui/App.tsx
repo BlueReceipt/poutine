@@ -7,6 +7,7 @@ import { nearest, searchPlaces } from '../domain/search.ts';
 import { MapView, type MapRequest } from '../map/MapView.tsx';
 import { AddPlace, type PickStart } from './AddPlace.tsx';
 import { noFixOf, whereAmI } from './location.ts';
+import { myRatings } from './rater.ts';
 import { NearbyList, type NearState } from './NearbyList.tsx';
 import { PlaceCard } from './PlaceCard.tsx';
 import { SearchBar } from './SearchBar.tsx';
@@ -32,10 +33,13 @@ export function App({ strings }: { strings: Strings }) {
   const [me, setMe] = useState<{ lat: number; lon: number } | null>(null);
   const [request, setRequest] = useState<MapRequest | null>(null);
   const [adding, setAdding] = useState(false);
+  const [addName, setAddName] = useState('');
   const [picking, setPicking] = useState<{ start: PickStart; seq: number } | null>(null);
   const [picked, setPicked] = useState<{ lat: number; lon: number } | null>(null);
   const [totals, setTotals] = useState<Record<string, RatingTotal>>({});
   const [ratedAt, setRatedAt] = useState<Record<string, number>>({});
+  // The places this browser rated, for their green pins.
+  const [mine, setMine] = useState<Record<string, number>>(() => myRatings());
   const seq = useRef(0);
   const failed = useCallback(() => {
     setState({ kind: 'failed' });
@@ -68,7 +72,9 @@ export function App({ strings }: { strings: Strings }) {
   const rated = useCallback((place: string, total: RatingTotal) => {
     setTotals((before) => ({ ...before, [place]: total }));
     setRatedAt((before) => ({ ...before, [place]: Date.now() }));
+    setMine(myRatings());
   }, []);
+  const ratedPlaces = useMemo(() => new Set(Object.keys(mine)), [mine]);
 
   const places = state.kind === 'ready' ? state.places : null;
   const groups = useMemo(() => (places ? groupByAddress(places) : []), [places]);
@@ -139,11 +145,13 @@ export function App({ strings }: { strings: Strings }) {
     seq.current += 1;
     setPicking({ start, seq: seq.current });
   }, []);
-  const startAdding = useCallback(() => {
+  /** Add a place, from a search that didn't find it: its name starts as what was searched. */
+  const startAdding = useCallback((name: string) => {
     setSelection(null);
     setNear(null);
     setQuery('');
     setPicked(null);
+    setAddName(name);
     setAdding(true);
   }, []);
   const closeAdding = useCallback(() => {
@@ -160,6 +168,7 @@ export function App({ strings }: { strings: Strings }) {
           strings={strings}
           selectedId={group?.id ?? null}
           me={me}
+          rated={ratedPlaces}
           request={request}
           picking={picking}
           onPicked={setPicked}
@@ -187,6 +196,7 @@ export function App({ strings }: { strings: Strings }) {
         results={results}
         onQuery={setQuery}
         onChoose={show}
+        onAdd={startAdding}
       />
       {places && !query.trim() && !adding && (
         <div class="map-actions">
@@ -197,12 +207,6 @@ export function App({ strings }: { strings: Strings }) {
               <path d="M12 1v4M12 19v4M1 12h4M19 12h4" stroke="currentColor" stroke-width="2" />
             </svg>
             {strings.nearMe.button}
-          </button>
-          <button type="button" class="pill add-place" onClick={startAdding}>
-            <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
-              <path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.5" />
-            </svg>
-            {strings.add.button}
           </button>
         </div>
       )}
@@ -216,6 +220,7 @@ export function App({ strings }: { strings: Strings }) {
         <AddPlace
           places={places}
           strings={strings}
+          initialName={addName}
           picked={picked}
           onPick={pick}
           onOpen={(existing) => {

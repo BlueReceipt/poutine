@@ -10,10 +10,12 @@ interface Props {
   results: readonly Place[];
   onQuery: (query: string) => void;
   onChoose: (place: Place) => void;
+  /** Add a place: the search didn't find it. */
+  onAdd: (name: string) => void;
 }
 
 /** The app's name and the search field across the top; what matches drops down below it. */
-export function SearchBar({ strings, count, query, results, onQuery, onChoose }: Props) {
+export function SearchBar({ strings, count, query, results, onQuery, onChoose, onAdd }: Props) {
   const words = strings.search;
   const searching = query.trim() !== '';
   return (
@@ -73,6 +75,18 @@ export function SearchBar({ strings, count, query, results, onQuery, onChoose }:
               ))}
             </ul>
           )}
+          <button
+            type="button"
+            class="add-missing"
+            onClick={() => {
+              onAdd(query.trim());
+            }}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18">
+              <path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.5" />
+            </svg>
+            {words.addMissing(query.trim())}
+          </button>
         </div>
       )}
     </header>

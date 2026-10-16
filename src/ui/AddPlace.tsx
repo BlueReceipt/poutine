@@ -16,6 +16,8 @@ type Step = 'where' | 'pin' | 'details' | 'sent';
 interface Props {
   places: readonly Place[];
   strings: Strings;
+  /** What the visitor searched for and didn't find. */
+  initialName: string;
   /** The map's center while picking: where the pin stands. */
   picked: { lat: number; lon: number } | null;
   onPick: (start: PickStart | null) => void;
@@ -47,12 +49,13 @@ const FIRST: Record<AddProblem, Step> = {
  * Add a place, in a sheet over the map: where it is (address, or I'm here), the pin (the map moves
  * under it), a few details and the bot check, then thanks. It waits for Alex's approval.
  */
-export function AddPlace({ places, strings, picked, onPick, onOpen, onClose }: Props) {
+export function AddPlace(props: Props) {
+  const { places, strings, initialName, picked, onPick, onOpen, onClose } = props;
   const words = strings.add;
   const heading = useRef<HTMLHeadingElement>(null);
   const botCheck = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState<Step>('where');
-  const [name, setName] = useState('');
+  const [name, setName] = useState(initialName);
   const [street, setStreet] = useState('');
   const [city, setCity] = useState('');
   const [province, setProvince] = useState('QC');
