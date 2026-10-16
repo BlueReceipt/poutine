@@ -25,7 +25,7 @@ const CONTENT_SECURITY_POLICY = [
 
 // Cloudflare Workers static assets: the same policy as an HTTP header, which also covers what a meta
 // tag can't (frame-ancestors), a few more locks, and caching: the page always revalidated, hashed
-// assets kept a year. no-transform keeps Cloudflare from editing the page (on a free plan it would
+// assets kept a day. no-transform keeps Cloudflare from editing the page (on a free plan it would
 // add its Web Analytics script).
 function cloudflareHeaders(): Plugin {
   const rules: Record<string, string[]> = {
@@ -38,7 +38,9 @@ function cloudflareHeaders(): Plugin {
     ],
     '/': ['Cache-Control: no-cache, no-transform'],
     '/index.html': ['Cache-Control: no-cache, no-transform'],
-    '/assets/*': ['Cache-Control: public, max-age=31536000, immutable'],
+    // A day, not a year: a broken copy a browser keeps (as Alex's Chrome did on 2026-10-16, from
+    // the minute of a deploy) then clears by itself. The names change with every change anyway.
+    '/assets/*': ['Cache-Control: public, max-age=86400'],
   };
   return {
     name: 'poutine:cloudflare-headers',

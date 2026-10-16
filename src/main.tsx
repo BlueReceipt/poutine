@@ -1,5 +1,6 @@
 import { render } from 'preact';
 import { App } from './ui/App.tsx';
+import { repairStylesWhenLoaded } from './ui/restyle.ts';
 import { phoneLanguage, stringsFor } from './ui/strings.ts';
 import './ui/fonts.css';
 import './ui/styles.css';
@@ -15,3 +16,4 @@ document.documentElement.lang = language;
 document.title = strings.appName;
 
 render(<App strings={strings} />, root);
+repairStylesWhenLoaded();

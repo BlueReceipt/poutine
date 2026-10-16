@@ -99,6 +99,15 @@ export function MapView(props: Props) {
     void loadMapLibre()
       .then((maplibre) => {
         if (cancelled || !container.current) return;
+        // The map's box is the screen whatever the stylesheet does: without it (a browser kept a
+        // broken copy, see restyle.ts) the box once grew without end and hid every control.
+        Object.assign(container.current.style, {
+          position: 'absolute',
+          top: '0',
+          right: '0',
+          bottom: '0',
+          left: '0',
+        });
         map = new maplibre.Map({
           container: container.current,
           style: mapStyle(window.location.origin),
