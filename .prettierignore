@@ -1,0 +1,13 @@
+dist
+coverage
+package-lock.json
+.wrangler
+
+# Written by npm run places
+data
+
+# Generated glyphs
+public/map-assets
+
+# Markdown is prose: never reflow it.
+*.md

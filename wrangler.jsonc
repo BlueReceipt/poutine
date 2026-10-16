@@ -1,0 +1,13 @@
+// How Cloudflare publishes the map: a Worker with no code of its own (yet) that serves the built
+// `dist` folder at poutine.ederer.digital. Connected to the GitHub repository (Workers Builds), each
+// push to main runs `npm run build`, then `npx wrangler deploy` with this file. Deploying your own
+// copy: change the name to your Worker's and the address to yours.
+{
+  "name": "poutine",
+  "compatibility_date": "2026-10-16",
+  "assets": { "directory": "./dist" },
+  // Wrangler replaces the Worker's addresses with these on each deploy.
+  "routes": [{ "pattern": "poutine.ederer.digital", "custom_domain": true }],
+  "workers_dev": false,
+  "preview_urls": false,
+}

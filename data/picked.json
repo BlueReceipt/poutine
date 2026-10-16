@@ -1,0 +1,478 @@
+{
+ "about": "Alex's picks, by OpenStreetMap ID, anywhere: always kept. Most come from his My Maps sample (2026-10-05); \"confirmed\": he vouches that it serves poutine.",
+ "places": [
+  {
+   "osm": "node/10301038872",
+   "name": "Cantine Chez Paul"
+  },
+  {
+   "osm": "node/10565949191",
+   "name": "Casse-Croûte Chez Line"
+  },
+  {
+   "osm": "node/10674791822",
+   "name": "Snack Bar D'Amours"
+  },
+  {
+   "osm": "node/10782146757",
+   "name": "Cantine La Paysanne"
+  },
+  {
+   "osm": "node/11018936726",
+   "name": "Jos Patate"
+  },
+  {
+   "osm": "node/11108915411",
+   "name": "Bistro Patate au Four"
+  },
+  {
+   "osm": "node/11171709513",
+   "name": "La Poutinerie"
+  },
+  {
+   "osm": "node/11252159575",
+   "name": "Chez Milie Casse-Croûte"
+  },
+  {
+   "osm": "node/11932016985",
+   "name": "Restaurant pizza / Le Patatier La Frite Dorée"
+  },
+  {
+   "osm": "node/12178390534",
+   "name": "Cantine Mamie Sylvie"
+  },
+  {
+   "osm": "node/12348720597",
+   "name": "Cric Crac Casse croûte antillais"
+  },
+  {
+   "osm": "node/12348738705",
+   "name": "La Belle Anne casse-croûte mets antillais"
+  },
+  {
+   "osm": "node/12509538648",
+   "name": "Casse-Croûte Saint-Caz"
+  },
+  {
+   "osm": "node/12565668615",
+   "name": "Patate de la 117"
+  },
+  {
+   "osm": "node/12898557004",
+   "name": "Cantine le baumier"
+  },
+  {
+   "osm": "node/13040089163",
+   "name": "Cantine et Bar laitier Mickey"
+  },
+  {
+   "osm": "node/13081786131",
+   "name": "Casse-Croûte 75"
+  },
+  {
+   "osm": "node/13125489985",
+   "name": "Cantine la patate a Patou"
+  },
+  {
+   "osm": "node/13180515388",
+   "name": "Casse-Croûte Chez Mamie Yoyo"
+  },
+  {
+   "osm": "node/13252332833",
+   "name": "Casse Croute Campbell"
+  },
+  {
+   "osm": "node/13261605363",
+   "name": "O'frites"
+  },
+  {
+   "osm": "node/13264897715",
+   "name": "Casse Croute Chez Renée"
+  },
+  {
+   "osm": "node/13426465212",
+   "name": "Le Coin de la Patate"
+  },
+  {
+   "osm": "node/13531712795",
+   "name": "Casse-croûte chez Jojo"
+  },
+  {
+   "osm": "node/13909719713",
+   "name": "Casse-croûte Jo-Bine"
+  },
+  {
+   "osm": "node/2209322835",
+   "name": "Cantine Le Rallye"
+  },
+  {
+   "osm": "node/2417267265",
+   "name": "Casse-croûte La Dégustation"
+  },
+  {
+   "osm": "node/2498985161",
+   "name": "Jukebox Burgers & Bar Laitier"
+  },
+  {
+   "osm": "node/2700490412",
+   "name": "Frites Alors!"
+  },
+  {
+   "osm": "node/2721770452",
+   "name": "Casse-croûte Pierrot"
+  },
+  {
+   "osm": "node/2920171976",
+   "name": "Snack-bar St-Jean"
+  },
+  {
+   "osm": "node/3196970861",
+   "name": "Casse-croûte L'Authentique"
+  },
+  {
+   "osm": "node/3471694244",
+   "name": "Véloasis (Bar Laitier et Casse-Croûte)"
+  },
+  {
+   "osm": "node/3874127261",
+   "name": "À la Patate Dorée"
+  },
+  {
+   "osm": "node/4121992103",
+   "name": "La Frite à Brigitte"
+  },
+  {
+   "osm": "node/4296900291",
+   "name": "Casse-Croûte Chez Gaston"
+  },
+  {
+   "osm": "node/4310150697",
+   "name": "La Patate d'Autrefois"
+  },
+  {
+   "osm": "node/4350355490",
+   "name": "Snack Bar Au Vieux Frêne"
+  },
+  {
+   "osm": "node/4398017640",
+   "name": "Casse-Croute Girouette"
+  },
+  {
+   "osm": "node/4412445740",
+   "name": "Casse-Croute Arc-en-Ciel"
+  },
+  {
+   "osm": "node/4437608446",
+   "name": "La Frite à Mon'Oncle"
+  },
+  {
+   "osm": "node/4468110851",
+   "name": "Casse-croûte Le St-Scho"
+  },
+  {
+   "osm": "node/4470347647",
+   "name": "Pomme frite Burger Gourmet"
+  },
+  {
+   "osm": "node/4569081640",
+   "name": "Chez Ma Tante Patates Frites"
+  },
+  {
+   "osm": "node/466615713",
+   "name": "Patate & Persil"
+  },
+  {
+   "osm": "node/4712841389",
+   "name": "Casse-croute D'en Haut"
+  },
+  {
+   "osm": "node/4998810223",
+   "name": "Casse-croûte mange dans mon hood"
+  },
+  {
+   "osm": "node/5004004037",
+   "name": "Steak Frite St Paul"
+  },
+  {
+   "osm": "node/5108397085",
+   "name": "Le Snack Shack"
+  },
+  {
+   "osm": "node/5829295542",
+   "name": "Cantine La Poutine Du Bonheur"
+  },
+  {
+   "osm": "node/5871262636",
+   "name": "Cantine du Heron"
+  },
+  {
+   "osm": "node/5885556648",
+   "name": "Casse-Croûte Fromage et cie"
+  },
+  {
+   "osm": "node/6191233520",
+   "name": "Casse-croûte La Baraque"
+  },
+  {
+   "osm": "node/6772991699",
+   "name": "Cantine & Bar Laitier Le Bouche-Trou"
+  },
+  {
+   "osm": "node/6933304997",
+   "name": "Cantine Maude"
+  },
+  {
+   "osm": "node/7069895739",
+   "name": "Patate Boyer"
+  },
+  {
+   "osm": "node/7147531777",
+   "name": "Restaurant Max Poutine"
+  },
+  {
+   "osm": "node/7396327740",
+   "name": "Chez M. Patate"
+  },
+  {
+   "osm": "node/7416011285",
+   "name": "Chez Ben - Casse-Croûte"
+  },
+  {
+   "osm": "node/7433945543",
+   "name": "Capitaine Patate"
+  },
+  {
+   "osm": "node/778707227",
+   "name": "Casse-Croûte La Bonne Bouffe"
+  },
+  {
+   "osm": "node/864716914",
+   "name": "Montreal Poutine"
+  },
+  {
+   "osm": "node/8670045222",
+   "name": "Casse-Croûte Madame Patate"
+  },
+  {
+   "osm": "node/8697287533",
+   "name": "Casse-Croûte La Fringale"
+  },
+  {
+   "osm": "node/8909946188",
+   "name": "Patate rouge"
+  },
+  {
+   "osm": "node/8936789396",
+   "name": "Cantine Saint-Mathias"
+  },
+  {
+   "osm": "node/8983944190",
+   "name": "Poutine & co"
+  },
+  {
+   "osm": "node/9218451427",
+   "name": "La Belle Patate Dorion"
+  },
+  {
+   "osm": "node/9249414117",
+   "name": "La Baraque à Frites"
+  },
+  {
+   "osm": "node/9250870364",
+   "name": "Patate Attack"
+  },
+  {
+   "osm": "node/9281976330",
+   "name": "La Cantine Punjab"
+  },
+  {
+   "osm": "node/9321116609",
+   "name": "Aux palais des saveurs poutinerie"
+  },
+  {
+   "osm": "node/9334559243",
+   "name": "Casse-Croûte St-Marc"
+  },
+  {
+   "osm": "node/9338409818",
+   "name": "Casse-Croûte H & P"
+  },
+  {
+   "osm": "node/9356494210",
+   "name": "Casse-croute - L'Ami du passant"
+  },
+  {
+   "osm": "node/9433747518",
+   "name": "Pat la Patate"
+  },
+  {
+   "osm": "node/9436909505",
+   "name": "CASSE-CROÛTE DU NORD"
+  },
+  {
+   "osm": "node/9436988252",
+   "name": "Casse-Croûte La Fringale"
+  },
+  {
+   "osm": "node/9463455986",
+   "name": "Casse-Croûte Patamix"
+  },
+  {
+   "osm": "node/9478445120",
+   "name": "Casse-Croûte du Mont Rigaud"
+  },
+  {
+   "osm": "node/9707374506",
+   "name": "Cantine Le Snack de la Rivière"
+  },
+  {
+   "osm": "node/9767052400",
+   "name": "Casse-Croûte Jo-Bine"
+  },
+  {
+   "osm": "node/9908562048",
+   "name": "Cantine La Bonne Poutine"
+  },
+  {
+   "osm": "way/1019988333",
+   "name": "Cantine du Green"
+  },
+  {
+   "osm": "way/1020394706",
+   "name": "Restaurant Cantine Fortier"
+  },
+  {
+   "osm": "way/1022937993",
+   "name": "Cantine Chez Marilyn"
+  },
+  {
+   "osm": "way/1123413158",
+   "name": "Casse-Croûte Bournival"
+  },
+  {
+   "osm": "way/1443388468",
+   "name": "Casse-croûte 125"
+  },
+  {
+   "osm": "way/1511531112",
+   "name": "Cantine du Vacancier"
+  },
+  {
+   "osm": "way/1540338111",
+   "name": "Cantine Hoffie"
+  },
+  {
+   "osm": "way/1558254666",
+   "name": "Cantine Hurteau"
+  },
+  {
+   "osm": "way/317980601",
+   "name": "Casse-Croute La Seigneurie"
+  },
+  {
+   "osm": "way/328864040",
+   "name": "La Patata Glacee"
+  },
+  {
+   "osm": "way/330091905",
+   "name": "Casse Croute Maxi Frite"
+  },
+  {
+   "osm": "way/369104599",
+   "name": "Chez Bob Pataterie"
+  },
+  {
+   "osm": "way/371782903",
+   "name": "Gaga Patate"
+  },
+  {
+   "osm": "way/389628674",
+   "name": "Leblanc Patates"
+  },
+  {
+   "osm": "way/412293843",
+   "name": "La Pataterie Hulloise"
+  },
+  {
+   "osm": "way/428195963",
+   "name": "Réjean Patate"
+  },
+  {
+   "osm": "way/459089268",
+   "name": "La Patate Dorée"
+  },
+  {
+   "osm": "way/465035610",
+   "name": "Le Roi des Patates Frites"
+  },
+  {
+   "osm": "way/466090062",
+   "name": "Coco Frite"
+  },
+  {
+   "osm": "way/473653473",
+   "name": "Patate Lou Lou"
+  },
+  {
+   "osm": "way/480211382",
+   "name": "Cantine du chenail"
+  },
+  {
+   "osm": "way/549181124",
+   "name": "Cantine La Fourchette"
+  },
+  {
+   "osm": "way/555012457",
+   "name": "Casse-croûte la Licorne"
+  },
+  {
+   "osm": "way/574669626",
+   "name": "Au coin de la Patate"
+  },
+  {
+   "osm": "way/584712557",
+   "name": "Snack-Shack"
+  },
+  {
+   "osm": "way/608070922",
+   "name": "Cantine Sainte-Flavie"
+  },
+  {
+   "osm": "way/624155421",
+   "name": "Cantine du Quai"
+  },
+  {
+   "osm": "way/712368791",
+   "name": "Cantine Chez Jo-Ann"
+  },
+  {
+   "osm": "way/799479427",
+   "name": "Casse-croûte l'express du fleuve"
+  },
+  {
+   "osm": "way/909175466",
+   "name": "Patate Chez Gros Loup"
+  },
+  {
+   "osm": "way/987216267",
+   "name": "Casse-Croûte Élisa"
+  },
+  {
+   "osm": "node/8156068991",
+   "name": "La Barouche",
+   "confirmed": true,
+   "note": "Saint-Isidore, Ontario (Alex, 2026-10-16). Address and description from its Facebook page; phone from Alex.",
+   "details": {
+    "housenumber": "4755",
+    "street": "Ste-Catherine",
+    "phone": "(613) 524-2952",
+    "facebook": "https://www.facebook.com/p/La-Barouche-100063580153629/",
+    "cuisine": [
+     "poutine",
+     "fries",
+     "hot_dog"
+    ]
+   }
+  }
+ ]
+}

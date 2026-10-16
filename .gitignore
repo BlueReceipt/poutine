@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+.wrangler/
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+
+# The review spreadsheet npm run places writes, and its last OpenStreetMap answer
+data/review/
+data/cache/
+
+# Logs
+*.log
+
+# OS, OneDrive and Office clutter
+.DS_Store
+Thumbs.db
+desktop.ini
+~$*
+
+# Editors and local tool settings
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.claude/settings.local.json
+.dev.vars
+*.local

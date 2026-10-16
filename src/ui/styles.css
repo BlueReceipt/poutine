@@ -1,0 +1,79 @@
+:root {
+  --ink: #000000;
+  --sheet: #ffffff;
+  --graphite: #52564f;
+  --text: 17px;
+  --text-secondary: 15px;
+  --space: 16px;
+
+  color-scheme: light;
+  font-family: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+  font-size: var(--text);
+  line-height: 1.4;
+  color: var(--ink);
+  background: var(--sheet);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app,
+.app {
+  margin: 0;
+  height: 100%;
+}
+
+.app {
+  position: relative;
+  overflow: hidden;
+}
+
+.map {
+  position: absolute;
+  inset: 0;
+}
+
+/* The app's name over the map, top left, clear of the phone's notch. */
+.badge {
+  position: absolute;
+  top: max(var(--space), env(safe-area-inset-top));
+  left: max(var(--space), env(safe-area-inset-left));
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: var(--sheet);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
+}
+
+.badge h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.badge p {
+  margin: 0;
+  color: var(--graphite);
+  font-size: var(--text-secondary);
+}
+
+.notice {
+  position: absolute;
+  inset: auto var(--space) max(var(--space), env(safe-area-inset-bottom));
+  margin: 0;
+  padding: 12px var(--space);
+  border-radius: 12px;
+  background: var(--sheet);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
+}
+
+.maplibregl-ctrl-attrib {
+  font-family: inherit;
+}
