@@ -1,14 +1,19 @@
 /**
- * Cloudflare Turnstile, the bot check of Add a place: loaded from Cloudflare only when the form
- * reaches it, shown only when Cloudflare isn't sure (most people never see it). Its token goes
- * with the place; the Worker asks Cloudflare whether it passed.
+ * Cloudflare Turnstile, the bot check of Add a place and ratings: loaded from Cloudflare only when
+ * a send is near, shown only when Cloudflare isn't sure (most people never see it). Its token goes
+ * with the send; the Worker asks Cloudflare whether it passed.
  */
 
 /** Cloudflare's test key: always passes, for local runs and tests. */
 const TEST_SITE_KEY = '1x00000000000000000000AA';
 
-/** The real key per address (public by design: it's in every page that shows the check). */
-const SITE_KEYS: Record<string, string> = {};
+/**
+ * The real key per address (public by design: it's in every page that shows the check). Its
+ * secret is the Worker's TURNSTILE_SECRET, set in Cloudflare, never here.
+ */
+const SITE_KEYS: Record<string, string> = {
+  'poutine.ederer.digital': '0x4AAAAAAFYoKVCK3kch26sY',
+};
 
 export function siteKey(hostname: string): string {
   return SITE_KEYS[hostname] ?? TEST_SITE_KEY;
