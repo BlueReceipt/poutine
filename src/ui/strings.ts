@@ -30,12 +30,38 @@ export interface Strings {
     /** The chooser at a pin shared by places at one address. */
     sharedPin: (count: number) => string;
   };
+  search: {
+    label: string;
+    placeholder: (count: number) => string;
+    clear: string;
+    none: (query: string) => string;
+    /** How many places the search found, for screen readers. */
+    found: (count: number) => string;
+  };
+  nearMe: {
+    button: string;
+    title: string;
+    locating: string;
+    denied: string;
+    unavailable: string;
+    distance: (meters: number) => string;
+  };
   hours: HoursWords;
 }
 
 export type Language = 'en' | 'fr';
 
 const pad = (minutes: number): string => String(minutes).padStart(2, '0');
+
+/** Metres to the nearest 10 under a kilometre (995 m is "1 km"), then km, one decimal under 10. */
+const distanceIn =
+  (locale: string, space: string) =>
+  (meters: number): string => {
+    const tens = Math.round(meters / 10) * 10;
+    if (tens < 1000) return `${String(tens)}${space}m`;
+    const decimals = meters < 9950 ? 1 : 0;
+    return `${(meters / 1000).toLocaleString(locale, { maximumFractionDigits: decimals })}${space}km`;
+  };
 
 const english: Strings = {
   appName: 'Pootsin',
@@ -56,6 +82,22 @@ const english: Strings = {
     menu: 'Menu',
     googleMaps: 'See on Google Maps',
     sharedPin: (count) => `${String(count)} places at this address`,
+  },
+  search: {
+    label: 'Search by name or town',
+    placeholder: (count) => `Search ${count.toLocaleString('en-CA')} places`,
+    clear: 'Clear the search',
+    none: (query) => `Nothing matches “${query}”. Try a town or part of a name.`,
+    found: (count) => (count === 1 ? '1 place found' : `${String(count)} places found`),
+  },
+  nearMe: {
+    button: 'Near me',
+    title: 'Closest to you',
+    locating: 'Finding where you are…',
+    denied:
+      'Location is off for this site. Allow it in your browser’s site settings to see the places near you.',
+    unavailable: 'Your location isn’t available right now. Try again outside or in a moment.',
+    distance: distanceIn('en-CA', ' '),
   },
   hours: {
     days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
@@ -90,6 +132,24 @@ const french: Strings = {
     menu: 'Menu',
     googleMaps: 'Voir sur Google Maps',
     sharedPin: (count) => `${String(count)} lieux à cette adresse`,
+  },
+  search: {
+    label: 'Chercher par nom ou par ville',
+    placeholder: (count) => `Chercher parmi ${count.toLocaleString('fr-CA')} places`,
+    clear: 'Effacer la recherche',
+    none: (query) =>
+      `Rien ne correspond à «${NBSP}${query}${NBSP}». Essayez une ville ou une partie du nom.`,
+    found: (count) => (count === 1 ? '1 place trouvée' : `${String(count)} places trouvées`),
+  },
+  nearMe: {
+    button: 'Près de moi',
+    title: 'Les plus proches',
+    locating: 'Recherche de votre position…',
+    denied:
+      'La localisation est désactivée pour ce site. Autorisez-la dans les paramètres du navigateur pour voir les places près de vous.',
+    unavailable:
+      'Votre position n’est pas disponible pour le moment. Réessayez dehors ou dans un instant.',
+    distance: distanceIn('fr-CA', NBSP),
   },
   hours: {
     days: ['lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.'],

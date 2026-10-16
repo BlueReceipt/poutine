@@ -12,10 +12,14 @@ export function displayPhone(e164: string): string {
  */
 export function addressLines(place: Place, near: (town: string) => string): string[] {
   const street = [place.housenumber, place.street].filter(Boolean).join(' ');
-  let town = place.citySource === 'nearest-town' && place.city ? near(place.city) : place.city;
-  if (town && place.province && place.province !== 'QC') town = `${town}, ${place.province}`;
-  const townLine = [town, place.postcode].filter(Boolean).join('  ');
+  const townLine = [townText(place, near), place.postcode].filter(Boolean).join('  ');
   return [street, townLine].filter(Boolean);
+}
+
+/** The town alone, as lists show it: "Saint-Isidore, ON", "near Sayabec", "Montréal". */
+export function townText(place: Place, near: (town: string) => string): string {
+  const town = place.citySource === 'nearest-town' && place.city ? near(place.city) : place.city;
+  return town && place.province && place.province !== 'QC' ? `${town}, ${place.province}` : town;
 }
 
 /** Google Maps directions to the pin itself (Maps URLs: no key, nothing stored). */

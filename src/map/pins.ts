@@ -54,6 +54,37 @@ export function boundsOf(places: readonly Place[]): [number, number, number, num
   return [west, south, east, north];
 }
 
+export const ME = 'me';
+
+/** Where you are, once Near me found it; nothing before. */
+export function meFeatures(me: { lat: number; lon: number } | null): FeatureCollection<Point> {
+  return {
+    type: 'FeatureCollection',
+    features: me
+      ? [
+          {
+            type: 'Feature',
+            geometry: { type: 'Point', coordinates: [me.lon, me.lat] },
+            properties: {},
+          },
+        ]
+      : [],
+  };
+}
+
+/** You: the usual blue dot, white-rimmed, above the pins. */
+export const meLayer: LayerSpecification = {
+  id: 'me',
+  type: 'circle',
+  source: ME,
+  paint: {
+    'circle-radius': 7,
+    'circle-color': '#1a73e8',
+    'circle-stroke-color': '#ffffff',
+    'circle-stroke-width': 3,
+  },
+};
+
 /** Only the selected pin; none when nothing is selected. */
 export function selectedFilter(id: string | null): FilterSpecification {
   return ['==', ['get', 'id'], id ?? ''];

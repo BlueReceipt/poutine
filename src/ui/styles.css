@@ -40,28 +40,153 @@ body,
   inset: 0;
 }
 
-/* The app's name over the map, top left, clear of the phone's notch. */
-.badge {
+.visually-hidden {
   position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The app's name and the search field across the top, clear of the phone's notch; the results
+   drop down below. Above the card, so a search can start while a card is open. */
+.top {
+  position: absolute;
+  z-index: 4;
   top: max(var(--space), env(safe-area-inset-top));
+  right: max(var(--space), env(safe-area-inset-right));
   left: max(var(--space), env(safe-area-inset-left));
-  padding: 8px 14px;
-  border-radius: 12px;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 4px 4px 14px;
+  border-radius: 14px;
   background: var(--sheet);
   box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
 }
 
-.badge h1 {
+.bar h1 {
   margin: 0;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   line-height: 1.2;
 }
 
-.badge p {
+.bar input {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0 10px;
+  border: 0;
+  border-left: 1px solid #d6d6d2;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+}
+
+.bar input:focus {
+  outline: none;
+}
+
+.bar:focus-within {
+  outline: 2px solid var(--ink);
+}
+
+/* The browser's own clear button: the bar has its own, bigger one. */
+.bar input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.bar .clear,
+.card .close {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 24px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.results {
+  max-height: 55vh;
+  margin-top: 8px;
+  overflow-y: auto;
+  border-radius: 14px;
+  background: var(--sheet);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
+}
+
+.results ul {
   margin: 0;
+  padding: 0 var(--space);
+  list-style: none;
+}
+
+.results .empty {
+  margin: 0;
+  padding: var(--space);
+}
+
+.results button,
+.card .choices button {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  min-height: 56px;
+  padding: 6px 4px;
+  border: 0;
+  border-bottom: 1px solid #d6d6d2;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.results li:last-child button,
+.card .choices li:last-child button {
+  border-bottom: 0;
+}
+
+.name {
+  font-weight: 700;
+}
+
+.where {
   color: var(--graphite);
   font-size: var(--text-secondary);
+}
+
+/* Near me, under the search bar on the right. */
+.near-me {
+  position: absolute;
+  z-index: 2;
+  top: calc(max(var(--space), env(safe-area-inset-top)) + 66px);
+  right: max(var(--space), env(safe-area-inset-right));
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 24px;
+  background: var(--sheet);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .notice {
@@ -111,16 +236,6 @@ body,
   position: absolute;
   top: 8px;
   right: 8px;
-  width: 48px;
-  height: 48px;
-  border: 0;
-  border-radius: 24px;
-  background: transparent;
-  color: var(--ink);
-  font: inherit;
-  font-size: 28px;
-  line-height: 1;
-  cursor: pointer;
 }
 
 .card .hint {
@@ -185,17 +300,4 @@ body,
   align-items: center;
   min-height: 48px;
   color: var(--ink);
-}
-
-.card .choices button {
-  width: 100%;
-  min-height: 56px;
-  padding: 0 4px;
-  border: 0;
-  border-bottom: 1px solid #d6d6d2;
-  background: transparent;
-  color: var(--ink);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
 }

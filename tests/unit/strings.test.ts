@@ -13,4 +13,16 @@ describe('language', () => {
     expect(stringsFor('en').appName).toBe('Pootsin');
     expect(stringsFor('fr').appName).toBe('Poutine');
   });
+
+  it('writes distances in metres, then kilometres, the language’s way', () => {
+    const en = stringsFor('en').nearMe.distance;
+    const fr = (meters: number): string =>
+      stringsFor('fr').nearMe.distance(meters).replaceAll(String.fromCharCode(0xa0), ' ');
+    expect(en(384)).toBe('380 m');
+    expect(en(995)).toBe('1 km');
+    expect(en(1340)).toBe('1.3 km');
+    expect(en(12_600)).toBe('13 km');
+    expect(fr(1340)).toBe('1,3 km');
+    expect(fr(384)).toBe('380 m');
+  });
 });

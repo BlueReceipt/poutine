@@ -1,12 +1,21 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
-import type { Point } from 'geojson';
-import type { Map as MapLibreMap, MapGeoJSONFeature } from 'maplibre-gl';
+import type { FeatureCollection, Point } from 'geojson';
+import type { GeoJSONSource, Map as MapLibreMap, MapGeoJSONFeature } from 'maplibre-gl';
 import { useEffect, useRef } from 'preact/hooks';
 import type { PinGroup } from '../domain/groups.ts';
 import type { Place } from '../domain/osmPlaces.ts';
 import type { Strings } from '../ui/strings.ts';
 import { loadMapLibre } from './maplibre.ts';
-import { PLACES, boundsOf, pinFeatures, pinLayers, selectedFilter } from './pins.ts';
+import {
+  ME,
+  PLACES,
+  boundsOf,
+  meFeatures,
+  meLayer,
+  pinFeatures,
+  pinLayers,
+  selectedFilter,
+} from './pins.ts';
 import { mapStyle } from './style.ts';
 
 declare global {
@@ -19,11 +28,19 @@ declare global {
 /** How far from a pin a finger may land, in screen pixels: the pins are small, fingers aren't. */
 const TAP = 22;
 
+/** Where the app asks the map to go: a pin chosen in a list, or an area (you and the closest). */
+export type MapRequest =
+  | { kind: 'place'; id: string; seq: number }
+  | { kind: 'area'; bounds: [number, number, number, number]; seq: number };
+
 interface Props {
   places: readonly Place[];
   groups: readonly PinGroup[];
   strings: Strings;
   selectedId: string | null;
+  /** Where you are, once Near me found it. */
+  me: { lat: number; lon: number } | null;
+  request: MapRequest | null;
   onSelect: (id: string | null) => void;
   onFailed: () => void;
 }
@@ -51,11 +68,16 @@ function nearestPin(map: MapLibreMap, x: number, y: number): MapGeoJSONFeature |
   return best;
 }
 
-export function MapView({ places, groups, strings, selectedId, onSelect, onFailed }: Props) {
+const still = (): boolean => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+export function MapView(props: Props) {
+  const { places, groups, strings, selectedId, me, request, onSelect, onFailed } = props;
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const select = useRef(onSelect);
   select.current = onSelect;
+  const meNow = useRef<FeatureCollection<Point>>(meFeatures(me));
+  meNow.current = meFeatures(me);
 
   useEffect(() => {
     let map: MapLibreMap | undefined;
@@ -71,11 +93,13 @@ export function MapView({ places, groups, strings, selectedId, onSelect, onFaile
           attributionControl: { compact: true, customAttribution: strings.placesCredit },
         });
         window.poutineMap = map;
-        mapRef.current = map;
         const loaded = map;
         loaded.on('load', () => {
           loaded.addSource(PLACES, { type: 'geojson', data: pinFeatures(groups) });
           for (const layer of pinLayers) loaded.addLayer(layer);
+          loaded.addSource(ME, { type: 'geojson', data: meNow.current });
+          loaded.addLayer(meLayer);
+          mapRef.current = loaded;
         });
         loaded.on('click', (event) => {
           const pin = nearestPin(loaded, event.point.x, event.point.y);
@@ -96,23 +120,51 @@ export function MapView({ places, groups, strings, selectedId, onSelect, onFaile
     };
   }, [places, groups, strings, onFailed]);
 
-  // The selected pin wears its ring, and slides above the card when the card would hide it.
+  // The selected pin wears its ring, and slides into view when the card or the search bar would
+  // hide it.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map?.getLayer('selected')) return;
+    if (!map) return;
     map.setFilter('selected', selectedFilter(selectedId));
     const group = groups.find((candidate) => candidate.id === selectedId);
     if (!group) return;
     const height = map.getContainer().clientHeight;
-    if (map.project([group.lon, group.lat]).y > height * 0.4) {
-      const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const { y } = map.project([group.lon, group.lat]);
+    if (y < 90 || y > height * 0.4)
       map.easeTo({
         center: [group.lon, group.lat],
         offset: [0, -height * 0.25],
-        duration: still ? 0 : 400,
+        duration: still() ? 0 : 400,
+      });
+  }, [selectedId, groups]);
+
+  useEffect(() => {
+    mapRef.current?.getSource<GeoJSONSource>(ME)?.setData(meFeatures(me));
+  }, [me]);
+
+  // A place chosen in a list: fly there, close enough to see the streets around it. Near me: show
+  // you and the closest places, above the list.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !request) return;
+    const height = map.getContainer().clientHeight;
+    if (request.kind === 'place') {
+      const group = groups.find((candidate) => candidate.id === request.id);
+      if (!group) return;
+      map.flyTo({
+        center: [group.lon, group.lat],
+        zoom: Math.max(map.getZoom(), 14),
+        offset: [0, -height * 0.25],
+        duration: still() ? 0 : 1200,
+      });
+    } else {
+      map.fitBounds(request.bounds, {
+        padding: { top: 140, bottom: height * 0.5, left: 40, right: 40 },
+        maxZoom: 15,
+        duration: still() ? 0 : 1200,
       });
     }
-  }, [selectedId, groups]);
+  }, [request, groups]);
 
   return <div ref={container} class="map" />;
 }
