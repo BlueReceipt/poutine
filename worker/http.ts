@@ -6,8 +6,13 @@ const LOCKED = {
   'Cache-Control': 'no-store',
 };
 
-export function json(body: unknown, status = 200): Response {
-  return Response.json(body, { status, headers: LOCKED });
+/** JSON for the page; with cacheSeconds, Cloudflare and the browser may keep it that long. */
+export function json(body: unknown, status = 200, cacheSeconds = 0): Response {
+  const headers =
+    cacheSeconds > 0
+      ? { ...LOCKED, 'Cache-Control': `public, max-age=${String(cacheSeconds)}` }
+      : LOCKED;
+  return Response.json(body, { status, headers });
 }
 
 /** An error the page turns into words: a code, never a sentence. */

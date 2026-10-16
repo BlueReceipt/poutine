@@ -22,6 +22,13 @@
   box-sizing: border-box;
 }
 
+/* No grey-blue flash on a tapped button: the stars and buttons show their own state, and a
+   keyboard's focus keeps its ring. */
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
 html,
 body,
 #app,
@@ -485,4 +492,77 @@ button.action.primary {
   margin: 8px 0 0;
   color: var(--graphite);
   font-size: var(--text-secondary);
+}
+
+/* Ratings: the summary under the name, "Your rating" as five big stars, in gravy brown. */
+.rating-summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 6px;
+  color: var(--graphite);
+  font-size: var(--text-secondary);
+}
+
+.star-small {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  color: #7a4a2a;
+  vertical-align: -2px;
+}
+
+.rating-box h3 {
+  margin: 16px 0 4px;
+  font-size: var(--text);
+}
+
+.stars {
+  display: flex;
+  gap: 4px;
+}
+
+.stars button {
+  width: 48px;
+  height: 48px;
+  padding: 6px;
+  border: 0;
+  border-radius: 24px;
+  background: transparent;
+  color: #7a4a2a;
+  cursor: pointer;
+}
+
+.stars button:focus-visible {
+  outline: 2px solid var(--ink);
+}
+
+.field textarea {
+  padding: 10px 12px;
+  border: 2px solid #8a8d86;
+  border-radius: 10px;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 400;
+  resize: vertical;
+}
+
+.reviews h3 {
+  margin: 16px 0 4px;
+  font-size: var(--text);
+}
+
+.reviews ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reviews li {
+  padding: 8px 0;
+  border-bottom: 1px solid #d6d6d2;
+}
+
+.reviews li p {
+  margin: 4px 0;
 }

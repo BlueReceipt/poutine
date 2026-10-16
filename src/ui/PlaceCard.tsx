@@ -10,6 +10,8 @@ import {
   googleMapsUrl,
   telUrl,
 } from '../domain/placeText.ts';
+import type { RatingTotal } from '../domain/ratings.ts';
+import { RatingBox, RatingSummary, ReviewList } from './Ratings.tsx';
 import type { Strings } from './strings.ts';
 
 interface Props {
@@ -17,12 +19,18 @@ interface Props {
   /** The place shown; null at a shared pin until one is chosen. */
   place: Place | null;
   strings: Strings;
+  /** Every rated place's count and stars added up (the Worker's totals); empty without them. */
+  totals: Readonly<Record<string, RatingTotal>>;
+  /** When this visitor last rated each place: its reviews are then asked for afresh. */
+  ratedAt: Readonly<Record<string, number>>;
+  onRated: (place: string, total: RatingTotal) => void;
   onChoose: (id: string) => void;
   onClose: () => void;
 }
 
 /** A sheet over the bottom of the map: one place's card, or the places sharing a pin. */
-export function PlaceCard({ group, place, strings, onChoose, onClose }: Props) {
+export function PlaceCard(props: Props) {
+  const { group, place, strings, totals, ratedAt, onRated, onChoose, onClose } = props;
   const heading = useRef<HTMLHeadingElement>(null);
 
   // The card takes the focus when it opens or changes; Escape closes it.
@@ -46,7 +54,17 @@ export function PlaceCard({ group, place, strings, onChoose, onClose }: Props) {
         ×
       </button>
       {place ? (
-        <PlaceDetails place={place} strings={strings} heading={heading} />
+        <PlaceDetails
+          key={place.osm}
+          place={place}
+          strings={strings}
+          heading={heading}
+          total={totals[place.osm]}
+          ratedAt={ratedAt[place.osm] ?? 0}
+          onRated={(total) => {
+            onRated(place.osm, total);
+          }}
+        />
       ) : (
         <>
           <h2 id="card-title" ref={heading} tabIndex={-1}>
@@ -76,9 +94,12 @@ interface DetailsProps {
   place: Place;
   strings: Strings;
   heading: RefObject<HTMLHeadingElement>;
+  total: RatingTotal | undefined;
+  ratedAt: number;
+  onRated: (total: RatingTotal) => void;
 }
 
-function PlaceDetails({ place, strings, heading }: DetailsProps) {
+function PlaceDetails({ place, strings, heading, total, ratedAt, onRated }: DetailsProps) {
   const words = strings.card;
   const address = addressLines(place, words.near);
   const hours = place.openingHours
@@ -96,6 +117,7 @@ function PlaceDetails({ place, strings, heading }: DetailsProps) {
       <h2 id="card-title" ref={heading} tabIndex={-1}>
         {place.name}
       </h2>
+      <RatingSummary total={total} strings={strings} />
       {place.poutine === 'unconfirmed' && <p class="hint">{words.unconfirmed}</p>}
       {address.length > 0 && (
         <p class="address">
@@ -117,6 +139,7 @@ function PlaceDetails({ place, strings, heading }: DetailsProps) {
           {words.directions}
         </a>
       </div>
+      <RatingBox place={place} strings={strings} onRated={onRated} />
       {hours.length > 0 && (
         <section class="hours">
           <h3>{words.hours}</h3>
@@ -141,6 +164,7 @@ function PlaceDetails({ place, strings, heading }: DetailsProps) {
           </a>
         </li>
       </ul>
+      <ReviewList place={place} strings={strings} version={ratedAt} />
     </>
   );
 }

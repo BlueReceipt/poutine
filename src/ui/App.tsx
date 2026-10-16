@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import placesUrl from '../../data/places.json?url';
 import { groupByAddress } from '../domain/groups.ts';
 import type { Place } from '../domain/osmPlaces.ts';
+import type { RatingTotal } from '../domain/ratings.ts';
 import { nearest, searchPlaces } from '../domain/search.ts';
 import { MapView, type MapRequest } from '../map/MapView.tsx';
 import { AddPlace, type PickStart } from './AddPlace.tsx';
@@ -33,6 +34,8 @@ export function App({ strings }: { strings: Strings }) {
   const [adding, setAdding] = useState(false);
   const [picking, setPicking] = useState<{ start: PickStart; seq: number } | null>(null);
   const [picked, setPicked] = useState<{ lat: number; lon: number } | null>(null);
+  const [totals, setTotals] = useState<Record<string, RatingTotal>>({});
+  const [ratedAt, setRatedAt] = useState<Record<string, number>>({});
   const seq = useRef(0);
   const failed = useCallback(() => {
     setState({ kind: 'failed' });
@@ -49,6 +52,23 @@ export function App({ strings }: { strings: Strings }) {
       })
       .catch(failed);
   }, [failed]);
+
+  // The stars of every rated place, from the Worker; without it (offline, npm run dev) cards say
+  // nobody has rated yet, and rating says why it couldn't be sent.
+  useEffect(() => {
+    fetch('/api/ratings')
+      .then((response) => (response.ok ? response.json() : { totals: {} }))
+      .then((answer: { totals: Record<string, RatingTotal> }) => {
+        setTotals(answer.totals);
+      })
+      .catch(() => {
+        // No stars shown.
+      });
+  }, []);
+  const rated = useCallback((place: string, total: RatingTotal) => {
+    setTotals((before) => ({ ...before, [place]: total }));
+    setRatedAt((before) => ({ ...before, [place]: Date.now() }));
+  }, []);
 
   const places = state.kind === 'ready' ? state.places : null;
   const groups = useMemo(() => (places ? groupByAddress(places) : []), [places]);
@@ -209,6 +229,9 @@ export function App({ strings }: { strings: Strings }) {
           group={group}
           place={place}
           strings={strings}
+          totals={totals}
+          ratedAt={ratedAt}
+          onRated={rated}
           onChoose={(placeId) => {
             setSelection({ groupId: group.id, placeId });
           }}

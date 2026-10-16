@@ -48,12 +48,39 @@ export interface Strings {
     distance: (meters: number) => string;
   };
   add: AddWords;
+  ratings: RatingWords;
   hours: HoursWords;
 }
 
 /** What Add a place says when sending fails, by the Worker's code or the form's own check. */
 export type AddProblem =
   Problem | 'bot-check' | 'too-many' | 'queue-full' | 'offline' | 'unexpected';
+
+/** What a rating's send can come back with, by the Worker's code or the card's own check. */
+export type RatingTrouble =
+  | 'stars'
+  | 'comment-too-long'
+  | 'reviews-off'
+  | 'not-a-rating'
+  | 'bot-check'
+  | 'too-many'
+  | 'already-rated'
+  | 'offline'
+  | 'unexpected';
+
+export interface RatingWords {
+  none: string;
+  summary: (average: number, count: number) => string;
+  yours: string;
+  star: (stars: number) => string;
+  send: string;
+  sending: string;
+  thanks: string;
+  comment: string;
+  reviews: string;
+  report: string;
+  problems: Record<RatingTrouble, string>;
+}
 
 export interface AddWords {
   button: string;
@@ -143,6 +170,30 @@ const english: Strings = {
       'Location is off for this site. Allow it in your browser’s site settings to see the places near you.',
     unavailable: 'Your location isn’t available right now. Try again outside or in a moment.',
     distance: distanceIn('en-CA', ' '),
+  },
+  ratings: {
+    none: 'No ratings yet',
+    summary: (average, count) =>
+      `${average.toLocaleString('en-CA', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} out of 5 · ${count === 1 ? '1 rating' : `${String(count)} ratings`}`,
+    yours: 'Your rating',
+    star: (stars) => (stars === 1 ? '1 star' : `${String(stars)} stars`),
+    send: 'Send my rating',
+    sending: 'Sending…',
+    thanks: 'Thanks! Your rating counts.',
+    comment: 'A few words',
+    reviews: 'What people say',
+    report: 'Report',
+    problems: {
+      stars: 'Choose from 1 to 5 stars.',
+      'comment-too-long': 'That’s a bit long: 500 characters at most.',
+      'reviews-off': 'Written reviews aren’t open yet: the stars alone are sent.',
+      'not-a-rating': 'Something’s off with the rating. Reload the page and try again.',
+      'bot-check': 'The bot check didn’t pass. Try again.',
+      'too-many': 'That’s a lot of ratings for one hour! Try again a bit later.',
+      'already-rated': 'Someone on your connection already rated this place today.',
+      offline: 'It couldn’t be sent. Check your connection and try again.',
+      unexpected: 'Something went wrong on our side. Try again in a moment.',
+    },
   },
   add: {
     button: 'Add a place',
@@ -267,6 +318,30 @@ const french: Strings = {
     unavailable:
       'Votre position n’est pas disponible pour le moment. Réessayez dehors ou dans un instant.',
     distance: distanceIn('fr-CA', NBSP),
+  },
+  ratings: {
+    none: 'Pas encore de note',
+    summary: (average, count) =>
+      `${average.toLocaleString('fr-CA', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} sur 5 · ${count === 1 ? '1 note' : `${String(count)} notes`}`,
+    yours: 'Votre note',
+    star: (stars) => (stars === 1 ? '1 étoile' : `${String(stars)} étoiles`),
+    send: 'Envoyer ma note',
+    sending: 'Envoi…',
+    thanks: `Merci${NBSP}! Votre note compte.`,
+    comment: 'Quelques mots',
+    reviews: 'Ce qu’on en dit',
+    report: 'Signaler',
+    problems: {
+      stars: 'Choisissez de 1 à 5 étoiles.',
+      'comment-too-long': `C’est un peu long${NBSP}: 500 caractères au plus.`,
+      'reviews-off': `Les commentaires ne sont pas encore ouverts${NBSP}: seules les étoiles sont envoyées.`,
+      'not-a-rating': 'Quelque chose cloche dans la note. Rechargez la page et réessayez.',
+      'bot-check': 'La vérification anti-robot a échoué. Réessayez.',
+      'too-many': `Ça fait beaucoup de notes en une heure${NBSP}! Réessayez un peu plus tard.`,
+      'already-rated': 'Quelqu’un sur votre connexion a déjà noté cette place aujourd’hui.',
+      offline: 'L’envoi n’a pas fonctionné. Vérifiez votre connexion et réessayez.',
+      unexpected: 'Un problème de notre côté. Réessayez dans un moment.',
+    },
   },
   add: {
     button: 'Ajouter une place',

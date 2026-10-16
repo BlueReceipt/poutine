@@ -20,6 +20,8 @@
     "waiting": "node scripts/review.ts waiting",
     "approve": "node scripts/review.ts approve",
     "reject": "node scripts/review.ts reject",
+    "ratings": "node scripts/review.ts ratings",
+    "hide": "node scripts/review.ts hide",
     "check": "npm run format:check && npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {

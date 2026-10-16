@@ -6,6 +6,8 @@
  *   npm run waiting                 the places waiting, with links to check them
  *   npm run approve -- 3 5          adds them to data/added.json and the list; live with the next push
  *   npm run reject -- 4             turns them down (kept in the database as rejected)
+ *   npm run ratings                 the latest ratings (and written reviews, once switched on)
+ *   npm run hide -- 12              hides ratings: they stop counting at once, no push needed
  *
  * Add --local to work on the database `npm start` uses on this PC instead of the real one.
  */
@@ -42,13 +44,13 @@ const [command = '', ...rest] = process.argv.slice(2);
 const where = rest.includes('--local') ? '--local' : '--remote';
 const ids = rest.filter((arg) => arg !== '--local').map(Number);
 
-function sql(statement: string): Row[] {
+function sql<T = Row>(statement: string): T[] {
   const output = execFileSync(
     process.execPath,
     [WRANGLER, 'd1', 'execute', 'poutine', where, '--json', '--command', statement],
     { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] },
   );
-  const answer = JSON.parse(output) as { results: Row[] }[];
+  const answer = JSON.parse(output) as { results: T[] }[];
   return answer.flatMap((part) => part.results);
 }
 
@@ -153,7 +155,67 @@ function review(status: 'approved' | 'rejected'): void {
   if (status === 'approved') console.log('They show on the map after the next push.');
 }
 
+interface RatingRow {
+  id: number;
+  place: string;
+  stars: number;
+  comment: string;
+  updated_at: string;
+  hidden: number;
+}
+
+function ratings(): void {
+  const rows = sql<RatingRow>(
+    'SELECT id, place, stars, comment, updated_at, hidden FROM ratings ORDER BY updated_at DESC LIMIT 50',
+  );
+  if (rows.length === 0) {
+    console.log('No ratings yet.');
+    return;
+  }
+  const { places } = JSON.parse(readFileSync(PLACES, 'utf8')) as { places: Place[] };
+  const names = new Map(places.map((place) => [place.osm, place.name]));
+  for (const row of rows)
+    console.log(
+      [
+        `#${String(row.id)}  ${'★'.repeat(row.stars)}${'☆'.repeat(5 - row.stars)}  ${names.get(row.place) ?? row.place}  ${row.updated_at.slice(0, 16).replace('T', ' ')} UTC${row.hidden ? '  (hidden)' : ''}`,
+        row.comment ? `    “${row.comment}”` : '',
+      ]
+        .filter(Boolean)
+        .join('\n'),
+    );
+}
+
+/** Hides ratings, and counts their places' totals again without them. */
+function hide(): void {
+  if (ids.length === 0 || ids.some((id) => !Number.isInteger(id) || id <= 0))
+    throw new Error('Give the numbers to hide: npm run hide -- 12 14');
+  const list = ids.join(', ');
+  const rows = sql<RatingRow>(`SELECT id, place FROM ratings WHERE id IN (${list})`);
+  if (rows.length === 0) {
+    console.warn('No such rating.');
+    return;
+  }
+  const placesHit = [...new Set(rows.map((row) => row.place))];
+  sql(
+    [
+      `UPDATE ratings SET hidden = 1 WHERE id IN (${list})`,
+      ...placesHit.map(
+        (place) =>
+          `INSERT OR REPLACE INTO rating_totals (place, count, total) SELECT '${place.replace(/'/g, "''")}', COUNT(*), COALESCE(SUM(stars), 0) FROM ratings WHERE place = '${place.replace(/'/g, "''")}' AND hidden = 0`,
+      ),
+    ].join('; '),
+  );
+  console.log(
+    `Hidden: ${rows.map((row) => `#${String(row.id)}`).join(', ')}. The map shows it within a minute.`,
+  );
+}
+
 if (command === 'waiting') waiting();
 else if (command === 'approve') review('approved');
 else if (command === 'reject') review('rejected');
-else throw new Error('npm run waiting | approve -- <numbers> | reject -- <numbers>');
+else if (command === 'ratings') ratings();
+else if (command === 'hide') hide();
+else
+  throw new Error(
+    'npm run waiting | approve -- <numbers> | reject -- <numbers> | ratings | hide -- <numbers>',
+  );

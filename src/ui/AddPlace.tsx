@@ -6,7 +6,7 @@ import { townText } from '../domain/placeText.ts';
 import { checkNewPlace, type PlacedBy, type Problem } from '../domain/submission.ts';
 import { noFixOf, whereAmI } from './location.ts';
 import type { AddProblem, Strings } from './strings.ts';
-import { loadTurnstile, siteKey } from './turnstile.ts';
+import { useBotCheck } from './useBotCheck.ts';
 
 /** Where pin picking starts: a spot and how close, or the map as it is. */
 export type PickStart = { lat: number; lon: number; zoom: number } | 'as-is';
@@ -66,29 +66,11 @@ export function AddPlace({ places, strings, picked, onPick, onOpen, onClose }: P
   const [notice, setNotice] = useState<string | null>(null);
   const [offerByHand, setOfferByHand] = useState(false);
   const [problems, setProblems] = useState<AddProblem[]>([]);
-  const widget = useRef<string | null>(null);
-  const token = useRef<string | null>(null);
-  const waiting = useRef<((value: string) => void)[]>([]);
-
-  const gotToken = (value: string | null) => {
-    token.current = value;
-    if (value) for (const resolve of waiting.current.splice(0)) resolve(value);
-  };
-  /** The bot check's token, waiting up to 15 s for Cloudflare's answer; null if none came. */
-  const botToken = (): Promise<string | null> =>
-    token.current
-      ? Promise.resolve(token.current)
-      : new Promise((resolve) => {
-          waiting.current.push(resolve);
-          setTimeout(() => {
-            resolve(token.current);
-          }, 15_000);
-        });
-  /** A token is spent once sent: a new check for the next try. */
-  const newBotCheck = () => {
-    gotToken(null);
-    if (widget.current) window.turnstile?.reset(widget.current);
-  };
+  // The bot check, once the details show (each token is good for one send).
+  const bot = useBotCheck(botCheck, step === 'details');
+  useEffect(() => {
+    if (bot.failed) setProblems(['bot-check']);
+  }, [bot.failed]);
 
   useEffect(() => {
     heading.current?.focus();
@@ -109,39 +91,6 @@ export function AddPlace({ places, strings, picked, onPick, onOpen, onClose }: P
     },
     [onPick],
   );
-
-  // The bot check, once the details show: Cloudflare's widget, mostly invisible. Its token comes
-  // a moment later; Send waits for it rather than failing (each token is good for one send).
-  useEffect(() => {
-    if (step !== 'details' || !botCheck.current) return;
-    let gone = false;
-    const container = botCheck.current;
-    loadTurnstile()
-      .then((turnstile) => {
-        if (gone) return;
-        widget.current = turnstile.render(container, {
-          sitekey: siteKey(window.location.hostname),
-          callback: gotToken,
-          'expired-callback': () => {
-            gotToken(null);
-          },
-          'error-callback': () => {
-            gotToken(null);
-          },
-          language: document.documentElement.lang,
-          appearance: 'interaction-only',
-        });
-      })
-      .catch(() => {
-        setProblems(['bot-check']);
-      });
-    return () => {
-      gone = true;
-      if (widget.current) window.turnstile?.remove(widget.current);
-      widget.current = null;
-      gotToken(null);
-    };
-  }, [step]);
 
   const pinAt = (where: { lat: number; lon: number }, how: PlacedBy, zoom: number) => {
     setPlacedBy(how);
@@ -246,7 +195,7 @@ export function AddPlace({ places, strings, picked, onPick, onOpen, onClose }: P
     }
     setBusy('sending');
     setProblems([]);
-    const check = await botToken();
+    const check = await bot.token();
     if (!check) {
       setProblems(['bot-check']);
       setBusy(null);
@@ -263,7 +212,7 @@ export function AddPlace({ places, strings, picked, onPick, onOpen, onClose }: P
         setStep('sent');
         return;
       }
-      newBotCheck();
+      bot.renew();
       const answer = (await response.json().catch(() => ({}))) as {
         error?: string;
         problems?: Problem[];
@@ -279,7 +228,7 @@ export function AddPlace({ places, strings, picked, onPick, onOpen, onClose }: P
         setProblems([answer.error]);
       else setProblems(['unexpected']);
     } catch {
-      newBotCheck();
+      bot.renew();
       setProblems(['offline']);
     } finally {
       setBusy(null);

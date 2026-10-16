@@ -2,47 +2,12 @@
 // sender is kept but a keyed hash of their connection and the day (emptied after 30 days), to
 // stop spam.
 import { checkNewPlace } from '../src/domain/submission.ts';
+import { connectionOf, KEEP_SENDER_DAYS, passedBotCheck, senderKey } from './guard.ts';
 import { fromThisSite, json, jsonBody, problem } from './http.ts';
 
 /** Places one connection may send in an hour, and places waiting before the form says to wait. */
 const PER_HOUR = 5;
 const MAX_WAITING = 500;
-const KEEP_SENDER_DAYS = 30;
-
-/** Cloudflare Turnstile's verdict on the token the form's bot check gave. */
-async function passedBotCheck(token: string, ip: string, secret: string): Promise<boolean> {
-  const form = new FormData();
-  form.append('secret', secret);
-  form.append('response', token);
-  if (ip) form.append('remoteip', ip);
-  try {
-    const answer = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      method: 'POST',
-      body: form,
-    });
-    const verdict = (await answer.json()) as { success?: boolean };
-    return verdict.success === true;
-  } catch {
-    return false;
-  }
-}
-
-/** A keyed hash of the connection's address and the day: the same sender today, never the address. */
-async function senderKey(ip: string, day: string, secret: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    'raw',
-    encoder.encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign'],
-  );
-  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(`${day}|${ip}`));
-  return [...new Uint8Array(signature)]
-    .slice(0, 16)
-    .map((byte) => byte.toString(16).padStart(2, '0'))
-    .join('');
-}
 
 export async function addPlace(request: Request, env: Env): Promise<Response> {
   if (!fromThisSite(request)) return problem(403, 'other-site');
@@ -51,9 +16,8 @@ export async function addPlace(request: Request, env: Env): Promise<Response> {
   const { botCheck, ...fields } = body as Record<string, unknown>;
   const checked = checkNewPlace(fields);
   if ('problems' in checked) return json({ error: 'problems', problems: checked.problems }, 400);
-  const ip = request.headers.get('CF-Connecting-IP') ?? '';
-  if (typeof botCheck !== 'string' || !(await passedBotCheck(botCheck, ip, env.TURNSTILE_SECRET)))
-    return problem(403, 'bot-check');
+  const ip = connectionOf(request);
+  if (!(await passedBotCheck(botCheck, ip, env.TURNSTILE_SECRET))) return problem(403, 'bot-check');
 
   const now = new Date();
   const sender = await senderKey(ip, now.toISOString().slice(0, 10), env.TURNSTILE_SECRET);
