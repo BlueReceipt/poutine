@@ -1,9 +1,20 @@
 import { describe, expect, it } from 'vitest';
+import { groupByAddress } from '../../src/domain/groups.ts';
 import type { Place } from '../../src/domain/osmPlaces.ts';
 import { boundsOf, pinFeatures } from '../../src/map/pins.ts';
 
-const at = (lon: number, lat: number): Place =>
-  ({ osm: `node/${String(lon)}`, name: 'Cantine Trempette', lon, lat, poutine: 'name' }) as Place;
+const at = (lon: number, lat: number, extra: Partial<Place> = {}): Place =>
+  ({
+    osm: `node/${String(lon)}`,
+    name: 'Cantine Trempette',
+    housenumber: '',
+    street: '',
+    city: '',
+    lon,
+    lat,
+    poutine: 'name',
+    ...extra,
+  }) as Place;
 
 describe('pins', () => {
   it('opens on where the places are, leaving out the farthest few', () => {
@@ -19,13 +30,21 @@ describe('pins', () => {
     expect(north).toBeLessThan(46);
   });
 
-  it('draws one point per place with what the pin needs', () => {
-    const { features } = pinFeatures([at(-73.6, 45.5)]);
+  it('draws one point per pin, with its count and whether anything confirms it', () => {
+    const shared = { housenumber: '1', street: 'Rue Principale', city: 'Saint-Rémi' };
+    const { features } = pinFeatures(
+      groupByAddress([
+        at(-73.6, 45.5),
+        at(-73.61, 45.26, { ...shared, poutine: 'unconfirmed' }),
+        at(-73.62, 45.26, { ...shared, poutine: 'cuisine' }),
+        at(-73.7, 45.3, { poutine: 'unconfirmed' }),
+      ]),
+    );
+    expect(features.map((feature) => feature.properties)).toEqual([
+      { id: 'node/-73.6', count: 1, poutine: 'name' },
+      { id: 'node/-73.61', count: 2, poutine: 'cuisine' },
+      { id: 'node/-73.7', count: 1, poutine: 'unconfirmed' },
+    ]);
     expect(features[0]?.geometry.coordinates).toEqual([-73.6, 45.5]);
-    expect(features[0]?.properties).toEqual({
-      osm: 'node/-73.6',
-      name: 'Cantine Trempette',
-      poutine: 'name',
-    });
   });
 });

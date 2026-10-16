@@ -1,6 +1,8 @@
 import type { FeatureCollection, Point } from 'geojson';
-import type { LayerSpecification } from 'maplibre-gl';
+import type { FilterSpecification, LayerSpecification } from 'maplibre-gl';
+import type { PinGroup } from '../domain/groups.ts';
 import type { Place, PoutineEvidence } from '../domain/osmPlaces.ts';
+import { FONT_BOLD } from './style.ts';
 
 export const PLACES = 'places';
 
@@ -8,19 +10,30 @@ export const PLACES = 'places';
 export const GRAVY = '#7a4a2a';
 
 export interface PinProperties {
-  osm: string;
-  name: string;
+  /** The pin group's ID: its first place's OpenStreetMap ID. */
+  id: string;
+  /** How many places share the pin (1 for most). */
+  count: number;
+  /** Unconfirmed only when nothing confirms any of the pin's places. */
   poutine: PoutineEvidence;
 }
 
-/** One point per place. Grouping places at one address under a shared pin comes with the cards. */
-export function pinFeatures(places: readonly Place[]): FeatureCollection<Point, PinProperties> {
+const STRENGTH: readonly PoutineEvidence[] = ['unconfirmed', 'name', 'cuisine', 'confirmed'];
+
+/** One point per pin: a place, or the places at one address. */
+export function pinFeatures(groups: readonly PinGroup[]): FeatureCollection<Point, PinProperties> {
   return {
     type: 'FeatureCollection',
-    features: places.map((place) => ({
+    features: groups.map((group) => ({
       type: 'Feature',
-      geometry: { type: 'Point', coordinates: [place.lon, place.lat] },
-      properties: { osm: place.osm, name: place.name, poutine: place.poutine },
+      geometry: { type: 'Point', coordinates: [group.lon, group.lat] },
+      properties: {
+        id: group.id,
+        count: group.places.length,
+        poutine: group.places
+          .map((place) => place.poutine)
+          .reduce((best, next) => (STRENGTH.indexOf(next) > STRENGTH.indexOf(best) ? next : best)),
+      },
     })),
   };
 }
@@ -41,15 +54,61 @@ export function boundsOf(places: readonly Place[]): [number, number, number, num
   return [west, south, east, north];
 }
 
-/** Solid gravy pins; a place nothing confirms yet is a ring with a white center. */
-export const pinLayer: LayerSpecification = {
-  id: 'pins',
-  type: 'circle',
-  source: PLACES,
-  paint: {
-    'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 3.5, 10, 6, 15, 9],
-    'circle-color': ['match', ['get', 'poutine'], 'unconfirmed', '#ffffff', GRAVY],
-    'circle-stroke-color': ['match', ['get', 'poutine'], 'unconfirmed', GRAVY, '#ffffff'],
-    'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 4, 1, 10, 2],
+/** Only the selected pin; none when nothing is selected. */
+export function selectedFilter(id: string | null): FilterSpecification {
+  return ['==', ['get', 'id'], id ?? ''];
+}
+
+/**
+ * Solid gravy pins; a place nothing confirms yet is a ring with a white center. A shared pin is
+ * bigger and carries its count. The selected pin wears a black ring outside a white one.
+ */
+export const pinLayers: LayerSpecification[] = [
+  {
+    id: 'selected',
+    type: 'circle',
+    source: PLACES,
+    filter: selectedFilter(null),
+    paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 9, 10, 12, 15, 15],
+      'circle-color': '#ffffff',
+      'circle-stroke-color': '#000000',
+      'circle-stroke-width': 2.5,
+    },
   },
-};
+  {
+    id: 'pins',
+    type: 'circle',
+    source: PLACES,
+    paint: {
+      // MapLibre wants the zoom on the outside: each stop picks the size for one or several places.
+      'circle-radius': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        4,
+        ['case', ['>', ['get', 'count'], 1], 7.5, 3.5],
+        10,
+        ['case', ['>', ['get', 'count'], 1], 10, 6],
+        15,
+        ['case', ['>', ['get', 'count'], 1], 13, 9],
+      ],
+      'circle-color': ['match', ['get', 'poutine'], 'unconfirmed', '#ffffff', GRAVY],
+      'circle-stroke-color': ['match', ['get', 'poutine'], 'unconfirmed', GRAVY, '#ffffff'],
+      'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 4, 1, 10, 2],
+    },
+  },
+  {
+    id: 'counts',
+    type: 'symbol',
+    source: PLACES,
+    filter: ['>', ['get', 'count'], 1],
+    layout: {
+      'text-field': ['to-string', ['get', 'count']],
+      'text-font': [FONT_BOLD],
+      'text-size': 11,
+      'text-allow-overlap': true,
+    },
+    paint: { 'text-color': ['match', ['get', 'poutine'], 'unconfirmed', GRAVY, '#ffffff'] },
+  },
+];
