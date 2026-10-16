@@ -1,6 +1,6 @@
 # Poutine · Pootsin
 
-A map of Québec's casse-croûtes, cantines and potato shacks: **Poutine** in French, **Pootsin** in English, at [poutine.ederer.digital](https://poutine.ederer.digital). Coming next: each place's card (address, hours, phone, directions), then photos of poutine and menu prices sent in by visitors, each one checked before it shows.
+A map of Québec's casse-croûtes, cantines and potato shacks: **Poutine** in French, **Pootsin** in English, at [poutine.ederer.digital](https://poutine.ederer.digital). Tap a pin for the place's card (address, hours, phone, directions), search by name or town, find the places near you, and add a place that's missing: each one sent is checked before it shows.
 
 ## The places
 
@@ -14,7 +14,10 @@ Node 24.
 
 - `npm install`, then `npm run dev` (http://localhost:5180) or `npm start` (the production build at http://localhost:4180).
 - `npm run check`: formatting, types, unit tests and the build, as the automatic checks run them.
-- Publishing: Cloudflare Workers, connected to this repository. Each push to `main` runs `npm run build`, then `npx wrangler deploy` with `wrangler.jsonc`.
+- `npm start` runs the Worker too (`wrangler dev`, a local D1 and Cloudflare Turnstile's test keys in `.dev.vars`: `TURNSTILE_SECRET=1x0000000000000000000000000000000AA`).
+- Publishing: Cloudflare Workers, connected to this repository. Each push to `main` runs `npm run build`, then `npx wrangler deploy` with `wrangler.jsonc`. The Worker (`worker/`) answers `/api/*`: the address lookup and Add a place, stored in D1 (`migrations/`) until checked.
+
+Address lookups: [Adresses Québec](https://www.donneesquebec.ca/) (CC BY 4.0) and Natural Resources Canada's Geolocation Service (Open Government Licence – Canada). Places visitors add join `data/places.json` under the ODbL once approved.
 
 ## License
 

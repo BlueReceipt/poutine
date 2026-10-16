@@ -1,11 +1,26 @@
-// How Cloudflare publishes the map: a Worker with no code of its own (yet) that serves the built
-// `dist` folder at poutine.ederer.digital. Connected to the GitHub repository (Workers Builds), each
-// push to main runs `npm run build`, then `npx wrangler deploy` with this file. Deploying your own
-// copy: change the name to your Worker's and the address to yours.
+// How Cloudflare publishes the map: the `poutine` Worker serves the built `dist` folder at
+// poutine.ederer.digital, and runs worker/index.ts for /api/* (address lookup, Add a place).
+// Connected to the GitHub repository (Workers Builds), each push to main runs `npm run build`,
+// then `npx wrangler deploy` with this file. Deploying your own copy: change the name, the address
+// and the database ID to yours, and set the TURNSTILE_SECRET secret.
 {
   "name": "poutine",
-  "compatibility_date": "2026-10-16",
-  "assets": { "directory": "./dist" },
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"],
+  },
+  // Places visitors send, waiting for approval. migrations/ holds its tables.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "poutine",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations",
+    },
+  ],
   // Wrangler replaces the Worker's addresses with these on each deploy.
   "routes": [{ "pattern": "poutine.ederer.digital", "custom_domain": true }],
   "workers_dev": false,

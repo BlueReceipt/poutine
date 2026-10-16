@@ -2,18 +2,21 @@
 import preact from '@preact/preset-vite';
 import { defineConfig, type Plugin } from 'vite';
 
-// Requests leave the app's own origin only for the street map's tiles (OpenFreeMap).
+// Requests leave the app's own origin only for the street map's tiles (OpenFreeMap) and, once Add a
+// place reaches its last step, Cloudflare Turnstile's bot check (a script and its frame).
 // blob: workers are for MapLibre.
 const TILES = 'https://tiles.openfreemap.org';
+const TURNSTILE = 'https://challenges.cloudflare.com';
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
-  "script-src 'self'",
+  `script-src 'self' ${TURNSTILE}`,
   "style-src 'self'",
   "img-src 'self' data: blob:",
   "font-src 'self'",
-  `connect-src 'self' ${TILES}`,
+  `connect-src 'self' ${TILES} ${TURNSTILE}`,
   "worker-src 'self' blob:",
   "child-src 'self' blob:",
+  `frame-src ${TURNSTILE}`,
   "manifest-src 'self'",
   "object-src 'none'",
   "base-uri 'self'",

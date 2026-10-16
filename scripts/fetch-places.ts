@@ -9,10 +9,11 @@
  * rule): npm run places -- --cached
  * Apply the picks' details to the list as it is, with no server at all: npm run places -- --offline
  */
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   applyPicks,
+  withAdded,
   metersBetween,
   normalizePostcode,
   provinceCode,
@@ -285,18 +286,24 @@ async function main(): Promise<void> {
     places: Pick[];
   };
 
-  // --offline: no server at all, only the picks' details and confirmations applied to the list.
+  // The places visitors added and Alex approved (npm run approve), joined to the list either way.
+  const addedFile = join(DATA, 'added.json');
+  const added = existsSync(addedFile)
+    ? (JSON.parse(readFileSync(addedFile, 'utf8')) as { places: Place[] }).places
+    : [];
+
+  // --offline: no server at all, only the picks' details and confirmations and the added places
+  // applied to the list.
   if (process.argv.includes('--offline')) {
     const saved = JSON.parse(readFileSync(join(DATA, 'places.json'), 'utf8')) as {
       places: Place[];
     };
-    const places = applyPicks(saved.places, picks);
+    const places = withAdded(applyPicks(saved.places, picks), added);
     writeFileSync(join(DATA, 'places.json'), `${JSON.stringify({ ...saved, places }, null, 1)}\n`);
     mkdirSync(join(DATA, 'review'), { recursive: true });
     writeFileSync(join(DATA, 'review', 'places.csv'), reviewCsv(places));
-    const changed = places.filter((place, i) => place !== saved.places[i]);
     console.log(
-      `picks applied offline to ${String(changed.length)} places: ${changed.map((p) => p.name).join(', ')}`,
+      `${String(places.length)} places: picks applied offline, ${String(added.length)} added by visitors`,
     );
     return;
   }
@@ -326,12 +333,13 @@ async function main(): Promise<void> {
     .filter((e) => e.lat !== undefined && e.lon !== undefined)
     .map((e) => ({ name: e.tags?.name ?? '', lat: e.lat ?? 0, lon: e.lon ?? 0 }));
   const eateries = [...inQuebec, ...picked.filter((e) => outsideQuebec.has(idOf(e)))];
-  const { places, dropped } = selectPlaces(eateries, towns, picks, outsideQuebec);
-  const townsFound = await lookUpTowns(places);
+  const { places: found, dropped } = selectPlaces(eateries, towns, picks, outsideQuebec);
+  const townsFound = await lookUpTowns(found);
   await fourAtATime(
-    places.filter((p) => p.province === 'QC' && p.housenumber && p.street),
+    found.filter((p) => p.province === 'QC' && p.housenumber && p.street),
     checkAddress,
   );
+  const places = withAdded(found, added);
 
   const missingPicks = picks.filter((pick) => !places.some((p) => p.osm === pick.osm));
   writeFileSync(

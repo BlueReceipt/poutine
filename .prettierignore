@@ -11,3 +11,6 @@ public/map-assets
 
 # Markdown is prose: never reflow it.
 *.md
+
+# Written by wrangler types
+worker-configuration.d.ts

@@ -27,9 +27,11 @@ export type PoutineEvidence = 'confirmed' | 'cuisine' | 'name' | 'unconfirmed';
 /**
  * Where the town comes from: the place's own address in OpenStreetMap, the municipality of the
  * nearest address in Adresses Québec, OpenStreetMap's own reverse lookup (Nominatim, outside
- * Québec), the nearest Québec town on the map (shown as "near …"), or nowhere yet.
+ * Québec), the nearest Québec town on the map (shown as "near …"), nowhere yet, or the visitor
+ * who added the place.
  */
-export type CitySource = 'osm' | 'adresses-quebec' | 'nominatim' | 'nearest-town' | 'none';
+export type CitySource =
+  'osm' | 'adresses-quebec' | 'nominatim' | 'nearest-town' | 'none' | 'visitor';
 
 /**
  * One of Alex's picks (data/picked.json): kept whatever the rules say, wherever it is. Confirmed:
@@ -355,6 +357,15 @@ export function applyPicks(places: readonly Place[], picks: readonly Pick[]): Pl
     const detailed = withDetails(place, pick.details);
     return pick.confirmed ? { ...detailed, poutine: 'confirmed', picked: true } : detailed;
   });
+}
+
+/**
+ * The places visitors added and Alex approved (data/added.json), joined to the list: each replaces
+ * any place of the list with its ID (an approved place approved again), the rest go at the end.
+ */
+export function withAdded(places: readonly Place[], added: readonly Place[]): Place[] {
+  const ids = new Set(added.map((place) => place.osm));
+  return [...places.filter((place) => !ids.has(place.osm)), ...added];
 }
 
 function richness(place: Place): number {

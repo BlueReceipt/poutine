@@ -4,6 +4,7 @@ import type { GeoJSONSource, Map as MapLibreMap, MapGeoJSONFeature } from 'mapli
 import { useEffect, useRef } from 'preact/hooks';
 import type { PinGroup } from '../domain/groups.ts';
 import type { Place } from '../domain/osmPlaces.ts';
+import type { PickStart } from '../ui/AddPlace.tsx';
 import type { Strings } from '../ui/strings.ts';
 import { loadMapLibre } from './maplibre.ts';
 import {
@@ -33,6 +34,12 @@ export type MapRequest =
   | { kind: 'place'; id: string; seq: number }
   | { kind: 'area'; bounds: [number, number, number, number]; seq: number };
 
+/**
+ * The share of the map's height the Add a place sheet covers while the pin is placed (the sheet's
+ * height in styles.css, .card.picking): the pin stands in the middle of what's left above it.
+ */
+export const PICK_SHEET = 0.45;
+
 interface Props {
   places: readonly Place[];
   groups: readonly PinGroup[];
@@ -41,6 +48,9 @@ interface Props {
   /** Where you are, once Near me found it. */
   me: { lat: number; lon: number } | null;
   request: MapRequest | null;
+  /** Add a place's pin: the map moves under it; null when no pin is being placed. */
+  picking: { start: PickStart; seq: number } | null;
+  onPicked: (center: { lat: number; lon: number }) => void;
   onSelect: (id: string | null) => void;
   onFailed: () => void;
 }
@@ -71,11 +81,15 @@ function nearestPin(map: MapLibreMap, x: number, y: number): MapGeoJSONFeature |
 const still = (): boolean => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 export function MapView(props: Props) {
-  const { places, groups, strings, selectedId, me, request, onSelect, onFailed } = props;
+  const { places, groups, strings, selectedId, me, request, picking, onSelect, onFailed } = props;
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const select = useRef(onSelect);
   select.current = onSelect;
+  const picked = useRef(props.onPicked);
+  picked.current = props.onPicked;
+  const isPicking = useRef(false);
+  isPicking.current = picking !== null;
   const meNow = useRef<FeatureCollection<Point>>(meFeatures(me));
   meNow.current = meFeatures(me);
 
@@ -102,8 +116,15 @@ export function MapView(props: Props) {
           mapRef.current = loaded;
         });
         loaded.on('click', (event) => {
+          // While a new place's pin is placed, a tap only moves the map.
+          if (isPicking.current) return;
           const pin = nearestPin(loaded, event.point.x, event.point.y);
           select.current(pin ? String(pin.properties.id) : null);
+        });
+        loaded.on('moveend', () => {
+          if (!isPicking.current) return;
+          const center = loaded.getCenter();
+          picked.current({ lat: center.lat, lon: center.lng });
         });
         loaded.on('mouseenter', 'pins', () => {
           loaded.getCanvas().style.cursor = 'pointer';
@@ -165,6 +186,28 @@ export function MapView(props: Props) {
       });
     }
   }, [request, groups]);
+
+  // Add a place: the map keeps the bottom of the screen for the sheet, so its center (where the pin
+  // stands) is the middle of what's left; it flies to where the address or the phone put the place.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const height = map.getContainer().clientHeight;
+    const duration = still() ? 0 : 800;
+    if (!picking) {
+      map.easeTo({ padding: { top: 0, bottom: 0, left: 0, right: 0 }, duration });
+      return;
+    }
+    const padding = { top: 0, bottom: height * PICK_SHEET, left: 0, right: 0 };
+    if (picking.start === 'as-is') map.easeTo({ padding, duration });
+    else
+      map.flyTo({
+        center: [picking.start.lon, picking.start.lat],
+        zoom: picking.start.zoom,
+        padding,
+        duration: still() ? 0 : 1200,
+      });
+  }, [picking]);
 
   return <div ref={container} class="map" />;
 }

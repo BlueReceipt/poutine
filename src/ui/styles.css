@@ -168,12 +168,22 @@ body,
   font-size: var(--text-secondary);
 }
 
-/* Near me, under the search bar on the right. */
-.near-me {
+/* Near me and Add a place, under the search bar on the right. */
+.map-actions {
   position: absolute;
   z-index: 2;
   top: calc(max(var(--space), env(safe-area-inset-top)) + 66px);
   right: max(var(--space), env(safe-area-inset-right));
+  left: max(var(--space), env(safe-area-inset-left));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.pill {
+  pointer-events: auto;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -300,4 +310,179 @@ body,
   align-items: center;
   min-height: 48px;
   color: var(--ink);
+}
+
+/* Add a place: the pin stands still in the middle of the map above the sheet (PICK_SHEET in
+   MapView.tsx: the sheet is 45% high, so the middle of the rest is 27.5% down); its tip is the spot. */
+.pick-pin {
+  position: absolute;
+  z-index: 2;
+  top: 27.5%;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  pointer-events: none;
+  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 35%));
+}
+
+.card.picking {
+  height: 45%;
+  max-height: 45%;
+}
+
+.card.form {
+  max-height: 88%;
+}
+
+.card form {
+  margin: 0;
+}
+
+.field {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  margin: 12px 0 0;
+  font-weight: 700;
+}
+
+.field small {
+  color: var(--graphite);
+  font-weight: 400;
+}
+
+.field input,
+.field select {
+  min-height: 48px;
+  padding: 0 12px;
+  border: 2px solid #8a8d86;
+  border-radius: 10px;
+  background: var(--sheet);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 400;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: var(--ink);
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+}
+
+.row .field {
+  min-width: 0;
+}
+
+.field.narrow {
+  flex: 0 0 38%;
+}
+
+.field select {
+  width: 100%;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  margin-top: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.check input {
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  accent-color: var(--ink);
+}
+
+.problems {
+  margin: 12px 0 0;
+  padding: 10px 12px 10px 32px;
+  border-left: 4px solid var(--ink);
+  background: #f1f1ee;
+}
+
+.notice-line {
+  margin: 12px 0 0;
+}
+
+.link {
+  min-height: 48px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.card .action:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+button.action {
+  font: inherit;
+  font-weight: 700;
+  background: var(--sheet);
+  cursor: pointer;
+}
+
+button.action.primary {
+  background: var(--ink);
+}
+
+.maybe-known {
+  margin: 8px 0 4px;
+  padding: 4px 12px 8px;
+  border-radius: 12px;
+  background: #f1f1ee;
+}
+
+.maybe-known h3 {
+  margin: 8px 0 4px;
+  font-size: var(--text);
+}
+
+.maybe-known ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.maybe-known li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+}
+
+.maybe-known li > span {
+  display: flex;
+  flex-direction: column;
+}
+
+.maybe-known .action {
+  flex: none;
+}
+
+.bot-check:not(:empty) {
+  margin-top: 12px;
+}
+
+.fine {
+  margin: 8px 0 0;
+  color: var(--graphite);
+  font-size: var(--text-secondary);
 }

@@ -4,6 +4,8 @@ import { groupByAddress } from '../domain/groups.ts';
 import type { Place } from '../domain/osmPlaces.ts';
 import { nearest, searchPlaces } from '../domain/search.ts';
 import { MapView, type MapRequest } from '../map/MapView.tsx';
+import { AddPlace, type PickStart } from './AddPlace.tsx';
+import { noFixOf, whereAmI } from './location.ts';
 import { NearbyList, type NearState } from './NearbyList.tsx';
 import { PlaceCard } from './PlaceCard.tsx';
 import { SearchBar } from './SearchBar.tsx';
@@ -28,6 +30,9 @@ export function App({ strings }: { strings: Strings }) {
   const [near, setNear] = useState<NearState | null>(null);
   const [me, setMe] = useState<{ lat: number; lon: number } | null>(null);
   const [request, setRequest] = useState<MapRequest | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [picking, setPicking] = useState<{ start: PickStart; seq: number } | null>(null);
+  const [picked, setPicked] = useState<{ lat: number; lon: number } | null>(null);
   const seq = useRef(0);
   const failed = useCallback(() => {
     setState({ kind: 'failed' });
@@ -86,13 +91,8 @@ export function App({ strings }: { strings: Strings }) {
     setSelection(null);
     setQuery('');
     setNear({ kind: 'locating' });
-    if (!('geolocation' in navigator)) {
-      setNear({ kind: 'unavailable' });
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const point = { lat: position.coords.latitude, lon: position.coords.longitude };
+    whereAmI()
+      .then((point) => {
         const nearby = nearest(places, point, NEARBY);
         setMe(point);
         setNear({ kind: 'found', nearby });
@@ -105,13 +105,31 @@ export function App({ strings }: { strings: Strings }) {
           bounds: [Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)],
           seq: seq.current,
         });
-      },
-      (error) => {
-        setNear({ kind: error.code === error.PERMISSION_DENIED ? 'denied' : 'unavailable' });
-      },
-      { enableHighAccuracy: true, timeout: 15_000, maximumAge: 60_000 },
-    );
+      })
+      .catch((error: unknown) => {
+        setNear({ kind: noFixOf(error) });
+      });
   }, [places]);
+
+  const pick = useCallback((start: PickStart | null) => {
+    if (!start) {
+      setPicking(null);
+      return;
+    }
+    seq.current += 1;
+    setPicking({ start, seq: seq.current });
+  }, []);
+  const startAdding = useCallback(() => {
+    setSelection(null);
+    setNear(null);
+    setQuery('');
+    setPicked(null);
+    setAdding(true);
+  }, []);
+  const closeAdding = useCallback(() => {
+    setAdding(false);
+    setPicking(null);
+  }, []);
 
   return (
     <main class="app">
@@ -123,9 +141,24 @@ export function App({ strings }: { strings: Strings }) {
           selectedId={group?.id ?? null}
           me={me}
           request={request}
+          picking={picking}
+          onPicked={setPicked}
           onSelect={select}
           onFailed={failed}
         />
+      )}
+      {picking && (
+        <div class="pick-pin" aria-hidden="true">
+          <svg viewBox="0 0 32 44" width="32" height="44">
+            <path
+              d="M16 2C8.3 2 2 8.1 2 15.7 2 26 16 42 16 42s14-16 14-26.3C30 8.1 23.7 2 16 2z"
+              fill="#7a4a2a"
+              stroke="#ffffff"
+              stroke-width="2.5"
+            />
+            <circle cx="16" cy="15.5" r="5" fill="#ffffff" />
+          </svg>
+        </div>
       )}
       <SearchBar
         strings={strings}
@@ -135,15 +168,23 @@ export function App({ strings }: { strings: Strings }) {
         onQuery={setQuery}
         onChoose={show}
       />
-      {places && !query.trim() && (
-        <button type="button" class="near-me" onClick={locate}>
-          <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
-            <circle cx="12" cy="12" r="4" fill="currentColor" />
-            <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2" />
-            <path d="M12 1v4M12 19v4M1 12h4M19 12h4" stroke="currentColor" stroke-width="2" />
-          </svg>
-          {strings.nearMe.button}
-        </button>
+      {places && !query.trim() && !adding && (
+        <div class="map-actions">
+          <button type="button" class="pill near-me" onClick={locate}>
+            <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
+              <circle cx="12" cy="12" r="4" fill="currentColor" />
+              <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2" />
+              <path d="M12 1v4M12 19v4M1 12h4M19 12h4" stroke="currentColor" stroke-width="2" />
+            </svg>
+            {strings.nearMe.button}
+          </button>
+          <button type="button" class="pill add-place" onClick={startAdding}>
+            <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
+              <path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.5" />
+            </svg>
+            {strings.add.button}
+          </button>
+        </div>
       )}
       {state.kind === 'loading' && <p class="notice">{strings.loading}</p>}
       {state.kind === 'failed' && (
@@ -151,7 +192,19 @@ export function App({ strings }: { strings: Strings }) {
           {strings.mapFailed}
         </p>
       )}
-      {group ? (
+      {adding && places ? (
+        <AddPlace
+          places={places}
+          strings={strings}
+          picked={picked}
+          onPick={pick}
+          onOpen={(existing) => {
+            closeAdding();
+            show(existing);
+          }}
+          onClose={closeAdding}
+        />
+      ) : group ? (
         <PlaceCard
           group={group}
           place={place}
