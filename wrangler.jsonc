@@ -45,8 +45,8 @@
   // The approval page's sign-in (worker/access.ts): Cloudflare Access's public keys for Alex's team,
   // and the Access application's tag (neither is a secret). Empty: nobody gets into /admin.
   "vars": {
-    "ACCESS_CERTS_URL": "",
-    "ACCESS_AUD": "",
+    "ACCESS_CERTS_URL": "https://tiny-grass-2498.cloudflareaccess.com/cdn-cgi/access/certs",
+    "ACCESS_AUD": "406a8310936b73c705e66f7dda3428f0d826f0011bd8528c84e07fb4cc579ebf",
   },
   // An email to Alex for each new place (worker/mail.ts), through Email Routing on poutines.app; the
   // address is the secret MAIL_TO.
