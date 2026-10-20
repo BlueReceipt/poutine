@@ -7,10 +7,13 @@
  * Run: npm run places
  * Rebuild from the last answer without asking OpenStreetMap again (after changing a pick or a
  * rule): npm run places -- --cached
- * Apply the picks' details to the list as it is, with no server at all: npm run places -- --offline
+ * Apply the picks' details and the fixes (data/fixes.json, npm run addresses) to the list as it is,
+ * with no server at all: npm run places -- --offline
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { applyFixes, staleFixes, type Fix } from '../src/domain/addressFixes.ts';
+import { localitiesNear, localityFor, type LocalityPoint } from '../src/domain/localities.ts';
 import {
   applyPicks,
   withAdded,
@@ -18,6 +21,8 @@ import {
   normalizePostcode,
   provinceCode,
   selectPlaces,
+  whyListed,
+  type ListedFor,
   type OsmElement,
   type Pick,
   type Place,
@@ -33,8 +38,9 @@ const SERVERS = [
 const USER_AGENT = 'Poutine map data (https://github.com/BlueReceipt/poutine)';
 
 /**
- * Three sets, each ended by `out count` (a "count" element in the answer): Québec's eateries,
- * Alex's picks by ID (some are elsewhere), Québec's towns.
+ * Four sets, each ended by `out count` (a "count" element in the answer): Québec's eateries,
+ * Alex's picks by ID (some are elsewhere), Québec's towns, Québec's sectors (place=suburb:
+ * Saint-Canut in Mirabel, Chicoutimi in Saguenay).
  */
 function query(picks: readonly Pick[]): string {
   const ids = (type: string): string =>
@@ -54,6 +60,9 @@ out count;
 ${byId ? `(${byId});\nout center tags;` : ''}
 out count;
 node["place"~"^(city|town|village)$"]["name"](area.qc);
+out;
+out count;
+node["place"="suburb"]["name"](area.qc);
 out;`;
 }
 
@@ -104,7 +113,7 @@ const ADRESSES_QUEBEC =
   'https://servicescarto.mrnf.gouv.qc.ca/pes/rest/services/Territoire/Adresse_Geocodage/GeocodeServer/reverseGeocode';
 
 /** The municipality of the nearest address Adresses Québec knows within 2 km, or null. */
-async function municipalityAt(place: Place): Promise<string | null> {
+async function municipalityAt(place: { lat: number; lon: number }): Promise<string | null> {
   const url = `${ADRESSES_QUEBEC}?location=${String(place.lon)},${String(place.lat)}&outSR=4326&f=json`;
   try {
     const response = await fetch(url);
@@ -120,6 +129,70 @@ async function municipalityAt(place: Place): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+// The municipality at each point already asked (gitignored): a rebuild asks only for new points.
+const MUNICIPALITIES = join(DATA, 'cache', 'municipalities.json');
+
+const pointKey = (point: { lat: number; lon: number }): string =>
+  `${point.lat.toFixed(5)},${point.lon.toFixed(5)}`;
+
+/** The municipality at each point, from the kept answers or Adresses Québec. */
+async function municipalitiesAt(
+  points: readonly { lat: number; lon: number }[],
+): Promise<Map<string, string>> {
+  const kept = existsSync(MUNICIPALITIES)
+    ? (JSON.parse(readFileSync(MUNICIPALITIES, 'utf8')) as Record<string, string>)
+    : {};
+  const missing = [...new Set(points.map(pointKey))].filter((key) => !(key in kept));
+  await fourAtATime(missing, async (key) => {
+    const [lat = 0, lon = 0] = key.split(',').map(Number);
+    const city = await municipalityAt({ lat, lon });
+    if (city !== null) kept[key] = city;
+  });
+  mkdirSync(join(DATA, 'cache'), { recursive: true });
+  writeFileSync(MUNICIPALITIES, JSON.stringify(kept));
+  return new Map(Object.entries(kept));
+}
+
+/**
+ * The village or sector of each Québec place whose town is a merged municipality
+ * (src/domain/localities.ts): the municipality at its pin and at each village near it, asked of
+ * Adresses Québec. Returns how many places got one.
+ */
+async function nameLocalities(places: Place[], nodes: readonly OsmElement[]): Promise<number> {
+  const points: LocalityPoint[] = nodes.flatMap((node) =>
+    node.lat !== undefined && node.lon !== undefined && node.tags?.name
+      ? [
+          {
+            name: node.tags.name,
+            kind: node.tags.place ?? '',
+            lat: node.lat,
+            lon: node.lon,
+            municipality: '',
+          },
+        ]
+      : [],
+  );
+  const asked = places.filter(
+    (place) =>
+      place.province === 'QC' &&
+      place.city &&
+      place.citySource !== 'nearest-town' &&
+      localitiesNear(place, points).length > 0,
+  );
+  const villages = [...new Set(asked.flatMap((place) => localitiesNear(place, points)))];
+  const at = await municipalitiesAt([...asked, ...villages]);
+  for (const village of villages) village.municipality = at.get(pointKey(village)) ?? '';
+  let named = 0;
+  for (const place of asked) {
+    const locality = localityFor(place, at.get(pointKey(place)) ?? '', points);
+    if (locality) {
+      place.locality = locality;
+      named += 1;
+    }
+  }
+  return named;
 }
 
 const NOMINATIM = 'https://nominatim.openstreetmap.org/reverse';
@@ -224,13 +297,10 @@ async function checkAddress(place: Place): Promise<void> {
 }
 
 /** Runs a lookup over the places four at a time, gently. */
-async function fourAtATime(
-  places: Place[],
-  lookUp: (place: Place) => Promise<void>,
-): Promise<void> {
-  const waiting = [...places];
+async function fourAtATime<T>(items: T[], lookUp: (item: T) => Promise<void>): Promise<void> {
+  const waiting = [...items];
   const work = async (): Promise<void> => {
-    for (let place = waiting.shift(); place; place = waiting.shift()) await lookUp(place);
+    for (let item = waiting.shift(); item !== undefined; item = waiting.shift()) await lookUp(item);
   };
   await Promise.all([work(), work(), work(), work()]);
 }
@@ -242,10 +312,23 @@ function csvCell(value: string): string {
 function townText(place: Place): string {
   const town =
     place.citySource === 'nearest-town' && place.city ? `near ${place.city}` : place.city;
+  if (place.locality) return `${place.locality} (${town})`;
   return place.province && place.province !== 'QC' ? `${town}, ${place.province}` : town;
 }
 
-function reviewCsv(places: readonly Place[]): string {
+const WHY_TEXT: Record<ListedFor, string> = {
+  cuisine: 'cuisine poutine',
+  name: 'name',
+  'dairy-bar': 'dairy bar',
+  'snack-cuisine': 'snack bar: fries, hot dogs or Québec food',
+  'burger-or-chicken': 'wider: burger or chicken counter',
+  'snack-bar': 'wider: snack bar, no cuisine given',
+  'family-restaurant': 'wider: family restaurant',
+  'quebec-restaurant': 'wider: Québec-food restaurant',
+};
+
+/** The review spreadsheet; why each place is listed when the OpenStreetMap answer is at hand. */
+function reviewCsv(places: readonly Place[], why = new Map<string, ListedFor | null>()): string {
   const header = [
     'Name',
     'Address',
@@ -257,6 +340,7 @@ function reviewCsv(places: readonly Place[]): string {
     'Facebook',
     'Hours',
     'Poutine',
+    'Why',
     'Alex pick',
     'OpenStreetMap',
   ];
@@ -272,6 +356,7 @@ function reviewCsv(places: readonly Place[]): string {
       p.facebook,
       p.openingHours,
       p.poutine,
+      ((reason) => (reason ? WHY_TEXT[reason] : ''))(why.get(p.osm)),
       p.picked ? 'yes' : '',
       `https://www.openstreetmap.org/${p.osm}`,
     ]
@@ -319,13 +404,19 @@ async function main(): Promise<void> {
     ? (JSON.parse(readFileSync(addedFile, 'utf8')) as { places: Place[] }).places
     : [];
 
-  // --offline: no server at all, only the picks' details and confirmations and the added places
-  // applied to the list.
+  // Corrections Alex accepted (npm run addresses), each with its source; picks' details win.
+  const fixesFile = join(DATA, 'fixes.json');
+  const fixes = existsSync(fixesFile)
+    ? (JSON.parse(readFileSync(fixesFile, 'utf8')) as { fixes: Record<string, Fix> }).fixes
+    : {};
+
+  // --offline: no server at all, only the fixes, the picks' details and confirmations and the
+  // added places applied to the list.
   if (process.argv.includes('--offline')) {
     const saved = JSON.parse(readFileSync(join(DATA, 'places.json'), 'utf8')) as {
       places: Place[];
     };
-    const places = withLinks(withAdded(applyPicks(saved.places, picks), added));
+    const places = withLinks(withAdded(applyPicks(applyFixes(saved.places, fixes), picks), added));
     writeFileSync(join(DATA, 'places.json'), `${JSON.stringify({ ...saved, places }, null, 1)}\n`);
     mkdirSync(join(DATA, 'review'), { recursive: true });
     writeFileSync(join(DATA, 'review', 'places.csv'), reviewCsv(places));
@@ -353,7 +444,7 @@ async function main(): Promise<void> {
     console.warn(
       `picks added since the last answer (run without --cached to fetch them): ${missingFromAnswer.map((p) => p.name).join(', ')}`,
     );
-  const [inQuebec = [], picked = [], townNodes = []] = elements;
+  const [inQuebec = [], picked = [], townNodes = [], sectorNodes] = elements;
   const quebecIds = new Set(inQuebec.map(idOf));
   const outsideQuebec = new Set(picked.map(idOf).filter((id) => !quebecIds.has(id)));
   const towns: Town[] = townNodes
@@ -362,11 +453,23 @@ async function main(): Promise<void> {
   const eateries = [...inQuebec, ...picked.filter((e) => outsideQuebec.has(idOf(e)))];
   const { places: found, dropped } = selectPlaces(eateries, towns, picks, outsideQuebec);
   const townsFound = await lookUpTowns(found);
+  for (const stale of staleFixes(found, fixes))
+    console.warn(
+      stale.now === null
+        ? `fix for ${stale.name} (${stale.osm}): the place has left the list`
+        : `fix for ${stale.name} (${stale.osm}) was made over "${stale.was}", OpenStreetMap now says "${stale.now}": still needed?`,
+    );
+  const fixed = applyPicks(applyFixes(found, fixes), picks);
   await fourAtATime(
-    found.filter((p) => p.province === 'QC' && p.housenumber && p.street),
+    fixed.filter((p) => p.province === 'QC' && p.housenumber && p.street),
     checkAddress,
   );
-  const places = withLinks(withAdded(found, added));
+  if (!sectorNodes)
+    console.warn(
+      'the last answer has no sectors: run without --cached to name villages and sectors',
+    );
+  const localities = await nameLocalities(fixed, [...townNodes, ...(sectorNodes ?? [])]);
+  const places = withLinks(withAdded(fixed, added));
 
   const missingPicks = picks.filter((pick) => !places.some((p) => p.osm === pick.osm));
   writeFileSync(
@@ -376,7 +479,7 @@ async function main(): Promise<void> {
         source:
           'OpenStreetMap: independent casse-croûtes, cantines and potato shacks in Québec, by cuisine=poutine or by name, plus Alex’s picks anywhere',
         attribution:
-          '© OpenStreetMap contributors, ODbL 1.0; towns where OpenStreetMap has none: Adresses Québec, CC BY 4.0',
+          '© OpenStreetMap contributors, ODbL 1.0; towns where OpenStreetMap has none, and address corrections (data/fixes.json): Adresses Québec, CC BY 4.0',
         osmBase: base,
         places,
       },
@@ -385,7 +488,8 @@ async function main(): Promise<void> {
     )}\n`,
   );
   mkdirSync(join(DATA, 'review'), { recursive: true });
-  writeFileSync(join(DATA, 'review', 'places.csv'), reviewCsv(places));
+  const why = new Map(eateries.map((e) => [idOf(e), whyListed(e.tags ?? {})]));
+  writeFileSync(join(DATA, 'review', 'places.csv'), reviewCsv(places, why));
 
   const count = (test: (p: Place) => boolean): string => String(places.filter(test).length);
   console.log(
@@ -394,11 +498,15 @@ async function main(): Promise<void> {
   console.log(
     `${String(places.length)} places: ${count((p) => p.poutine === 'confirmed')} confirmed by Alex, ${count((p) => p.poutine === 'cuisine')} tagged poutine, ${count((p) => p.poutine === 'name')} by name, ${count((p) => p.poutine === 'unconfirmed')} unconfirmed; ${count((p) => p.picked)} of Alex's ${String(picks.length)} picks; ${count((p) => p.province !== 'QC')} outside Québec`,
   );
+  const listed = (group: ListedFor): string => count((p) => why.get(p.osm) === group);
+  console.log(
+    `wider rules: ${listed('burger-or-chicken')} burger or chicken counters, ${listed('snack-bar')} snack bars with no cuisine, ${listed('family-restaurant')} family restaurants, ${listed('quebec-restaurant')} Québec-food restaurants`,
+  );
   console.log(
     `details: phone ${count((p) => Boolean(p.phone))}, hours ${count((p) => Boolean(p.openingHours))}, website ${count((p) => Boolean(p.website))}, Facebook ${count((p) => Boolean(p.facebook))}, menu ${count((p) => Boolean(p.menu))}, street address ${count((p) => Boolean(p.housenumber && p.street))}`,
   );
   console.log(
-    `towns: ${count((p) => p.citySource === 'osm')} from OpenStreetMap, ${String(townsFound.quebec)} from Adresses Québec, ${String(townsFound.elsewhere)} from OpenStreetMap's reverse lookup, ${count((p) => p.citySource === 'nearest-town')} nearest town, ${count((p) => p.citySource === 'none')} none`,
+    `towns: ${String(localities)} with their village or sector, ${count((p) => p.citySource === 'osm')} from OpenStreetMap, ${String(townsFound.quebec)} from Adresses Québec, ${String(townsFound.elsewhere)} from OpenStreetMap's reverse lookup, ${count((p) => p.citySource === 'nearest-town')} nearest town, ${count((p) => p.citySource === 'none')} none`,
   );
   console.log(
     `addresses: ${count((p) => p.addressCheck === 'confirmed')} confirmed at the pin, ${count((p) => p.addressCheck === 'far')} far from the pin, ${count((p) => p.addressCheck === 'not-found')} not found; postal code ${count((p) => Boolean(p.postcode))}`,

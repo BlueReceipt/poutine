@@ -91,11 +91,24 @@ function words(text: string): string[] {
     .filter((word) => !IGNORED.has(word));
 }
 
+/** A name as sameName compares it: "Sainte-Cécile-de-Milton" is "ste cecile milton". */
+export function nameKey(text: string): string {
+  return words(text).join(' ');
+}
+
 /** "Saint-Hyacinthe" is "St-Hyacinthe" and "ST HYACINTHE". */
-function sameName(a: string, b: string): boolean {
-  const left = words(a);
-  const right = words(b);
-  return left.length > 0 && left.join(' ') === right.join(' ');
+export function sameName(a: string, b: string): boolean {
+  const left = nameKey(a);
+  return left.length > 0 && left === nameKey(b);
+}
+
+const DIRECTIONS = new Set(['est', 'ouest', 'nord', 'sud', 'e', 'o', 'n', 's']);
+
+/** The same street but perhaps for its direction: "rue Maclaren Ouest" and "Rue Maclaren Est". */
+export function sameStreetName(a: string, b: string): boolean {
+  const name = (text: string) => words(text).filter((word) => !DIRECTIONS.has(word));
+  const left = name(a);
+  return left.length > 0 && left.join(' ') === name(b).join(' ');
 }
 
 /** The civic number that starts a street address: "780, rue Saint-Jean" → "780". */

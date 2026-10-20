@@ -16,9 +16,13 @@ export function addressLines(place: Place, near: (town: string) => string): stri
   return [street, townLine].filter(Boolean);
 }
 
-/** The town alone, as lists show it: "Saint-Isidore, ON", "near Sayabec", "Montréal". */
+/**
+ * The town alone, as lists show it: "Saint-Isidore, ON", "near Sayabec", "Montréal", and a merged
+ * town's village or sector before it: "Sainte-Scholastique (Mirabel)".
+ */
 export function townText(place: Place, near: (town: string) => string): string {
   const town = place.citySource === 'nearest-town' && place.city ? near(place.city) : place.city;
+  if (town && place.locality) return `${place.locality} (${town})`;
   return town && place.province && place.province !== 'QC' ? `${town}, ${place.province}` : town;
 }
 

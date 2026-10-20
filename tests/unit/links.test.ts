@@ -127,6 +127,12 @@ describe('link previews', () => {
     ).toBe(
       'Casse-croûte près de Saint-Rémi. Les casse-croûtes et cantines du Québec sur une carte',
     );
+    const inVillage = place({ city: 'Mirabel', locality: 'Sainte-Scholastique' });
+    expect(previewOf(inVillage, undefined, words('fr'))).toMatchObject({
+      title: 'Casse-Croûte Trempette · Sainte-Scholastique (Mirabel)',
+      description:
+        'Casse-croûte à Sainte-Scholastique. Les casse-croûtes et cantines du Québec sur une carte',
+    });
   });
 
   it('says what a place is from its name, poutine when it says nothing', () => {

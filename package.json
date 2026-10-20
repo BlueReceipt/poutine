@@ -17,6 +17,7 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "places": "node scripts/fetch-places.ts",
+    "addresses": "node scripts/check-addresses.ts",
     "waiting": "node scripts/review.ts waiting",
     "approve": "node scripts/review.ts approve",
     "reject": "node scripts/review.ts reject",

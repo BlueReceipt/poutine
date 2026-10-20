@@ -91,18 +91,22 @@ export function linkFromPath(path: string): string | null {
 
 /**
  * A one-word path that's no place's link: what to search for instead. A name several places share
- * ("/cassecroute": the search for Casse-croûte lists them all), or a town ("/drummondville",
- * "/mtl"). Null when it names neither.
+ * ("/cassecroute": the search for Casse-croûte lists them all), a town ("/drummondville",
+ * "/mtl") or a village in one ("/saintescholastique"). Null when it names none.
  */
 export function searchFor(
   word: string,
-  places: readonly Pick<Place, 'name' | 'city'>[],
+  places: readonly Pick<Place, 'name' | 'city' | 'locality'>[],
 ): string | null {
   const named = places.find((place) => linkWord(place.name) === word);
   if (named) return named.name;
   const town = places.find((place) => place.city && townWord(place.city) === word);
   if (town) return town.city;
-  return places.find((place) => place.city && linkWord(place.city) === word)?.city ?? null;
+  const city = places.find((place) => place.city && linkWord(place.city) === word)?.city;
+  if (city) return city;
+  return (
+    places.find((place) => place.locality && linkWord(place.locality) === word)?.locality ?? null
+  );
 }
 
 /**

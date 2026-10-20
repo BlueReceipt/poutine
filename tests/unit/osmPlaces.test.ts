@@ -9,6 +9,7 @@ import {
   profileUrl,
   provinceCode,
   selectPlaces,
+  whyListed,
   type OsmElement,
   type Town,
 } from '../../src/domain/osmPlaces.ts';
@@ -53,9 +54,36 @@ describe('poutineEvidence', () => {
     expect(poutineEvidence({ name: 'Chez Grains', amenity: 'fast_food', cuisine: 'hot_dog' })).toBe(
       'unconfirmed',
     );
+  });
+
+  it('widens to burger and chicken counters, snack bars and family restaurants, each a group', () => {
+    const burger = { name: 'Burger Trempette', amenity: 'fast_food', cuisine: 'burger' };
+    expect(whyListed(burger)).toBe('burger-or-chicken');
+    expect(poutineEvidence(burger)).toBe('unconfirmed');
+    expect(poutineEvidence(burger, new Set(['snack-bar']))).toBeNull();
+    expect(whyListed({ name: 'Chez Grains', amenity: 'fast_food' })).toBe('snack-bar');
     expect(
-      poutineEvidence({ name: 'Burger Trempette', amenity: 'fast_food', cuisine: 'burger' }),
+      whyListed({ name: 'Le Relais Grains', amenity: 'restaurant', cuisine: 'burger;regional' }),
+    ).toBe('family-restaurant');
+    expect(
+      whyListed({ name: 'Le Relais Grains', amenity: 'restaurant', cuisine: 'regional' }),
+    ).toBe('quebec-restaurant');
+    expect(
+      whyListed({ name: 'Cabane à sucre Grains', amenity: 'restaurant', cuisine: 'regional' }),
     ).toBeNull();
+  });
+
+  it('keeps out what cooks something else, by cuisine or by name', () => {
+    expect(
+      whyListed({ name: 'Poulet Grains', amenity: 'fast_food', cuisine: 'chicken;korean' }),
+    ).toBeNull();
+    expect(whyListed({ name: 'Pizzeria Trempette', amenity: 'fast_food' })).toBeNull();
+    expect(whyListed({ name: 'Sushi Trempette', amenity: 'fast_food' })).toBeNull();
+    expect(whyListed({ name: 'Café Grains', amenity: 'fast_food' })).toBeNull();
+    expect(
+      whyListed({ name: 'Le Grains', amenity: 'restaurant', cuisine: 'italian;pizza' }),
+    ).toBeNull();
+    expect(whyListed({ name: 'Crèmerie Trempette', amenity: 'ice_cream' })).toBeNull();
   });
 });
 

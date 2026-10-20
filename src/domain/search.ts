@@ -9,9 +9,9 @@ function searchable(text: string): string {
 }
 
 /**
- * Places whose name, town or street has a word starting with each word typed, accents and
- * punctuation ignored. Names starting with what was typed come first, then names holding every
- * word, then the rest (a town, a street); alphabetical within each.
+ * Places whose name, town (or village in it) or street has a word starting with each word typed,
+ * accents and punctuation ignored. Names starting with what was typed come first, then names
+ * holding every word, then the rest (a town, a street); alphabetical within each.
  */
 export function searchPlaces(places: readonly Place[], query: string): Place[] {
   const typed = searchable(query);
@@ -21,7 +21,10 @@ export function searchPlaces(places: readonly Place[], query: string): Place[] {
   for (const place of places) {
     const name = searchable(place.name);
     const nameWords = name.split(' ');
-    const allWords = [...nameWords, ...searchable(`${place.city} ${place.street}`).split(' ')];
+    const allWords = [
+      ...nameWords,
+      ...searchable(`${place.locality ?? ''} ${place.city} ${place.street}`).split(' '),
+    ];
     if (!words.every((word) => allWords.some((candidate) => candidate.startsWith(word)))) continue;
     let rank = 2;
     if (name.startsWith(typed)) rank = 0;

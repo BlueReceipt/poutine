@@ -158,7 +158,7 @@ export function previewOf(
     ? what
     : place.citySource === 'nearest-town'
       ? words.placedNear(what, place.city)
-      : words.placedIn(what, place.city);
+      : words.placedIn(what, place.locality ?? place.city);
   const average = averageOf(total);
   const stars = average === null || !total ? '' : `${words.summary(average, total.count)}. `;
   return { title: named, description: `${stars}${where}. ${words.tagline}` };

@@ -27,11 +27,11 @@ export type PoutineEvidence = 'confirmed' | 'cuisine' | 'name' | 'unconfirmed';
 /**
  * Where the town comes from: the place's own address in OpenStreetMap, the municipality of the
  * nearest address in Adresses Québec, OpenStreetMap's own reverse lookup (Nominatim, outside
- * Québec), the nearest Québec town on the map (shown as "near …"), nowhere yet, or the visitor
- * who added the place.
+ * Québec), the nearest Québec town on the map (shown as "near …"), nowhere yet, the visitor
+ * who added the place, or a correction in data/fixes.json.
  */
 export type CitySource =
-  'osm' | 'adresses-quebec' | 'nominatim' | 'nearest-town' | 'none' | 'visitor';
+  'osm' | 'adresses-quebec' | 'nominatim' | 'nearest-town' | 'none' | 'visitor' | 'fix';
 
 /**
  * One of Alex's picks (data/picked.json): kept whatever the rules say, wherever it is. Confirmed:
@@ -73,6 +73,11 @@ export interface Place {
   street: string;
   city: string;
   citySource: CitySource;
+  /**
+   * The village or sector inside a merged municipality (Sainte-Scholastique in Mirabel), shown
+   * before the town and searched too; none where the town says it all (src/domain/localities.ts).
+   */
+  locality?: string;
   /** Two-letter province code (QC, ON...), or empty while unknown. */
   province: string;
   postcode: string;
@@ -168,8 +173,57 @@ function cuisines(tags: Record<string, string>): string[] {
     .filter(Boolean);
 }
 
-/** Whether, and why, a place belongs on the poutine map; null when nothing says it serves poutine. */
-export function poutineEvidence(tags: Record<string, string>): PoutineEvidence | null {
+/** A counter cooking one of these, and nothing from OTHER_CUISINE, is a casse-croûte at heart. */
+const COUNTER_CUISINE = /burger|chicken|american|diner|canadian/;
+
+/** A sit-down restaurant cooking one of these is a family restaurant, where poutine is on the menu. */
+const FAMILY_CUISINE = /burger|hot_dog|fish_and_chips|chicken|diner|fries|friture/;
+
+/** A sit-down restaurant cooking only Québec food: a family restaurant, or a fine table. */
+const QUEBEC_CUISINE = /regional|quebec|canadian/;
+
+/** Sugar shacks cook Québec food in the spring, not poutine. */
+const SUGAR_SHACK = /cabane|sucre|erabliere|sucrerie/;
+
+/** A snack bar with no cuisine whose name says it sells something else. */
+const OTHER_FOOD_NAME =
+  /pizz|sushi|shawarma|chawarma|kebab|doner|falafel|\bpho\b|ramen|thai|\bwok\b|dumpling|taco|burrit|bagel|\bcafe\b|coffee|espresso|boulangerie|bakery|patisserie|traiteur|bubble|\bthe\b|\btea\b|crepe|beigne|donut|doughnut|smoothie|\bjus\b|juice|poke|curry|souvlaki|gyro|deli\b|sous marin|\bsubs?\b|sandwich|panini|salade|salad|noodle|nouille|asia|chin|vietnam|japon|indien|libanais|mexic|portug|italien|empanada|arepa|pupusa|halal|dim sum|\bbao\b|glace|gelato|yogourt|yogurt|cupcake|biscuit|cookie|gaufre|waffle|churro|chocolat|fromagerie|epicerie|depanneur|latin|sabor|szechuan|sichuan|panda|\blao\b|baan|marrakech|maroc|shish|taouk|tandoori|biryani|banh mi|\bpita\b|nutrition|cafeteria|college|universit|hopital|croissant|macaron|bonbon|soja|castor|boulange|baguette|madina|mechwi|acai|galerie|variete/;
+
+/**
+ * Why a place is on the list. The first rules (2026-10-16): its cuisine says poutine, its name says
+ * what it is (casse-croûte, cantine, patates, frites...), a dairy bar, a snack bar cooking fries,
+ * hot dogs or Québec food. The wider rules (Alex, 2026-10-20), each a group that WIDER switches on:
+ * an independent burger or chicken counter, a snack bar OpenStreetMap gives no cuisine for (and
+ * whose name says no other food), a family restaurant cooking burgers, hot dogs, chicken or fries,
+ * a restaurant cooking only Québec food (sugar shacks left out).
+ */
+export type ListedFor =
+  | 'cuisine'
+  | 'name'
+  | 'dairy-bar'
+  | 'snack-cuisine'
+  | 'burger-or-chicken'
+  | 'snack-bar'
+  | 'family-restaurant'
+  | 'quebec-restaurant';
+
+const WIDER_GROUPS: ReadonlySet<ListedFor> = new Set([
+  'burger-or-chicken',
+  'snack-bar',
+  'family-restaurant',
+  'quebec-restaurant',
+]);
+
+/** The wider rules' groups that are on: their places come in unconfirmed. */
+export const WIDER: ReadonlySet<ListedFor> = new Set([
+  'burger-or-chicken',
+  'snack-bar',
+  'family-restaurant',
+  'quebec-restaurant',
+]);
+
+/** Why a place belongs on the poutine map, whatever WIDER says; null when nothing says it does. */
+export function whyListed(tags: Record<string, string>): ListedFor | null {
   const kinds = cuisines(tags);
   if (kinds.includes('poutine')) return 'cuisine';
   const name = fold(tags.name ?? '');
@@ -192,9 +246,38 @@ export function poutineEvidence(tags: Record<string, string>): PoutineEvidence |
       amenity === 'food_court' ||
       SNACK_CUISINE.test(cooks))
   )
-    return 'unconfirmed';
-  if (amenity === 'fast_food' && CASSE_CROUTE_CUISINE.test(cooks)) return 'unconfirmed';
+    return 'dairy-bar';
+  if (amenity === 'fast_food' && CASSE_CROUTE_CUISINE.test(cooks)) return 'snack-cuisine';
+  if (OTHER_CUISINE.test(cooks)) return null;
+  if (amenity === 'fast_food' && COUNTER_CUISINE.test(cooks)) return 'burger-or-chicken';
+  if (amenity === 'fast_food' && kinds.length === 0 && !OTHER_FOOD_NAME.test(name))
+    return 'snack-bar';
+  if (amenity === 'restaurant' && !cooks.includes('maple') && !SUGAR_SHACK.test(name)) {
+    if (FAMILY_CUISINE.test(cooks)) return 'family-restaurant';
+    if (QUEBEC_CUISINE.test(cooks)) return 'quebec-restaurant';
+  }
   return null;
+}
+
+const EVIDENCE_OF: Record<ListedFor, PoutineEvidence> = {
+  cuisine: 'cuisine',
+  name: 'name',
+  'dairy-bar': 'unconfirmed',
+  'snack-cuisine': 'unconfirmed',
+  'burger-or-chicken': 'unconfirmed',
+  'snack-bar': 'unconfirmed',
+  'family-restaurant': 'unconfirmed',
+  'quebec-restaurant': 'unconfirmed',
+};
+
+/** Whether, and why, a place belongs on the poutine map; null when nothing says it serves poutine. */
+export function poutineEvidence(
+  tags: Record<string, string>,
+  wider: ReadonlySet<ListedFor> = WIDER,
+): PoutineEvidence | null {
+  const why = whyListed(tags);
+  if (!why || (WIDER_GROUPS.has(why) && !wider.has(why))) return null;
+  return EVIDENCE_OF[why];
 }
 
 export function isChain(tags: Record<string, string>): boolean {
