@@ -263,11 +263,11 @@ export async function storyPicture(
 }
 
 /**
- * The picture link previews show (public/share.png, 1200 × 630): both names, the address and what
+ * The picture link previews show (public/share.png, 1200 × 630): the name, the address and what
  * the site is in both languages, since a preview can't know its reader's. Made once in a browser.
  */
 export async function linkPreview(english: Strings, french: Strings): Promise<Blob> {
-  const names = `${french.appName} · ${english.appName}`;
+  const names = french.appName;
   const icon = await ready([names, SITE_NAME, english.tagline, french.tagline]);
   const context = canvasOf(1200, 630);
   context.fillStyle = GRAVY;
@@ -287,5 +287,23 @@ export async function linkPreview(english: Strings, french: Strings): Promise<Bl
       context.fillText(line, 490, y);
       y += 42;
     }
+  return blobOf(context);
+}
+
+/**
+ * The app's home-screen icon (public/icons/, listed in the manifest): the bowl on cream. Maskable
+ * fills the square and keeps the bowl inside the middle 80%, which Android may crop to a circle.
+ * Made once in a browser, like the link preview.
+ */
+export async function appIcon(size: number, maskable: boolean): Promise<Blob> {
+  const icon = await ready([]);
+  const context = canvasOf(size, size);
+  context.fillStyle = CREAM;
+  context.beginPath();
+  if (maskable) context.rect(0, 0, size, size);
+  else context.roundRect(0, 0, size, size, size * 0.22);
+  context.fill();
+  const bowl = size * (maskable ? 0.58 : 0.74);
+  context.drawImage(icon, (size - bowl) / 2, (size - bowl) / 2 + size * 0.02, bowl, bowl);
   return blobOf(context);
 }

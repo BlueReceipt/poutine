@@ -1,9 +1,13 @@
+import type { FriendStars } from '../domain/links.ts';
+
 /**
  * Who rates, without an account: a random ID this browser keeps, and the stars it gave each place
  * (to show "Your rating"). Browser storage can be off or wiped: then a fresh ID for this visit.
  */
 const RATER = 'poutine.rater';
 const MINE = 'poutine.ratings';
+/** The Worker's code for each rating's stars, for shared links (worker/codes.ts). */
+const CODES = 'poutine.codes';
 /** The welcome box was closed. Every key this browser keeps starts with "poutine.". */
 const WELCOMED = 'poutine.welcomed';
 
@@ -38,12 +42,35 @@ export function myStars(place: string): number | null {
   return typeof stars === 'number' ? stars : null;
 }
 
-export function rememberStars(place: string, stars: number): void {
+export function rememberStars(place: string, stars: number, code?: string): void {
   try {
     localStorage.setItem(MINE, JSON.stringify({ ...myRatings(), [place]: stars }));
+    const codes = savedCodes();
+    if (code) codes[place] = code;
+    else delete codes[place];
+    localStorage.setItem(CODES, JSON.stringify(codes));
   } catch {
     // Nothing kept: the rating still counts.
   }
+}
+
+function savedCodes(): Record<string, string> {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CODES) ?? '{}') as unknown;
+    return saved && typeof saved === 'object' ? (saved as Record<string, string>) : {};
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * This browser's stars for a place with the Worker's code, for the links it shares; null when it
+ * didn't rate it, or rated before codes (its next rating brings one).
+ */
+export function myFriendStars(place: string): FriendStars | null {
+  const stars = myStars(place);
+  const code = savedCodes()[place];
+  return stars !== null && code ? { stars, code } : null;
 }
 
 /**

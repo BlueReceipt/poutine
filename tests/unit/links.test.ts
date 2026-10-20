@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
+  kindOf,
   placeIdFromPath,
   placePath,
   placeUrl,
   previewOf,
   slugOf,
-  starsFromSearch,
+  friendFromSearch,
 } from '../../src/domain/links.ts';
 import type { Place } from '../../src/domain/osmPlaces.ts';
 import { balancedLines, wrapLines } from '../../src/domain/text.ts';
@@ -65,19 +66,30 @@ describe('place links', () => {
       expect(placeIdFromPath(placePath(each))).toBe(each.osm);
   });
 
-  it('carries the sharer’s stars, and only whole stars from 1 to 5', () => {
-    expect(placeUrl(place(), 4)).toBe(
-      'https://poutines.app/p/casse-croute-trempette-n265847671?s=4',
+  it('carries the sharer’s stars with their code, only whole stars from 1 to 5', () => {
+    expect(placeUrl(place(), { stars: 4, code: 'x7Kq2m-_' })).toBe(
+      'https://poutines.app/p/casse-croute-trempette-n265847671?s=4&c=x7Kq2m-_',
     );
-    for (const stars of [null, undefined, 0, 6, 3.5])
-      expect(placeUrl(place(), stars)).toBe(
+    for (const friend of [
+      null,
+      undefined,
+      { stars: 0, code: 'x7Kq2m-_' },
+      { stars: 4, code: 'short' },
+    ])
+      expect(placeUrl(place(), friend)).toBe(
         'https://poutines.app/p/casse-croute-trempette-n265847671',
       );
-    expect(starsFromSearch('?s=4')).toBe(4);
-    expect(starsFromSearch('?lang=fr&s=1')).toBe(1);
-    expect(starsFromSearch('?s=2&x=1')).toBe(2);
-    for (const search of ['', '?s=0', '?s=6', '?s=45', '?s=4x', '?ss=4', '?s='])
-      expect(starsFromSearch(search)).toBeNull();
+    expect(friendFromSearch('?s=4&c=x7Kq2m-_')).toEqual({ stars: 4, code: 'x7Kq2m-_' });
+    expect(friendFromSearch('?c=AAAAAAAA&lang=fr&s=1')).toEqual({ stars: 1, code: 'AAAAAAAA' });
+    for (const search of [
+      '',
+      '?s=4',
+      '?s=0&c=AAAAAAAA',
+      '?s=6&c=AAAAAAAA',
+      '?s=4&c=AAAA',
+      '?s=4&c=AAAAAAA%3C',
+    ])
+      expect(friendFromSearch(search)).toBeNull();
   });
 });
 
@@ -85,23 +97,47 @@ describe('link previews', () => {
   const words = (language: 'en' | 'fr') => {
     const strings = stringsFor(language);
     return {
-      appName: strings.appName,
       tagline: strings.tagline,
       summary: strings.ratings.summary,
-      none: strings.ratings.none,
       near: strings.card.near,
       friend: strings.share.friend,
+      ...strings.preview,
     };
   };
 
-  it('names the place and its town, then its stars and what the site is', () => {
+  it('names the place and its town, then its stars once it has some, what it is and where', () => {
     expect(previewOf(place(), { count: 3, total: 13 }, words('en'))).toEqual({
       title: 'Casse-Croûte Trempette · Saint-Rémi',
-      description: '4.3 out of 5 · 3 ratings. Québec’s casse-croûtes and potato shacks on a map',
+      description:
+        '4.3 out of 5 · 3 ratings. Casse-croûte in Saint-Rémi. Québec’s casse-croûtes and potato shacks on a map',
     });
     expect(previewOf(place(), undefined, words('fr')).description).toBe(
-      'Pas encore de note. Les casse-croûtes et cantines du Québec sur une carte',
+      'Casse-croûte à Saint-Rémi. Les casse-croûtes et cantines du Québec sur une carte',
     );
+    expect(
+      previewOf(place({ citySource: 'nearest-town' }), { count: 0, total: 0 }, words('fr'))
+        .description,
+    ).toBe(
+      'Casse-croûte près de Saint-Rémi. Les casse-croûtes et cantines du Québec sur une carte',
+    );
+  });
+
+  it('says what a place is from its name, poutine when it says nothing', () => {
+    const kinds = [
+      ['Casse-croute du Village', 'casse-croute'],
+      ['La Belle Anne casse-croûte mets antillais', 'casse-croute'],
+      ['Cantine Grains', 'cantine'],
+      ['Friterie Poutini', 'friterie'],
+      ['Bar laitier Trempette', 'bar-laitier'],
+      ['La Patate d’Autrefois', 'patates'],
+      ['La Pataterie', 'patates'],
+      ['La Banquise', 'poutine'],
+    ] as const;
+    for (const [name, kind] of kinds) expect(kindOf({ name })).toBe(kind);
+    expect(
+      previewOf(place({ name: 'La Banquise', city: 'Montréal' }), undefined, words('en'))
+        .description,
+    ).toBe('Poutine in Montréal. Québec’s casse-croûtes and potato shacks on a map');
   });
 
   it('leads with a friend’s stars when the link carries them', () => {

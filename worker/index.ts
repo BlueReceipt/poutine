@@ -1,6 +1,7 @@
 // The Worker behind poutines.app: the built app from `dist`, under /api the few things a static
 // page can't do, and a place's short link (/labanquise, and the older /p/… ones). The app's files
 // (assets, fonts, map glyphs, pictures) never reach this code: run_worker_first in wrangler.jsonc.
+import { countTap } from './counts.ts';
 import { geocode } from './geocode.ts';
 import { problem } from './http.ts';
 import { oldPlaceLink, placePage } from './pages.ts';
@@ -13,6 +14,7 @@ export default {
     const { pathname } = new URL(request.url);
     const { method } = request;
     if (method === 'POST' && pathname === '/api/geocode') return geocode(request);
+    if (method === 'POST' && pathname === '/api/count') return countTap(request, env, ctx);
     if (method === 'POST' && pathname === '/api/places') return addPlace(request, env);
     if (method === 'GET' && pathname === '/api/ratings') return ratingTotals(request, env, ctx);
     if (method === 'POST' && pathname === '/api/ratings') return rate(request, env);

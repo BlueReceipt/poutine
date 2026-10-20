@@ -1,6 +1,6 @@
-# Poutine · Pootsin
+# Poutine
 
-A map of Québec's casse-croûtes, cantines and potato shacks: **Poutine** in French, **Pootsin** in English, at [poutines.app](https://poutines.app). Tap a pin for the place's card (address, hours, phone, directions), search by name or town, find the places near you, rate it from 1 to 5 stars and share your rating as a story picture with the place's link, and add a place that's missing: each place sent is checked before it shows.
+A map of Québec's casse-croûtes, cantines and potato shacks: **Poutine** (pronounced pootsin), at [poutines.app](https://poutines.app). Tap a pin for the place's card (address, hours, phone, directions), search by name or town, find the places near you, rate it from 1 to 5 stars and share your rating as a story picture with the place's link, and add a place that's missing: each place sent is checked before it shows.
 
 ## The places
 

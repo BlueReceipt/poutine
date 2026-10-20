@@ -61,4 +61,12 @@ describe('pins', () => {
     expect(visited(['node/-73.6'])).toEqual([true, false]);
     expect(visited(['node/-73.62'])).toEqual([false, true]);
   });
+
+  it('makes solid the pin of a place raters confirmed', () => {
+    const groups = groupByAddress([at(-73.7, 45.3, { poutine: 'unconfirmed' })]);
+    const evidence = (confirmed: string[]) =>
+      pinFeatures(groups, new Set(), new Set(confirmed)).features[0]?.properties.poutine;
+    expect(evidence([])).toBe('unconfirmed');
+    expect(evidence(['node/-73.7'])).toBe('confirmed');
+  });
 });

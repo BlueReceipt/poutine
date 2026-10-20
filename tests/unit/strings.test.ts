@@ -9,8 +9,10 @@ describe('language', () => {
     expect(phoneLanguage([])).toBe('en');
   });
 
-  it('names the app Pootsin in English and Poutine in French', () => {
-    expect(stringsFor('en').appName).toBe('Pootsin');
+  it('names the app Poutine in both languages, how to say it in English', () => {
+    expect(stringsFor('en').appName).toBe('Poutine');
+    expect(stringsFor('en').pronounced).toBe('pronounced Pootsin');
+    expect(stringsFor('fr').pronounced).toBe('');
     expect(stringsFor('fr').appName).toBe('Poutine');
   });
 

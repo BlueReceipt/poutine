@@ -8,13 +8,17 @@
  *   npm run reject -- 4             turns them down (kept in the database as rejected)
  *   npm run ratings                 the latest ratings (and written reviews, once switched on)
  *   npm run hide -- 12              hides ratings: they stop counting at once, no push needed
+ *   npm run counts                  the last 30 days' counts: Share taps, link opens, ratings
+ *   npm run confirmed               places raters confirmed serve poutine (3 yeses, more than noes)
  *
  * Add --local to work on the database `npm start` uses on this PC instead of the real one.
  */
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { COUNT_KINDS, type CountKind } from '../src/domain/counts.ts';
 import { possibleDuplicates } from '../src/domain/duplicates.ts';
+import { CONFIRM_AT } from '../src/domain/ratings.ts';
 import type { Place } from '../src/domain/osmPlaces.ts';
 import { approvedPlace, type NewPlace, type PlacedBy } from '../src/domain/submission.ts';
 
@@ -201,7 +205,7 @@ function hide(): void {
       `UPDATE ratings SET hidden = 1 WHERE id IN (${list})`,
       ...placesHit.map(
         (place) =>
-          `INSERT OR REPLACE INTO rating_totals (place, count, total) SELECT '${place.replace(/'/g, "''")}', COUNT(*), COALESCE(SUM(stars), 0) FROM ratings WHERE place = '${place.replace(/'/g, "''")}' AND hidden = 0`,
+          `INSERT OR REPLACE INTO rating_totals (place, count, total, poutine_yes, poutine_no) SELECT '${place.replace(/'/g, "''")}', COUNT(*), COALESCE(SUM(stars), 0), COALESCE(SUM(poutine = 1), 0), COALESCE(SUM(poutine = 0), 0) FROM ratings WHERE place = '${place.replace(/'/g, "''")}' AND hidden = 0`,
       ),
     ].join('; '),
   );
@@ -210,12 +214,55 @@ function hide(): void {
   );
 }
 
+/** The last 30 days' counts, a line a day (only numbers: nothing about who). */
+function counts(): void {
+  const rows = sql<{ day: string; kind: CountKind; n: number }>(
+    "SELECT day, kind, n FROM daily_counts WHERE day >= date('now', '-30 days') ORDER BY day",
+  );
+  if (rows.length === 0) {
+    console.log('Nothing counted in the last 30 days.');
+    return;
+  }
+  const heads = ['day', ...COUNT_KINDS];
+  console.log(heads.map((head) => head.padEnd(12)).join(''));
+  for (const day of [...new Set(rows.map((row) => row.day))]) {
+    const of = (kind: CountKind) =>
+      String(rows.find((row) => row.day === day && row.kind === kind)?.n ?? 0);
+    console.log([day, ...COUNT_KINDS.map(of)].map((cell) => cell.padEnd(12)).join(''));
+  }
+}
+
+/**
+ * The places raters confirmed serve poutine, and which of them the list still calls unconfirmed:
+ * those can be made permanent with "confirmed": true in data/picked.json.
+ */
+function confirmed(): void {
+  const rows = sql<{ place: string; poutine_yes: number; poutine_no: number }>(
+    `SELECT place, poutine_yes, poutine_no FROM rating_totals
+      WHERE poutine_yes >= ${String(CONFIRM_AT)} AND poutine_yes > poutine_no ORDER BY place`,
+  );
+  if (rows.length === 0) {
+    console.log('No place confirmed by raters yet.');
+    return;
+  }
+  const { places } = JSON.parse(readFileSync(PLACES, 'utf8')) as { places: Place[] };
+  for (const row of rows) {
+    const place = places.find((candidate) => candidate.osm === row.place);
+    const still = place?.poutine === 'unconfirmed' ? '  (still unconfirmed in the list)' : '';
+    console.log(
+      `${row.place}  ${place?.name ?? '?'}, ${place?.city ?? ''}: ${String(row.poutine_yes)} yes, ${String(row.poutine_no)} no${still}`,
+    );
+  }
+}
+
 if (command === 'waiting') waiting();
 else if (command === 'approve') review('approved');
 else if (command === 'reject') review('rejected');
 else if (command === 'ratings') ratings();
 else if (command === 'hide') hide();
+else if (command === 'counts') counts();
+else if (command === 'confirmed') confirmed();
 else
   throw new Error(
-    'npm run waiting | approve -- <numbers> | reject -- <numbers> | ratings | hide -- <numbers>',
+    'npm run waiting | approve -- <numbers> | reject -- <numbers> | ratings | hide -- <numbers> | counts | confirmed',
   );

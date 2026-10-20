@@ -49,6 +49,8 @@ interface Props {
   me: { lat: number; lon: number } | null;
   /** The places this visitor rated: their pins turn green. */
   rated: ReadonlySet<string>;
+  /** The places raters confirmed serve poutine. */
+  confirmed: ReadonlySet<string>;
   request: MapRequest | null;
   /** Add a place's pin: the map moves under it; null when no pin is being placed. */
   picking: { start: PickStart; seq: number } | null;
@@ -109,8 +111,8 @@ function go(map: MapLibreMap, request: MapRequest, groups: readonly PinGroup[], 
 }
 
 export function MapView(props: Props) {
-  const { places, groups, strings, selectedId, me, rated, request, picking, onSelect, onFailed } =
-    props;
+  const { places, groups, strings, selectedId, me, rated, confirmed, request, picking } = props;
+  const { onSelect, onFailed } = props;
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const select = useRef(onSelect);
@@ -121,6 +123,8 @@ export function MapView(props: Props) {
   isPicking.current = picking !== null;
   const ratedNow = useRef(rated);
   ratedNow.current = rated;
+  const confirmedNow = useRef(confirmed);
+  confirmedNow.current = confirmed;
   const meNow = useRef<FeatureCollection<Point>>(meFeatures(me));
   meNow.current = meFeatures(me);
   // What was asked before the map was ready (a place's link): it starts there.
@@ -164,7 +168,7 @@ export function MapView(props: Props) {
         loaded.on('load', () => {
           loaded.addSource(PLACES, {
             type: 'geojson',
-            data: pinFeatures(groups, ratedNow.current),
+            data: pinFeatures(groups, ratedNow.current, confirmedNow.current),
           });
           for (const layer of pinLayers) loaded.addLayer(layer);
           loaded.setFilter('selected', selectedFilter(selectedNow.current));
@@ -221,10 +225,12 @@ export function MapView(props: Props) {
     mapRef.current?.getSource<GeoJSONSource>(ME)?.setData(meFeatures(me));
   }, [me]);
 
-  // A place just rated turns green at once.
+  // A place just rated turns green at once; one raters just confirmed turns solid.
   useEffect(() => {
-    mapRef.current?.getSource<GeoJSONSource>(PLACES)?.setData(pinFeatures(groups, rated));
-  }, [rated, groups]);
+    mapRef.current
+      ?.getSource<GeoJSONSource>(PLACES)
+      ?.setData(pinFeatures(groups, rated, confirmed));
+  }, [rated, confirmed, groups]);
 
   useEffect(() => {
     const map = mapRef.current;

@@ -44,24 +44,37 @@ export function placePath(place: Pick<Place, 'osm' | 'name' | 'link'>): string {
 }
 
 /**
- * The place's link on the site's own address, wherever the page that shares it runs. With the
- * sharer's stars (Alex, 2026-10-20: "What would you give?"), the link carries them, and only them:
- * "?s=4". They're a friend's word, never counted as a rating.
+ * A friend's stars in a shared link, with the code the Worker gave their rating (Alex, 2026-10-20:
+ * "Friend's stars that can't be faked"): "?s=4&c=x7Kq2mPa". They're a friend's word, never counted
+ * as a rating, and shown only when the Worker finds the code fits.
  */
-export function placeUrl(
-  place: Pick<Place, 'osm' | 'name' | 'link'>,
-  stars?: number | null,
-): string {
-  const given = stars && isStars(stars) ? `?s=${String(stars)}` : '';
-  return `${SITE}${placePath(place)}${given}`;
+export interface FriendStars {
+  stars: number;
+  code: string;
 }
+
+const FRIEND_CODE = /^[A-Za-z0-9_-]{8}$/;
 
 const isStars = (stars: number): boolean => Number.isInteger(stars) && stars >= 1 && stars <= 5;
 
-/** The sharer's stars a link carries ("?s=4"), 1 to 5; null for none or anything else. */
-export function starsFromSearch(search: string): number | null {
-  const found = /[?&]s=([1-5])(?:&|$)/.exec(search);
-  return found ? Number(found[1]) : null;
+/** The place's link on the site's own address, wherever the page that shares it runs. */
+export function placeUrl(
+  place: Pick<Place, 'osm' | 'name' | 'link'>,
+  friend?: FriendStars | null,
+): string {
+  const given =
+    friend && isStars(friend.stars) && FRIEND_CODE.test(friend.code)
+      ? `?s=${String(friend.stars)}&c=${friend.code}`
+      : '';
+  return `${SITE}${placePath(place)}${given}`;
+}
+
+/** The friend's stars and code a link carries; null for none or anything malformed. */
+export function friendFromSearch(search: string): FriendStars | null {
+  const params = new URLSearchParams(search);
+  const stars = Number(params.get('s'));
+  const code = params.get('c') ?? '';
+  return isStars(stars) && FRIEND_CODE.test(code) ? { stars, code } : null;
 }
 
 const PLACE_PATH = /^\/p\/(?:[a-z0-9-]*-)?([nwra])(\d{1,20})\/?$/i;
@@ -76,21 +89,37 @@ export function placeIdFromPath(path: string): string | null {
   return found && kind ? `${kind}/${found[2] ?? ''}` : null;
 }
 
+/** What a place is, as its name says; "poutine" when it says none of these. */
+export type PlaceKind =
+  'casse-croute' | 'cantine' | 'friterie' | 'bar-laitier' | 'patates' | 'poutine';
+
+export function kindOf(place: Pick<Place, 'name'>): PlaceKind {
+  const name = ` ${fold(place.name)} `;
+  if (/ casse ?croute /.test(name)) return 'casse-croute';
+  if (/ cantine /.test(name)) return 'cantine';
+  if (/ friterie /.test(name)) return 'friterie';
+  if (/ bar laitier /.test(name)) return 'bar-laitier';
+  if (/ patat/.test(name)) return 'patates';
+  return 'poutine';
+}
+
 export interface PreviewWords {
-  /** Pootsin or Poutine. */
-  appName: string;
   /** What the site is, after the stars. */
   tagline: string;
   summary: (average: number, count: number) => string;
-  none: string;
   near: (town: string) => string;
   /** A link carrying a friend's stars: what they gave, and the question back. */
   friend: (stars: number) => string;
+  kinds: Readonly<Record<PlaceKind, string>>;
+  /** "Casse-croûte à Drummondville", and near a town when that's all that's known. */
+  placedIn: (what: string, town: string) => string;
+  placedNear: (what: string, town: string) => string;
 }
 
 /**
  * What a link preview says (WhatsApp, Messenger, a Facebook post): the place and its town, then
- * its stars and what the site is. A link with a friend's stars leads with them.
+ * its stars once it has some, what it is and what the site is (Alex, 2026-10-20: no "No ratings
+ * yet"). A link with a friend's stars leads with them.
  */
 export function previewOf(
   place: Place,
@@ -105,7 +134,13 @@ export function previewOf(
       title: `${String(friend)} ★ · ${named}`,
       description: `${words.friend(friend)} ${words.tagline}`,
     };
+  const what = words.kinds[kindOf(place)];
+  const where = !place.city
+    ? what
+    : place.citySource === 'nearest-town'
+      ? words.placedNear(what, place.city)
+      : words.placedIn(what, place.city);
   const average = averageOf(total);
-  const stars = average === null || !total ? words.none : words.summary(average, total.count);
-  return { title: named, description: `${stars}. ${words.tagline}` };
+  const stars = average === null || !total ? '' : `${words.summary(average, total.count)}. `;
+  return { title: named, description: `${stars}${where}. ${words.tagline}` };
 }

@@ -3,7 +3,8 @@
 // place's short link (/labanquise, its preview naming the place).
 // Connected to the GitHub repository (Workers Builds), each push to main runs `npm run build`,
 // then `npx wrangler deploy` with this file. Deploying your own copy: change the name, the address
-// and the database ID to yours, and set the TURNSTILE_SECRET secret.
+// and the database ID to yours, and set the TURNSTILE_SECRET and LINK_SECRET
+// secrets.
 {
   "name": "poutine",
   "main": "worker/index.ts",
@@ -19,6 +20,8 @@
       "!/fonts/*",
       "!/map-assets/*",
       "!/icon.svg",
+      "!/icons/*",
+      "!/manifest.webmanifest",
       "!/share.png",
     ],
   },

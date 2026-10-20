@@ -7,6 +7,8 @@ import {
   type RatingTotal,
   type Review,
 } from '../src/domain/ratings.ts';
+import { friendCode } from './codes.ts';
+import { countStatement } from './counts.ts';
 import { connectionOf, KEEP_SENDER_DAYS, passedBotCheck, senderKey } from './guard.ts';
 import { fromThisSite, json, jsonBody, problem } from './http.ts';
 
@@ -25,10 +27,13 @@ export async function ratingTotals(
   const kept = await cache.match(request);
   if (kept) return kept;
   const { results } = await env.DB.prepare(
-    'SELECT place, count, total FROM rating_totals WHERE count > 0',
-  ).all<RatingTotal & { place: string }>();
+    'SELECT place, count, total, poutine_yes, poutine_no FROM rating_totals WHERE count > 0',
+  ).all<{ place: string; count: number; total: number; poutine_yes: number; poutine_no: number }>();
   const totals = Object.fromEntries(
-    results.map(({ place, count, total }) => [place, { count, total }]),
+    results.map(({ place, count, total, poutine_yes: yes, poutine_no: no }) => [
+      place,
+      yes || no ? { count, total, yes, no } : { count, total },
+    ]),
   );
   const response = json({ totals }, 200, TOTALS_KEPT);
   ctx.waitUntil(cache.put(request, response.clone()));
@@ -70,24 +75,42 @@ export async function rate(request: Request, env: Env): Promise<Response> {
   const monthAgo = new Date(now.getTime() - KEEP_SENDER_DAYS * 86_400_000).toISOString();
   await env.DB.batch([
     env.DB.prepare(
-      `INSERT INTO ratings (place, rater, stars, comment, created_at, updated_at, sender)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO ratings (place, rater, stars, comment, created_at, updated_at, sender, poutine)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT (place, rater) DO UPDATE SET
           stars = excluded.stars, comment = excluded.comment,
-          updated_at = excluded.updated_at, sender = excluded.sender`,
-    ).bind(rating.place, rating.rater, rating.stars, rating.comment, at, at, sender),
+          updated_at = excluded.updated_at, sender = excluded.sender,
+          poutine = COALESCE(excluded.poutine, ratings.poutine)`,
+    ).bind(
+      rating.place,
+      rating.rater,
+      rating.stars,
+      rating.comment,
+      at,
+      at,
+      sender,
+      rating.poutine === null ? null : Number(rating.poutine),
+    ),
+    // The place's totals again, without hidden ratings (scripts/review.ts hide does the same).
     env.DB.prepare(
-      `INSERT OR REPLACE INTO rating_totals (place, count, total)
-        SELECT ?, COUNT(*), COALESCE(SUM(stars), 0) FROM ratings WHERE place = ? AND hidden = 0`,
+      `INSERT OR REPLACE INTO rating_totals (place, count, total, poutine_yes, poutine_no)
+        SELECT ?, COUNT(*), COALESCE(SUM(stars), 0), COALESCE(SUM(poutine = 1), 0),
+          COALESCE(SUM(poutine = 0), 0)
+        FROM ratings WHERE place = ? AND hidden = 0`,
     ).bind(rating.place, rating.place),
     env.DB.prepare("UPDATE ratings SET sender = '' WHERE sender != '' AND updated_at < ?").bind(
       monthAgo,
     ),
+    countStatement(env, 'rating', now),
   ]);
-  const total = await env.DB.prepare('SELECT count, total FROM rating_totals WHERE place = ?')
+  const total = await env.DB.prepare(
+    'SELECT count, total, poutine_yes AS yes, poutine_no AS no FROM rating_totals WHERE place = ?',
+  )
     .bind(rating.place)
     .first<RatingTotal>();
-  return json({ total: total ?? { count: 0, total: 0 } });
+  // The code a shared link carries with these stars (codes.ts).
+  const code = await friendCode(env.LINK_SECRET, rating.place, rating.stars);
+  return json({ total: total ?? { count: 0, total: 0 }, code });
 }
 
 /** A place's latest written reviews, once reviews are switched on; not found until then. */

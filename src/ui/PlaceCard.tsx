@@ -10,8 +10,7 @@ import {
   googleMapsUrl,
   telUrl,
 } from '../domain/placeText.ts';
-import type { RatingTotal } from '../domain/ratings.ts';
-import { myStars } from './rater.ts';
+import { confirmedByRaters, type RatingTotal } from '../domain/ratings.ts';
 import { RatingBox, RatingSummary, ReviewList } from './Ratings.tsx';
 import { sharePlace, type Shared } from './sharing.ts';
 import type { Strings } from './strings.ts';
@@ -111,7 +110,7 @@ function PlaceDetails(props: DetailsProps) {
   const [shared, setShared] = useState<Shared | null>(null);
   const share = async () => {
     setShared(null);
-    setShared(await sharePlace(place, myStars(place.osm), strings));
+    setShared(await sharePlace(place, strings));
   };
   const address = addressLines(place, words.near);
   const hours = place.openingHours
@@ -131,7 +130,9 @@ function PlaceDetails(props: DetailsProps) {
       </h2>
       <RatingSummary total={total} strings={strings} />
       {friend !== null && <p class="friend">{strings.share.friend(friend)}</p>}
-      {place.poutine === 'unconfirmed' && <p class="hint">{words.unconfirmed}</p>}
+      {place.poutine === 'unconfirmed' && !confirmedByRaters(total) && (
+        <p class="hint">{words.unconfirmed}</p>
+      )}
       {address.length > 0 && (
         <p class="address">
           {address.map((line, i) => (

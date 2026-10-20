@@ -62,7 +62,9 @@ describe('short links in use', () => {
   it('is the place’s path and link once it has one', () => {
     const banquise = { osm: 'node/5228808422', name: 'La Banquise', link: 'labanquise' };
     expect(placePath(banquise)).toBe('/labanquise');
-    expect(placeUrl(banquise, 4)).toBe('https://poutines.app/labanquise?s=4');
+    expect(placeUrl(banquise, { stars: 4, code: 'x7Kq2mPa' })).toBe(
+      'https://poutines.app/labanquise?s=4&c=x7Kq2mPa',
+    );
   });
 
   it('reads a typed link however it’s written', () => {

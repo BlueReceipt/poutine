@@ -1,5 +1,7 @@
+import type { CountKind } from '../domain/counts.ts';
 import { placeUrl, slugOf } from '../domain/links.ts';
 import type { Place } from '../domain/osmPlaces.ts';
+import { myFriendStars } from './rater.ts';
 import { storyPicture } from './storyPicture.ts';
 import type { Strings } from './strings.ts';
 
@@ -36,6 +38,16 @@ function save(file: File): void {
   }, 10_000);
 }
 
+/** A Share tap, counted for the day (only the number: nothing about who). */
+function counted(kind: CountKind): void {
+  fetch('/api/count', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kind }),
+    keepalive: true,
+  }).catch(() => undefined);
+}
+
 const cancelled = (error: unknown): boolean =>
   error instanceof DOMException && error.name === 'AbortError';
 
@@ -43,13 +55,13 @@ const cancelled = (error: unknown): boolean =>
  * A place's link through the share sheet, from any card (for "let's eat here" in a group chat),
  * with the visitor's stars when they rated it. Without a share sheet, the link is copied.
  */
-export async function sharePlace(
-  place: Place,
-  stars: number | null,
-  strings: Strings,
-): Promise<Shared> {
-  const url = placeUrl(place, stars);
-  const text = stars ? strings.share.text(place.name, stars) : strings.share.placeText(place.name);
+export async function sharePlace(place: Place, strings: Strings): Promise<Shared> {
+  counted('share-place');
+  const friend = myFriendStars(place.osm);
+  const url = placeUrl(place, friend);
+  const text = friend
+    ? strings.share.text(place.name, friend.stars)
+    : strings.share.placeText(place.name);
   if (typeof navigator.share === 'function') {
     try {
       await navigator.share({ text, url });
@@ -86,8 +98,10 @@ export async function shareStory(
   place: Place,
   stars: number,
   strings: Strings,
+  kind: 'share-story' | 'share-photo' = 'share-story',
 ): Promise<Shared> {
-  const url = placeUrl(place, stars);
+  counted(kind);
+  const url = placeUrl(place, myFriendStars(place.osm));
   const copied = await copy(url);
   let ready: File;
   try {

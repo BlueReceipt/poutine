@@ -8,10 +8,12 @@ import {
   placePath,
   placeUrl,
   previewOf,
-  starsFromSearch,
+  friendFromSearch,
 } from '../src/domain/links.ts';
 import type { Place } from '../src/domain/osmPlaces.ts';
 import { linkFromPath } from '../src/domain/shortLinks.ts';
+import { friendCodeFits } from './codes.ts';
+import { countLater } from './counts.ts';
 import type { RatingTotal } from '../src/domain/ratings.ts';
 import { phoneLanguage, stringsFor, type Language } from '../src/ui/strings.ts';
 
@@ -72,11 +74,17 @@ export async function placePage(
   // A word that's no place's link: the app's page, which looks it up (a shared name, a town).
   if (!place) return env.ASSETS.fetch(new URL('/', url));
 
+  if (request.method === 'GET') countLater(env, ctx, 'link-open');
   const language = languageOf(request);
-  const friend = starsFromSearch(url.search);
+  // A friend's stars count only when their code fits: anyone can type "?s=5".
+  const asked = friendFromSearch(url.search);
+  const friend =
+    asked && (await friendCodeFits(env.LINK_SECRET, place.osm, asked.stars, asked.code))
+      ? asked
+      : null;
   // One kept copy per place, language and friend's stars.
   const key = new Request(
-    `${url.origin}/p/${place.osm}?lang=${language}&s=${friend === null ? '' : String(friend)}`,
+    `${url.origin}/p/${place.osm}?lang=${language}&s=${friend ? `${String(friend.stars)}&c=${friend.code}` : ''}`,
   );
   const kept = await caches.default.match(key);
   if (kept) return forBrowser(kept, request.method);
@@ -89,14 +97,13 @@ export async function placePage(
     place,
     total,
     {
-      appName: strings.appName,
       tagline: strings.tagline,
       summary: strings.ratings.summary,
-      none: strings.ratings.none,
       near: strings.card.near,
       friend: strings.share.friend,
+      ...strings.preview,
     },
-    friend,
+    friend?.stars ?? null,
   );
   const set = (name: string, value: string): HTMLRewriterElementContentHandlers => ({
     element(element) {
@@ -118,6 +125,15 @@ export async function placePage(
     // Facebook reads the page at og:url again: it keeps the friend's stars.
     .on('meta[property="og:url"]', set('content', placeUrl(place, friend)))
     .on('meta[property="og:locale"]', set('content', language === 'fr' ? 'fr_CA' : 'en_CA'))
+    // The page shows the friend's line only from here: the code was checked.
+    .on('head', {
+      element(element) {
+        if (friend)
+          element.append(`<meta name="poutine-friend" content="${String(friend.stars)}" />`, {
+            html: true,
+          });
+      },
+    })
     .transform(page);
   const headers = new Headers(named.headers);
   headers.set('Cache-Control', `public, max-age=${String(PAGE_KEPT)}`);

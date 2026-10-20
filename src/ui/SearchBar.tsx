@@ -21,7 +21,10 @@ export function SearchBar({ strings, count, query, results, onQuery, onChoose, o
   return (
     <header class="top">
       <div class="bar">
-        <h1>{strings.appName}</h1>
+        <h1>
+          {strings.appName}
+          {strings.pronounced && <small>{strings.pronounced}</small>}
+        </h1>
         <input
           type="search"
           value={query}

@@ -78,10 +78,20 @@ body,
 }
 
 .bar h1 {
+  display: flex;
+  flex-direction: column;
   margin: 0;
   font-size: 20px;
   font-weight: 700;
   line-height: 1.2;
+}
+
+/* English: how to say the name, small under it. */
+.bar h1 small {
+  color: var(--graphite);
+  font-size: 12px;
+  font-weight: 400;
+  white-space: nowrap;
 }
 
 .bar input {
@@ -585,6 +595,35 @@ button.action.primary {
   font-weight: 700;
   overflow-wrap: anywhere;
   user-select: all;
+}
+
+/* "Did you have poutine here?": Yes and No side by side, big enough for a thumb. */
+.had-poutine {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin: 12px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.had-poutine legend {
+  margin-bottom: 4px;
+  padding: 0;
+  font-weight: 700;
+}
+
+.had-poutine label {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 48px;
+}
+
+.had-poutine input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--ink);
 }
 
 .field textarea {

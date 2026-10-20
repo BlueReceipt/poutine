@@ -1,19 +1,29 @@
 import type { HoursWords } from '../domain/hours.ts';
+import type { PlaceKind } from '../domain/links.ts';
 import type { PlacedBy, Problem } from '../domain/submission.ts';
 
 /** French puts a no-break space before a colon. Built here: never typed as an escape. */
 const NBSP = String.fromCharCode(0xa0);
 
 /**
- * Every word on screen, in English and French (same shape). The app's name follows the language
- * (Alex, 2026-10-15): Pootsin in English, Poutine in French, "to get them to stop saying pooteeen".
+ * Every word on screen, in English and French (same shape). The name is always Poutine (Alex,
+ * 2026-10-20, replacing Pootsin in English): in English the search bar adds "pronounced Pootsin",
+ * "to get them to stop saying pooteeen".
  */
 export interface Strings {
   appName: string;
+  /** Beside the name in the search bar: how to say it (English only). */
+  pronounced: string;
   /** What the site is: in link previews and on the story picture. */
   tagline: string;
   /** The closable box of a first visit (Alex's words, 2026-10-19). */
   welcome: string;
+  /** Link previews: what a place is, from its name, and where. */
+  preview: {
+    kinds: Readonly<Record<PlaceKind, string>>;
+    placedIn: (what: string, town: string) => string;
+    placedNear: (what: string, town: string) => string;
+  };
   /** The map's label for how many places it shows. */
   placeCount: (count: number) => string;
   loading: string;
@@ -107,6 +117,10 @@ export type RatingTrouble =
 
 export interface RatingWords {
   none: string;
+  /** Asked with a rating where nothing confirms poutine yet. */
+  hadPoutine: string;
+  yes: string;
+  no: string;
   summary: (average: number, count: number) => string;
   yours: string;
   star: (stars: number) => string;
@@ -172,7 +186,20 @@ const distanceIn =
   };
 
 const english: Strings = {
-  appName: 'Pootsin',
+  appName: 'Poutine',
+  pronounced: 'pronounced Pootsin',
+  preview: {
+    kinds: {
+      'casse-croute': 'Casse-croûte',
+      cantine: 'Cantine',
+      friterie: 'Friterie',
+      'bar-laitier': 'Dairy bar',
+      patates: 'Potato shack',
+      poutine: 'Poutine',
+    },
+    placedIn: (what, town) => `${what} in ${town}`,
+    placedNear: (what, town) => `${what} near ${town}`,
+  },
   tagline: 'Québec’s casse-croûtes and potato shacks on a map',
   welcome:
     'Poutine, pronounced pootsin, was invented in Québec. If you’re going to appropriate its name, then at least call it by what it is, and eat at a real spot.',
@@ -213,6 +240,9 @@ const english: Strings = {
   },
   ratings: {
     none: 'No ratings yet',
+    hadPoutine: 'Did you have poutine here?',
+    yes: 'Yes',
+    no: 'No',
     summary: (average, count) =>
       `${average.toLocaleString('en-CA', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} out of 5 · ${count === 1 ? '1 rating' : `${String(count)} ratings`}`,
     yours: 'Your rating',
@@ -237,7 +267,7 @@ const english: Strings = {
   },
   share: {
     place: 'Share',
-    placeText: (name) => `${name}, on Pootsin`,
+    placeText: (name) => `${name}, on Poutine`,
     copied: 'Link copied.',
     friend: (stars) =>
       `A friend gave this place ${stars === 1 ? '1 star' : `${String(stars)} stars`}. What would you give it?`,
@@ -250,7 +280,7 @@ const english: Strings = {
     hint: 'Sharing also copies the link, for a story’s Link sticker.',
     gave: 'I gave',
     text: (name, stars) =>
-      `I gave ${name} ${stars === 1 ? '1 star' : `${String(stars)} stars`} on Pootsin.`,
+      `I gave ${name} ${stars === 1 ? '1 star' : `${String(stars)} stars`} on Poutine.`,
     saved: 'The picture is in your downloads.',
     linkCopied: 'The link is copied.',
     copyThis: 'In a story, add this link with the Link sticker:',
@@ -343,6 +373,19 @@ const english: Strings = {
 
 const french: Strings = {
   appName: 'Poutine',
+  pronounced: '',
+  preview: {
+    kinds: {
+      'casse-croute': 'Casse-croûte',
+      cantine: 'Cantine',
+      friterie: 'Friterie',
+      'bar-laitier': 'Bar laitier',
+      patates: 'Cantine',
+      poutine: 'Poutine',
+    },
+    placedIn: (what, town) => `${what} à ${town}`,
+    placedNear: (what, town) => `${what} près de ${town}`,
+  },
   tagline: 'Les casse-croûtes et cantines du Québec sur une carte',
   welcome: `Poutines.app te permet de trouver ta prochaine poutine. Note-la pis partage ta photo${NBSP}! Fini les chaînes${NBSP}!`,
   placeCount: (count) => `${count.toLocaleString('fr-CA')} places à poutine`,
@@ -384,6 +427,9 @@ const french: Strings = {
   },
   ratings: {
     none: 'Pas encore de note',
+    hadPoutine: `Avez-vous mangé une poutine ici${NBSP}?`,
+    yes: 'Oui',
+    no: 'Non',
     summary: (average, count) =>
       `${average.toLocaleString('fr-CA', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} sur 5 · ${count === 1 ? '1 note' : `${String(count)} notes`}`,
     yours: 'Votre note',

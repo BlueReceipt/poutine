@@ -29,6 +29,8 @@ const STRENGTH: readonly PoutineEvidence[] = ['unconfirmed', 'name', 'cuisine', 
 export function pinFeatures(
   groups: readonly PinGroup[],
   rated: ReadonlySet<string> = new Set(),
+  /** Places raters confirmed serve poutine: solid pins, like any confirmed place. */
+  confirmed: ReadonlySet<string> = new Set(),
 ): FeatureCollection<Point, PinProperties> {
   return {
     type: 'FeatureCollection',
@@ -39,7 +41,7 @@ export function pinFeatures(
         id: group.id,
         count: group.places.length,
         poutine: group.places
-          .map((place) => place.poutine)
+          .map((place) => (confirmed.has(place.osm) ? 'confirmed' : place.poutine))
           .reduce((best, next) => (STRENGTH.indexOf(next) > STRENGTH.indexOf(best) ? next : best)),
         visited: group.places.some((place) => rated.has(place.osm)),
       },

@@ -31,14 +31,30 @@ export interface Rating {
   stars: 1 | 2 | 3 | 4 | 5;
   /** Empty while reviews are switched off. */
   comment: string;
+  /** "Did you have poutine here?", asked at places not confirmed yet; null when not answered. */
+  poutine: boolean | null;
 }
 
 export type RatingProblem = 'not-a-rating' | 'stars' | 'comment-too-long' | 'reviews-off';
 
-/** A place's ratings, as the Worker keeps them: how many, and their stars added up. */
+/**
+ * A place's ratings, as the Worker keeps them: how many, their stars added up, and the raters who
+ * said they had poutine there or not (left out while none did).
+ */
 export interface RatingTotal {
   count: number;
   total: number;
+  yes?: number;
+  no?: number;
+}
+
+/** Yeses it takes from different raters to confirm a place serves poutine (Alex, 2026-10-20). */
+export const CONFIRM_AT = 3;
+
+/** Three yeses or more, and more yeses than noes. */
+export function confirmedByRaters(total: RatingTotal | undefined): boolean {
+  const yes = total?.yes ?? 0;
+  return yes >= CONFIRM_AT && yes > (total?.no ?? 0);
 }
 
 /**
@@ -52,17 +68,19 @@ export function checkRating(
   if (!input || typeof input !== 'object' || Array.isArray(input))
     return { problems: ['not-a-rating'] };
   const fields = input as Record<string, unknown>;
-  const allowed = ['place', 'rater', 'stars', 'comment'];
+  const allowed = ['place', 'rater', 'stars', 'comment', 'poutine'];
   if (Object.keys(fields).some((key) => !allowed.includes(key)))
     return { problems: ['not-a-rating'] };
   const { place, rater, stars } = fields;
   const comment = fields.comment ?? '';
+  const poutine = fields.poutine ?? null;
   if (
     typeof place !== 'string' ||
     !PLACE_ID.test(place) ||
     typeof rater !== 'string' ||
     !RATER_ID.test(rater) ||
-    typeof comment !== 'string'
+    typeof comment !== 'string' ||
+    (poutine !== null && typeof poutine !== 'boolean')
   )
     return { problems: ['not-a-rating'] };
   const problems: RatingProblem[] = [];
@@ -72,7 +90,7 @@ export function checkRating(
   if (words && !reviewsOn) problems.push('reviews-off');
   if (words.length > MAX_COMMENT) problems.push('comment-too-long');
   if (problems.length > 0) return { problems };
-  return { rating: { place, rater, stars: stars as Rating['stars'], comment: words } };
+  return { rating: { place, rater, stars: stars as Rating['stars'], comment: words, poutine } };
 }
 
 /** The average, to one decimal: 4.33 → 4.3. Null with no rating. */

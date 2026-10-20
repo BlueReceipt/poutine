@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { averageOf, checkRating, REVIEWS_ON } from '../../src/domain/ratings.ts';
+import { averageOf, checkRating, confirmedByRaters, REVIEWS_ON } from '../../src/domain/ratings.ts';
 
 const rater = '0b5c1e7a-3f2d-4c8e-9a61-2d4f8e6b7c90';
 const sent = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
@@ -12,7 +12,7 @@ const sent = (overrides: Record<string, unknown> = {}): Record<string, unknown> 
 describe('checkRating', () => {
   it('keeps whole stars from 1 to 5 for a place of the list', () => {
     expect(checkRating(sent())).toEqual({
-      rating: { place: 'node/1016199628', rater, stars: 4, comment: '' },
+      rating: { place: 'node/1016199628', rater, stars: 4, comment: '', poutine: null },
     });
     expect(checkRating(sent({ place: 'added/12', stars: 1 }))).toMatchObject({
       rating: { place: 'added/12', stars: 1 },
@@ -45,6 +45,24 @@ describe('checkRating', () => {
     expect(checkRating(sent({ comment: 'x'.repeat(501) }), true)).toEqual({
       problems: ['comment-too-long'],
     });
+  });
+});
+
+describe('Did you have poutine here?', () => {
+  it('takes a yes or a no with the stars, and nothing else', () => {
+    expect(checkRating(sent({ poutine: true }))).toMatchObject({ rating: { poutine: true } });
+    expect(checkRating(sent({ poutine: false }))).toMatchObject({ rating: { poutine: false } });
+    for (const poutine of ['yes', 1, 0])
+      expect(checkRating(sent({ poutine }))).toEqual({ problems: ['not-a-rating'] });
+  });
+
+  it('confirms a place with three yeses from raters, and more yeses than noes', () => {
+    expect(confirmedByRaters({ count: 3, total: 12, yes: 3 })).toBe(true);
+    expect(confirmedByRaters({ count: 5, total: 20, yes: 3, no: 2 })).toBe(true);
+    expect(confirmedByRaters({ count: 6, total: 20, yes: 3, no: 3 })).toBe(false);
+    expect(confirmedByRaters({ count: 2, total: 8, yes: 2 })).toBe(false);
+    expect(confirmedByRaters({ count: 9, total: 30 })).toBe(false);
+    expect(confirmedByRaters(undefined)).toBe(false);
   });
 });
 

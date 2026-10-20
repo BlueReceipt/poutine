@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import placesUrl from '../../data/places.json?url';
 import { groupByAddress } from '../domain/groups.ts';
-import { placeIdFromPath, placePath, starsFromSearch } from '../domain/links.ts';
+import { placeIdFromPath, placePath } from '../domain/links.ts';
 import { linkFromPath, searchFor } from '../domain/shortLinks.ts';
 import type { Place } from '../domain/osmPlaces.ts';
-import type { RatingTotal } from '../domain/ratings.ts';
+import { confirmedByRaters, type RatingTotal } from '../domain/ratings.ts';
 import { nearest, searchPlaces } from '../domain/search.ts';
 import { MapView, type MapRequest } from '../map/MapView.tsx';
 import { AddPlace, type PickStart } from './AddPlace.tsx';
@@ -15,6 +15,17 @@ import { PlaceCard } from './PlaceCard.tsx';
 import { SearchBar } from './SearchBar.tsx';
 import { Welcome } from './Welcome.tsx';
 import type { Strings } from './strings.ts';
+
+/**
+ * A friend's stars the Worker checked and wrote in the page of a place's link (worker/pages.ts);
+ * null without them (a typed "?s=5" alone shows nothing).
+ */
+function friendOnPage(): number | null {
+  const stars = Number(
+    document.querySelector('meta[name="poutine-friend"]')?.getAttribute('content'),
+  );
+  return Number.isInteger(stars) && stars >= 1 && stars <= 5 ? stars : null;
+}
 
 type State = { kind: 'loading' } | { kind: 'ready'; places: Place[] } | { kind: 'failed' };
 
@@ -80,6 +91,15 @@ export function App({ strings }: { strings: Strings }) {
     setMine(myRatings());
   }, []);
   const ratedPlaces = useMemo(() => new Set(Object.keys(mine)), [mine]);
+  const confirmed = useMemo(
+    () =>
+      new Set(
+        Object.entries(totals)
+          .filter(([, total]) => confirmedByRaters(total))
+          .map(([place]) => place),
+      ),
+    [totals],
+  );
 
   const places = state.kind === 'ready' ? state.places : null;
   const groups = useMemo(() => (places ? groupByAddress(places) : []), [places]);
@@ -139,7 +159,7 @@ export function App({ strings }: { strings: Strings }) {
       id ? candidate.osm === id : word !== null && candidate.link === word,
     );
     if (chosen) {
-      const stars = starsFromSearch(window.location.search);
+      const stars = friendOnPage();
       if (stars !== null) setFriend({ place: chosen.osm, stars });
       show(chosen);
       return;
@@ -213,6 +233,7 @@ export function App({ strings }: { strings: Strings }) {
           selectedId={group?.id ?? null}
           me={me}
           rated={ratedPlaces}
+          confirmed={confirmed}
           request={request}
           picking={picking}
           onPicked={setPicked}

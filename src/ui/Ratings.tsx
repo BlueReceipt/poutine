@@ -61,6 +61,9 @@ export function RatingBox({ place, strings, onRated }: BoxProps) {
   const [given, setGiven] = useState<number | null>(() => myStars(place.osm));
   const [chosen, setChosen] = useState<number | null>(null);
   const [comment, setComment] = useState('');
+  // Asked only where nothing confirms poutine yet; not answering is fine.
+  const asks = place.poutine === 'unconfirmed';
+  const [hadPoutine, setHadPoutine] = useState<boolean | null>(null);
   const [sending, setSending] = useState(false);
   const [thanks, setThanks] = useState(false);
   const [trouble, setTrouble] = useState<RatingTrouble | null>(null);
@@ -79,6 +82,7 @@ export function RatingBox({ place, strings, onRated }: BoxProps) {
       rater: raterId(),
       stars: chosen,
       ...(REVIEWS_ON && comment.trim() ? { comment } : {}),
+      ...(asks && hadPoutine !== null ? { poutine: hadPoutine } : {}),
     };
     const checked = checkRating(fields);
     if ('problems' in checked) {
@@ -100,8 +104,8 @@ export function RatingBox({ place, strings, onRated }: BoxProps) {
         body: JSON.stringify({ ...fields, botCheck: token }),
       });
       if (response.ok) {
-        const { total } = (await response.json()) as { total: RatingTotal };
-        rememberStars(place.osm, chosen);
+        const { total, code } = (await response.json()) as { total: RatingTotal; code?: string };
+        rememberStars(place.osm, chosen, code);
         setGiven(chosen);
         setChosen(null);
         setComment('');
@@ -157,6 +161,24 @@ export function RatingBox({ place, strings, onRated }: BoxProps) {
             void send();
           }}
         >
+          {asks && (
+            <fieldset class="had-poutine">
+              <legend>{words.hadPoutine}</legend>
+              {[true, false].map((answer) => (
+                <label key={String(answer)}>
+                  <input
+                    type="radio"
+                    name={`had-poutine-${place.osm}`}
+                    checked={hadPoutine === answer}
+                    onChange={() => {
+                      setHadPoutine(answer);
+                    }}
+                  />
+                  {answer ? words.yes : words.no}
+                </label>
+              ))}
+            </fieldset>
+          )}
           {REVIEWS_ON && (
             <label class="field">
               <span>
@@ -217,10 +239,10 @@ function ShareRating({ place, stars, strings }: { place: Place; stars: number; s
     [withPhoto],
   );
 
-  const share = async (file: File | Promise<File>) => {
+  const share = async (file: File | Promise<File>, kind: 'share-story' | 'share-photo') => {
     setBusy(true);
     setShared(null);
-    setShared(await shareStory(file, place, stars, strings));
+    setShared(await shareStory(file, place, stars, strings, kind));
     setBusy(false);
   };
   const picked = async (chosen: File | undefined) => {
@@ -258,7 +280,7 @@ function ShareRating({ place, stars, strings }: { place: Place; stars: number; s
                 class="action primary"
                 disabled={busy}
                 onClick={() => {
-                  void share(withPhoto.file);
+                  void share(withPhoto.file, 'share-photo');
                 }}
               >
                 {words.place}
@@ -283,7 +305,7 @@ function ShareRating({ place, stars, strings }: { place: Place; stars: number; s
             class="action"
             disabled={busy}
             onClick={() => {
-              void share(storyFile(place, stars, strings));
+              void share(storyFile(place, stars, strings), 'share-story');
             }}
           >
             {busy ? words.making : words.button}
