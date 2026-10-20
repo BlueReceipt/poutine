@@ -14,8 +14,8 @@ const POUTINE_CRIMES = 'https://www.reddit.com/r/PoutineCrimes/';
 /**
  * Loaded fries sold as poutine: the picture of a menu Alex sent (2026-10-20: "add a hyperlink to the
  * frittenwerk picture i gave you, for not poutine"; "just put a link to the static picture"), its
- * source named beside the link in English; in French the link is on "ou quelque chose d'autre", with
- * no example ("french doesn't need it. only the english side").
+ * source written on the picture itself; in French the link is on "ou quelque chose d'autre", with no
+ * example ("french doesn't need it. only the english side").
  */
 const SOLD_AS_POUTINE = '/examples/not-poutine.webp';
 
@@ -93,8 +93,8 @@ export function Settings({ strings, chosen, onLanguage, onClose }: Props) {
           {words.counts.example} {words.counts.seeOne}{' '}
           <a href={SOLD_AS_POUTINE} target="_blank" rel="noopener noreferrer">
             {words.counts.oneSold}
-          </a>{' '}
-          ({words.counts.source}).
+          </a>
+          .
         </p>
       )}
       <p>

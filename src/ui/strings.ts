@@ -109,12 +109,11 @@ export interface Strings {
       notLinked: string;
       /**
        * English only (French needn't: Alex, 2026-10-20): what loaded fries look like, before the link
-       * to a menu of them sold as poutine, the link's words and its source.
+       * to a menu of them sold as poutine, and the link's words. The picture names its own source.
        */
       example: string;
       seeOne: string;
       oneSold: string;
-      source: string;
       /** Before the link to r/PoutineCrimes. */
       dare: string;
     };
@@ -408,7 +407,6 @@ const english: Strings = {
         'Loaded fries, for example: fries under shawarma chicken and garlic-mayo zigzags, currywurst, or pulled pork and slaw, with melted cheese and not one fresh curd. Tasty maybe. Not poutine.',
       seeOne: 'Like these, sold in Germany:',
       oneSold: 'a menu of “poutines”',
-      source: 'picture from Frittenwerk’s website',
       dare: 'If you dare, share it to',
     },
   },
@@ -675,7 +673,6 @@ const french: Strings = {
       example: '',
       seeOne: '',
       oneSold: '',
-      source: '',
       dare: `T’es pas sûr${NBSP}? Va voir sur`,
     },
   },
