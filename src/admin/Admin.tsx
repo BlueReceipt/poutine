@@ -45,7 +45,7 @@ export function Admin({ strings }: { strings: Strings }) {
   // Every place on the map, for the look-alikes: the list the app ships, and those approved since.
   useEffect(() => {
     const listed = fetch(placesUrl).then((answer) => answer.json()) as Promise<{ places: Place[] }>;
-    const since = fetch('/api/added')
+    const since = fetch('/api/added', { cache: 'no-cache' })
       .then((answer) => (answer.ok ? answer.json() : { places: [] }))
       .catch(() => ({ places: [] })) as Promise<{ places: Place[] }>;
     Promise.all([listed, since])

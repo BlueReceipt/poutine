@@ -68,7 +68,7 @@ export function App({ strings }: { strings: Strings }) {
       if (!response.ok) throw new Error(`places.json answered ${String(response.status)}`);
       return response.json() as Promise<{ places: Place[] }>;
     });
-    const added = fetch('/api/added')
+    const added = fetch('/api/added', { cache: 'no-cache' })
       .then((response) => (response.ok ? response.json() : { places: [] }))
       .catch(() => ({ places: [] })) as Promise<{ places: Place[] }>;
     Promise.all([listed, added])

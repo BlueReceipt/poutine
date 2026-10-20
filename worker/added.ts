@@ -10,8 +10,19 @@ import {
 } from '../src/domain/submission.ts';
 import { json } from './http.ts';
 
-/** How long Cloudflare and browsers keep the approved places, in seconds. */
+/**
+ * How long Cloudflare keeps the approved places, in seconds; each approval empties it. Browsers
+ * keep nothing (Alex, 2026-10-20: "make the map ask for approved places afresh on every visit"):
+ * a place he approves shows on the next visit.
+ */
 const ADDED_KEPT = 60;
+
+/** The answer as browsers get it: asked again on every visit. */
+function forBrowser(answer: Response): Response {
+  const response = new Response(answer.body, answer);
+  response.headers.set('Cache-Control', 'no-cache');
+  return response;
+}
 
 export const ADDED_PATH = '/api/added';
 
@@ -31,16 +42,17 @@ export async function approvedPlaces(env: Env, link?: string): Promise<Place[]> 
   }));
 }
 
-/** GET /api/added: the approved places for the map, kept a minute. */
+/** GET /api/added: the approved places for the map, kept a minute by Cloudflare only. */
 export async function addedPlaces(
   request: Request,
   env: Env,
   ctx: ExecutionContext,
 ): Promise<Response> {
   const cache = caches.default;
-  const kept = await cache.match(request);
-  if (kept) return kept;
+  const key = new Request(new URL(ADDED_PATH, request.url));
+  const kept = await cache.match(key);
+  if (kept) return forBrowser(kept);
   const response = json({ places: await approvedPlaces(env) }, 200, ADDED_KEPT);
-  ctx.waitUntil(cache.put(request, response.clone()));
-  return response;
+  ctx.waitUntil(cache.put(key, response.clone()));
+  return forBrowser(response);
 }
