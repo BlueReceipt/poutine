@@ -15,6 +15,9 @@ test-results/
 data/review/
 data/cache/
 
+# Copies of the live database (ratings, places waiting, hashed senders): never in git
+data/backup/
+
 # Logs
 *.log
 
