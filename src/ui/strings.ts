@@ -93,7 +93,7 @@ export interface Strings {
     title: string;
     found: string;
     language: string;
-    /** Follow the phone's language. */
+    /** Follow the phone's language (Alex, 2026-10-20: "automatic (automatique in french)"). */
     phone: string;
     /** Each language, named in the menu's own language. */
     names: Readonly<Record<Language, string>>;
@@ -380,7 +380,7 @@ const english: Strings = {
     title: 'Secret menu',
     found: 'You found it. Tap the name again any time.',
     language: 'Language',
-    phone: 'Same as my phone',
+    phone: 'Automatic',
     names: { fr: 'French', en: 'English' },
     history: 'Poutine’s history',
     articles: [
@@ -648,7 +648,7 @@ const french: Strings = {
     title: 'Menu secret',
     found: 'Vous l’avez trouvé. Touchez le nom quand vous voulez.',
     language: 'Langue',
-    phone: 'Comme mon téléphone',
+    phone: 'Automatique',
     names: { fr: 'Français', en: 'Anglais' },
     history: 'L’histoire de la poutine',
     articles: [
