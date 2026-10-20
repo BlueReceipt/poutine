@@ -24,6 +24,7 @@
     "hide": "node scripts/review.ts hide",
     "counts": "node scripts/review.ts counts",
     "confirmed": "node scripts/review.ts confirmed",
+    "fold": "node scripts/review.ts fold",
     "check": "npm run format:check && npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {

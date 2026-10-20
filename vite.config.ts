@@ -1,4 +1,5 @@
 /// <reference types="vitest/config" />
+import { fileURLToPath } from 'node:url';
 import preact from '@preact/preset-vite';
 import { defineConfig, type Plugin } from 'vite';
 
@@ -41,6 +42,8 @@ function cloudflareHeaders(): Plugin {
     // A day, not a year: a broken copy a browser keeps (as Alex's Chrome did on 2026-10-16, from
     // the minute of a deploy) then clears by itself. The names change with every change anyway.
     '/assets/*': ['Cache-Control: public, max-age=86400'],
+    // The approval page: Alex's alone (the Worker serves it only to him), never kept, never indexed.
+    '/admin/*': ['Cache-Control: no-store', 'X-Robots-Tag: noindex'],
   };
   return {
     name: 'poutine:cloudflare-headers',
@@ -79,7 +82,16 @@ function contentSecurityPolicy(): Plugin {
 export default defineConfig({
   plugins: [preact(), contentSecurityPolicy(), cloudflareHeaders()],
   // MapLibre (about 1 MB) is its own chunk, loaded only once the map shows.
-  build: { chunkSizeWarningLimit: 1100 },
+  build: {
+    chunkSizeWarningLimit: 1100,
+    // Two pages: the map, and the approval page (/admin, behind Cloudflare Access).
+    rollupOptions: {
+      input: {
+        main: fileURLToPath(new URL('index.html', import.meta.url)),
+        admin: fileURLToPath(new URL('admin/index.html', import.meta.url)),
+      },
+    },
+  },
   preview: { port: 4180, strictPort: true },
   server: { port: 5180, strictPort: true },
   test: {

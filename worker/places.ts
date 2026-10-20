@@ -4,12 +4,17 @@
 import { checkNewPlace } from '../src/domain/submission.ts';
 import { connectionOf, KEEP_SENDER_DAYS, passedBotCheck, senderKey } from './guard.ts';
 import { fromThisSite, json, jsonBody, problem } from './http.ts';
+import { mailLater } from './mail.ts';
 
 /** Places one connection may send in an hour, and places waiting before the form says to wait. */
 const PER_HOUR = 5;
 const MAX_WAITING = 500;
 
-export async function addPlace(request: Request, env: Env): Promise<Response> {
+export async function addPlace(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext,
+): Promise<Response> {
   if (!fromThisSite(request)) return problem(403, 'other-site');
   const body = await jsonBody(request, 8 * 1024);
   if (!body || typeof body !== 'object' || Array.isArray(body)) return problem(400, 'not-a-place');
@@ -33,7 +38,7 @@ export async function addPlace(request: Request, env: Env): Promise<Response> {
 
   const place = checked.place;
   const monthAgo = new Date(now.getTime() - KEEP_SENDER_DAYS * 86_400_000).toISOString();
-  await env.DB.batch([
+  const [inserted] = await env.DB.batch([
     env.DB.prepare(
       `INSERT INTO submissions
         (created_at, name, housenumber, street, city, province, postcode, lat, lon, placed_by, phone, website, sender)
@@ -57,5 +62,6 @@ export async function addPlace(request: Request, env: Env): Promise<Response> {
       monthAgo,
     ),
   ]);
+  mailLater(env, ctx, inserted?.meta.last_row_id ?? 0, place);
   return json({ ok: true }, 201);
 }

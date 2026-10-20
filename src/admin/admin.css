@@ -1,0 +1,137 @@
+/* The approval page: a plain column that scrolls, the app's type and buttons, a small map. */
+html,
+body,
+#admin {
+  height: auto;
+  min-height: 100%;
+}
+
+.admin {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: max(var(--space), env(safe-area-inset-top)) var(--space)
+    max(32px, env(safe-area-inset-bottom));
+}
+
+.admin h1 {
+  margin: 8px 0 12px;
+  font-size: 24px;
+}
+
+.admin h2 {
+  margin: 8px 0 2px;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.admin h3 {
+  margin: 20px 0 4px;
+  font-size: var(--text);
+}
+
+.waiting-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.waiting-list button {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 64px;
+  padding: 10px 4px;
+  border: 0;
+  border-bottom: 1px solid #d6d6d2;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-map {
+  position: relative;
+  height: 260px;
+  margin: 12px 0 0;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.details {
+  margin: 12px 0 0;
+}
+
+.details div {
+  display: flex;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid #ecece8;
+}
+
+.details dt {
+  flex: 0 0 38%;
+  color: var(--graphite);
+}
+
+.details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.twins {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.twins li {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0;
+}
+
+.admin .hint {
+  margin: 8px 0 0;
+  color: var(--graphite);
+}
+
+.admin-actions {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 20px 0 0;
+  padding: 12px 0 max(12px, env(safe-area-inset-bottom));
+  background: var(--sheet);
+}
+
+.admin .action {
+  display: inline-flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.admin .action.primary {
+  background: var(--ink);
+  color: var(--sheet);
+}
+
+.admin .action.danger {
+  border-color: #b3261e;
+  background: #b3261e;
+  color: #ffffff;
+}
+
+.admin .action:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

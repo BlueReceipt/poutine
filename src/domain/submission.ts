@@ -160,3 +160,74 @@ export function checkNewPlace(input: unknown): { place: NewPlace } | { problems:
     },
   };
 }
+
+/** A place sent, as D1 keeps it (migrations/0001 and 0005). */
+export interface SubmissionRow {
+  id: number;
+  created_at: string;
+  name: string;
+  housenumber: string;
+  street: string;
+  city: string;
+  province: string;
+  postcode: string;
+  lat: number;
+  lon: number;
+  placed_by: PlacedBy;
+  phone: string;
+  website: string;
+  /** Its short link, given when Alex approves it. */
+  link?: string | null;
+}
+
+export const SUBMISSION_COLUMNS =
+  'id, created_at, name, housenumber, street, city, province, postcode, lat, lon, placed_by, phone, website, link';
+
+export function newPlaceOfRow(row: SubmissionRow): NewPlace {
+  return {
+    name: row.name,
+    housenumber: row.housenumber,
+    street: row.street,
+    city: row.city,
+    province: row.province,
+    postcode: row.postcode,
+    lat: row.lat,
+    lon: row.lon,
+    placedBy: row.placed_by,
+    phone: row.phone,
+    website: row.website,
+  };
+}
+
+/** The form's fields, as Add a place sends them and the approval page's Fix edits them. */
+export interface PlaceForm {
+  name: string;
+  /** Civic number and street on one line, as typed. */
+  street: string;
+  city: string;
+  province: string;
+  postcode: string;
+  lat: number;
+  lon: number;
+  placedBy: PlacedBy;
+  phone: string;
+  website: string;
+  servesPoutine: true;
+}
+
+/** A kept place as the form's fields, to fix and check again (the approval page's Fix). */
+export function formOf(place: NewPlace): PlaceForm {
+  return {
+    name: place.name,
+    street: [place.housenumber, place.street].filter(Boolean).join(' '),
+    city: place.city,
+    province: place.province,
+    postcode: place.postcode,
+    lat: place.lat,
+    lon: place.lon,
+    placedBy: place.placedBy,
+    phone: place.phone,
+    website: place.website,
+    servesPoutine: true,
+  };
+}

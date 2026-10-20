@@ -104,3 +104,16 @@ export function searchFor(
   if (town) return town.city;
   return places.find((place) => place.city && linkWord(place.city) === word)?.city ?? null;
 }
+
+/**
+ * The link of a place approved after the list was built (the approval page): given against every
+ * link already given, the list's and the other approved places', so none is ever given twice.
+ */
+export function linkForNewPlace(
+  place: Named,
+  known: readonly Named[],
+  given: Readonly<Record<string, string>>,
+): string {
+  const links = assignLinks([...known.filter((other) => other.osm !== place.osm), place], given);
+  return links[place.osm] ?? linkWord(place.name);
+}

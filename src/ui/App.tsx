@@ -61,14 +61,23 @@ export function App({ strings }: { strings: Strings }) {
     setState({ kind: 'failed' });
   }, []);
 
+  // The list the app ships, and the places Alex approved since (from the Worker; without it, the
+  // list alone), so a link to a new place opens it too.
   useEffect(() => {
-    fetch(placesUrl)
-      .then((response) => {
-        if (!response.ok) throw new Error(`places.json answered ${String(response.status)}`);
-        return response.json() as Promise<{ places: Place[] }>;
-      })
-      .then(({ places }) => {
-        setState({ kind: 'ready', places });
+    const listed = fetch(placesUrl).then((response) => {
+      if (!response.ok) throw new Error(`places.json answered ${String(response.status)}`);
+      return response.json() as Promise<{ places: Place[] }>;
+    });
+    const added = fetch('/api/added')
+      .then((response) => (response.ok ? response.json() : { places: [] }))
+      .catch(() => ({ places: [] })) as Promise<{ places: Place[] }>;
+    Promise.all([listed, added])
+      .then(([list, since]) => {
+        const known = new Set(list.places.map((place) => place.osm));
+        setState({
+          kind: 'ready',
+          places: [...list.places, ...since.places.filter((place) => !known.has(place.osm))],
+        });
       })
       .catch(failed);
   }, [failed]);

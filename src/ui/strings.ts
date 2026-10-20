@@ -64,6 +64,7 @@ export interface Strings {
     distance: (meters: number) => string;
   };
   add: AddWords;
+  admin: AdminWords;
   ratings: RatingWords;
   share: ShareWords;
   hours: HoursWords;
@@ -131,6 +132,31 @@ export interface RatingWords {
   reviews: string;
   report: string;
   problems: Record<RatingTrouble, string>;
+}
+
+/** The approval page (/admin), Alex's alone. */
+export interface AdminWords {
+  title: string;
+  loading: string;
+  none: string;
+  notSignedIn: string;
+  failed: string;
+  sent: (when: string) => string;
+  lookAlikes: (count: number) => string;
+  noLookAlike: string;
+  pinBy: Record<PlacedBy, string>;
+  moveHint: string;
+  postcode: string;
+  approve: string;
+  fix: string;
+  saveApprove: string;
+  reject: string;
+  rejectSure: string;
+  back: string;
+  approved: (name: string) => string;
+  rejected: (name: string) => string;
+  notWaiting: string;
+  unexpected: string;
 }
 
 export interface AddWords {
@@ -285,6 +311,35 @@ const english: Strings = {
     linkCopied: 'The link is copied.',
     copyThis: 'In a story, add this link with the Link sticker:',
     failed: 'This browser can’t share the picture.',
+  },
+  admin: {
+    title: 'Places waiting',
+    loading: 'Loading…',
+    none: 'Nothing waiting.',
+    notSignedIn: 'You’re not signed in. Open poutines.app/admin again to sign in.',
+    failed: 'The list didn’t load. Reload the page.',
+    sent: (when) => `Sent ${when}`,
+    lookAlikes: (count) =>
+      count === 1 ? '1 look-alike nearby' : `${String(count)} look-alikes nearby`,
+    noLookAlike: 'No look-alike nearby.',
+    pinBy: {
+      address: 'Pin at the address',
+      street: 'Pin on the street (number not found)',
+      me: 'Pin where the sender stood',
+      hand: 'Pin placed by hand',
+    },
+    moveHint: 'Tap the map to move the pin.',
+    postcode: 'Postal code',
+    approve: 'Approve',
+    fix: 'Fix',
+    saveApprove: 'Save and approve',
+    reject: 'Reject',
+    rejectSure: 'Tap again to reject',
+    back: 'Back',
+    approved: (name) => `${name} is approved: it shows on the map within a minute.`,
+    rejected: (name) => `${name} is rejected.`,
+    notWaiting: 'Already decided, maybe in another tab. The list is loaded again.',
+    unexpected: 'Something went wrong. Try again in a moment.',
   },
   add: {
     title: 'Add a place',
@@ -472,6 +527,36 @@ const french: Strings = {
     linkCopied: 'Le lien est copié.',
     copyThis: `Dans une story, ajoutez ce lien avec l’autocollant Lien${NBSP}:`,
     failed: 'Ce navigateur ne peut pas partager l’image.',
+  },
+  admin: {
+    title: 'Places en attente',
+    loading: 'Chargement…',
+    none: 'Rien en attente.',
+    notSignedIn: `Vous n’êtes pas connecté. Rouvrez poutines.app/admin pour vous connecter.`,
+    failed: 'La liste n’a pas chargé. Rechargez la page.',
+    sent: (when) => `Envoyée le ${when}`,
+    lookAlikes: (count) =>
+      count === 1 ? '1 place semblable tout près' : `${String(count)} places semblables tout près`,
+    noLookAlike: 'Aucune place semblable tout près.',
+    pinBy: {
+      address: 'Épingle à l’adresse',
+      street: 'Épingle sur la rue (numéro introuvable)',
+      me: 'Épingle là où était la personne',
+      hand: 'Épingle placée à la main',
+    },
+    moveHint: 'Touchez la carte pour déplacer l’épingle.',
+    postcode: 'Code postal',
+    approve: 'Approuver',
+    fix: 'Corriger',
+    saveApprove: 'Enregistrer et approuver',
+    reject: 'Refuser',
+    rejectSure: 'Touchez encore pour refuser',
+    back: 'Retour',
+    approved: (name) =>
+      `${name} est approuvée${NBSP}: elle apparaît sur la carte d’ici une minute.`,
+    rejected: (name) => `${name} est refusée.`,
+    notWaiting: 'Déjà décidée, peut-être dans un autre onglet. La liste est rechargée.',
+    unexpected: 'Un problème est survenu. Réessayez dans un moment.',
   },
   add: {
     title: 'Ajouter une place',

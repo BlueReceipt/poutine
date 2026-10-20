@@ -4,7 +4,9 @@
  * this PC (`npx wrangler login`, once).
  *
  *   npm run waiting                 the places waiting, with links to check them
- *   npm run approve -- 3 5          adds them to data/added.json and the list; live with the next push
+ *   npm run approve -- 3 5          approves them as the approval page does (on the map within a minute),
+ *                                   then folds
+ *   npm run fold                    copies the approved places to data/added.json and the list
  *   npm run reject -- 4             turns them down (kept in the database as rejected)
  *   npm run ratings                 the latest ratings (and written reviews, once switched on)
  *   npm run hide -- 12              hides ratings: they stop counting at once, no push needed
@@ -14,13 +16,19 @@
  * Add --local to work on the database `npm start` uses on this PC instead of the real one.
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { COUNT_KINDS, type CountKind } from '../src/domain/counts.ts';
 import { possibleDuplicates } from '../src/domain/duplicates.ts';
 import { CONFIRM_AT } from '../src/domain/ratings.ts';
 import type { Place } from '../src/domain/osmPlaces.ts';
-import { approvedPlace, type NewPlace, type PlacedBy } from '../src/domain/submission.ts';
+import { linkForNewPlace } from '../src/domain/shortLinks.ts';
+import {
+  approvedPlace,
+  newPlaceOfRow,
+  SUBMISSION_COLUMNS,
+  type SubmissionRow,
+} from '../src/domain/submission.ts';
 
 const ROOT = join(import.meta.dirname, '..');
 const ADDED = join(ROOT, 'data', 'added.json');
@@ -28,21 +36,7 @@ const PLACES = join(ROOT, 'data', 'places.json');
 // Wrangler's own entry (its package exports don't name it): the project's installed copy.
 const WRANGLER = join(ROOT, 'node_modules', 'wrangler', 'bin', 'wrangler.js');
 
-interface Row {
-  id: number;
-  created_at: string;
-  name: string;
-  housenumber: string;
-  street: string;
-  city: string;
-  province: string;
-  postcode: string;
-  lat: number;
-  lon: number;
-  placed_by: PlacedBy;
-  phone: string;
-  website: string;
-}
+type Row = SubmissionRow;
 
 const [command = '', ...rest] = process.argv.slice(2);
 const where = rest.includes('--local') ? '--local' : '--remote';
@@ -58,24 +52,8 @@ function sql<T = Row>(statement: string): T[] {
   return answer.flatMap((part) => part.results);
 }
 
-function newPlaceOf(row: Row): NewPlace {
-  return {
-    name: row.name,
-    housenumber: row.housenumber,
-    street: row.street,
-    city: row.city,
-    province: row.province,
-    postcode: row.postcode,
-    lat: row.lat,
-    lon: row.lon,
-    placedBy: row.placed_by,
-    phone: row.phone,
-    website: row.website,
-  };
-}
-
-const COLUMNS =
-  'id, created_at, name, housenumber, street, city, province, postcode, lat, lon, placed_by, phone, website';
+const COLUMNS = SUBMISSION_COLUMNS;
+const LINKS = join(ROOT, 'data', 'links.json');
 
 function waiting(): void {
   const rows = sql(
@@ -125,38 +103,97 @@ function review(status: 'approved' | 'rejected'): void {
     console.warn(`Not waiting (already reviewed, or no such number): ${missing.join(', ')}`);
   if (rows.length === 0) return;
 
-  if (status === 'approved') {
-    const saved = existsSync(ADDED)
-      ? (JSON.parse(readFileSync(ADDED, 'utf8')) as { places: Place[] })
-      : { places: [] };
-    const approved = rows.map((row) => approvedPlace(row.id, newPlaceOf(row)));
-    const kept = saved.places.filter((place) => !approved.some((a) => a.osm === place.osm));
-    writeFileSync(
-      ADDED,
-      `${JSON.stringify(
-        {
-          about:
-            'Places visitors added and Alex approved (npm run approve), joined to places.json by npm run places. Open data under the ODbL like the rest of the list.',
-          places: [...kept, ...approved],
-        },
-        null,
-        1,
-      )}\n`,
+  const now = new Date().toISOString();
+  if (status === 'rejected')
+    sql(
+      `UPDATE submissions SET status = 'rejected', reviewed_at = '${now}' WHERE id IN (${rows.map((row) => String(row.id)).join(', ')}) AND status = 'pending'`,
     );
-    // The list the app ships: the picks and the added places applied, no server asked.
-    execFileSync(process.execPath, [join(ROOT, 'scripts', 'fetch-places.ts'), '--offline'], {
-      cwd: ROOT,
-      stdio: 'inherit',
-    });
+  else {
+    // Each gets its short link as the approval page gives it: against every link already given.
+    const { places } = JSON.parse(readFileSync(PLACES, 'utf8')) as { places: Place[] };
+    const { links } = JSON.parse(readFileSync(LINKS, 'utf8')) as { links: Record<string, string> };
+    const known: Place[] = [...places, ...approvedRows().map(placeOfRow)];
+    const given = {
+      ...links,
+      ...Object.fromEntries(known.flatMap((p) => (p.link ? [[p.osm, p.link]] : []))),
+    };
+    for (const row of rows) {
+      const place = approvedPlace(row.id, newPlaceOfRow(row));
+      const link = linkForNewPlace(place, known, given);
+      given[place.osm] = link;
+      known.push({ ...place, link });
+      sql(
+        `UPDATE submissions SET status = 'approved', reviewed_at = '${now}', link = '${link}' WHERE id = ${String(row.id)} AND status = 'pending'`,
+      );
+    }
   }
-  sql(
-    `UPDATE submissions SET status = '${status}', reviewed_at = '${new Date().toISOString()}' WHERE id IN (${rows.map((row) => String(row.id)).join(', ')}) AND status = 'pending'`,
-  );
   for (const row of rows)
     console.log(
       `${status === 'approved' ? 'Approved' : 'Rejected'} #${String(row.id)} ${row.name}`,
     );
-  if (status === 'approved') console.log('They show on the map after the next push.');
+  if (status === 'approved') {
+    console.log('They show on the map within a minute.');
+    fold();
+  }
+}
+
+/** The places approved in D1 (the approval page or npm run approve), with their short links. */
+function approvedRows(): Row[] {
+  return sql(
+    `SELECT ${COLUMNS} FROM submissions WHERE status = 'approved' AND link IS NOT NULL ORDER BY id`,
+  );
+}
+
+function placeOfRow(row: Row): Place {
+  return { ...approvedPlace(row.id, newPlaceOfRow(row)), link: row.link ?? undefined };
+}
+
+/**
+ * The approved places into the list the app ships: data/added.json, their links in
+ * data/links.json, then data/places.json again (no server asked). Commit and push to ship them;
+ * they already show from D1 until then.
+ */
+function fold(): void {
+  const rows = approvedRows();
+  const file = JSON.parse(readFileSync(LINKS, 'utf8')) as {
+    about: string;
+    links: Record<string, string>;
+  };
+  const clash = rows.filter((row) =>
+    Object.entries(file.links).some(
+      ([osm, link]) => link === row.link && osm !== `added/${String(row.id)}`,
+    ),
+  );
+  if (clash.length > 0)
+    throw new Error(
+      `These links are already another place's in data/links.json: ${clash.map((row) => `${row.link ?? ''} (#${String(row.id)})`).join(', ')}`,
+    );
+  for (const row of rows) if (row.link) file.links[`added/${String(row.id)}`] = row.link;
+  writeFileSync(
+    LINKS,
+    `${JSON.stringify(file, null, 1)}
+`,
+  );
+  writeFileSync(
+    ADDED,
+    `${JSON.stringify(
+      {
+        about:
+          'Places visitors added and Alex approved (the approval page or npm run approve), copied from the database by npm run fold, joined to places.json by npm run places. Open data under the ODbL like the rest of the list.',
+        places: rows.map((row) => approvedPlace(row.id, newPlaceOfRow(row))),
+      },
+      null,
+      1,
+    )}
+`,
+  );
+  execFileSync(process.execPath, [join(ROOT, 'scripts', 'fetch-places.ts'), '--offline'], {
+    cwd: ROOT,
+    stdio: 'inherit',
+  });
+  console.log(
+    `${String(rows.length)} approved places in data/added.json: commit and push to ship them.`,
+  );
 }
 
 interface RatingRow {
@@ -262,7 +299,8 @@ else if (command === 'ratings') ratings();
 else if (command === 'hide') hide();
 else if (command === 'counts') counts();
 else if (command === 'confirmed') confirmed();
+else if (command === 'fold') fold();
 else
   throw new Error(
-    'npm run waiting | approve -- <numbers> | reject -- <numbers> | ratings | hide -- <numbers> | counts | confirmed',
+    'npm run waiting | approve -- <numbers> | reject -- <numbers> | ratings | hide -- <numbers> | counts | confirmed | fold',
   );

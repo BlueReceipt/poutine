@@ -42,6 +42,15 @@
     { "pattern": "poutines.app", "custom_domain": true },
     { "pattern": "www.poutines.app", "custom_domain": true },
   ],
+  // The approval page's sign-in (worker/access.ts): Cloudflare Access's public keys for Alex's team,
+  // and the Access application's tag (neither is a secret). Empty: nobody gets into /admin.
+  "vars": {
+    "ACCESS_CERTS_URL": "",
+    "ACCESS_AUD": "",
+  },
+  // An email to Alex for each new place (worker/mail.ts), through Email Routing on poutines.app; the
+  // address is the secret MAIL_TO.
+  "send_email": [{ "name": "MAIL" }],
   "workers_dev": false,
   "preview_urls": false,
 }

@@ -2,7 +2,6 @@
 // place and its stars (or a friend's, from "?s=4"), for WhatsApp, Messenger, Facebook and the
 // rest. The page then opens the place's card itself. Cloudflare keeps each page five minutes. The
 // links shared before short links (/p/la-banquise-n5228808422) are sent to the short one.
-import list from '../data/places.json';
 import {
   placeIdFromPath,
   placePath,
@@ -10,16 +9,16 @@ import {
   previewOf,
   friendFromSearch,
 } from '../src/domain/links.ts';
-import type { Place } from '../src/domain/osmPlaces.ts';
 import { linkFromPath } from '../src/domain/shortLinks.ts';
 import { friendCodeFits } from './codes.ts';
+import { approvedPlaces } from './added.ts';
 import { countLater } from './counts.ts';
+import { listed } from './list.ts';
 import type { RatingTotal } from '../src/domain/ratings.ts';
 import { phoneLanguage, stringsFor, type Language } from '../src/ui/strings.ts';
 
-const all = (list as unknown as { places: Place[] }).places;
-const byId = new Map(all.map((p) => [p.osm, p]));
-const byLink = new Map(all.flatMap((p) => (p.link ? [[p.link, p] as const] : [])));
+const byId = new Map(listed.map((p) => [p.osm, p]));
+const byLink = new Map(listed.flatMap((p) => (p.link ? [[p.link, p] as const] : [])));
 
 /** A link from before short links: to the place's short link, a friend's stars kept. */
 export function oldPlaceLink(request: Request, env: Env): Promise<Response> | Response {
@@ -70,7 +69,10 @@ export async function placePage(
 ): Promise<Response> {
   const url = new URL(request.url);
   const word = linkFromPath(url.pathname);
-  const place = word ? byLink.get(word) : undefined;
+  // A place approved since the list was built has its link in D1 (worker/added.ts).
+  const place = word
+    ? (byLink.get(word) ?? (await approvedPlaces(env, word).catch(() => []))[0])
+    : undefined;
   // A word that's no place's link: the app's page, which looks it up (a shared name, a town).
   if (!place) return env.ASSETS.fetch(new URL('/', url));
 
