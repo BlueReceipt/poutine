@@ -2,7 +2,12 @@
 // CC BY 4.0), elsewhere in Canada from Natural Resources Canada's Geolocation Service (OGL-Canada).
 // Ported from Terrain's relay (relay/worker.js, /geocode), one address per request. It takes a
 // street, town, postal code and province, and nothing else.
-import type { AddressCandidate, AddressQuery } from '../src/domain/addresses.ts';
+import {
+  civicNumber,
+  quebecLookups,
+  type AddressCandidate,
+  type AddressQuery,
+} from '../src/domain/addresses.ts';
 import { fromThisSite, json, jsonBody, problem } from './http.ts';
 
 const ADRESSES_QUEBEC =
@@ -87,11 +92,33 @@ async function federalCandidates(address: AddressQuery): Promise<AddressCandidat
   });
 }
 
-/** Adresses Québec's answers for one address: buildings at a civic number, and streets. */
+/**
+ * Adresses Québec's answers for one address, buildings at a civic number and streets: asked each
+ * way quebecLookups gives until one finds the building at the civic number typed.
+ */
 async function quebecCandidates(address: AddressQuery): Promise<AddressCandidate[]> {
-  const area = [address.province, address.postalCode].filter(Boolean).join(' ');
+  const number = civicNumber(address.street);
+  const found: AddressCandidate[] = [];
+  for (const line of quebecLookups(address)) {
+    for (const candidate of await quebecAnswers(line))
+      if (
+        !found.some(
+          (seen) =>
+            seen.number === candidate.number &&
+            seen.lat === candidate.lat &&
+            seen.lon === candidate.lon,
+        )
+      )
+        found.push(candidate);
+    if (number && found.some((candidate) => candidate.number === number)) break;
+  }
+  return found;
+}
+
+/** Adresses Québec's answers for one way of writing an address. */
+async function quebecAnswers(line: string): Promise<AddressCandidate[]> {
   const query = new URLSearchParams({
-    SingleLine: [address.street, address.town, area].filter(Boolean).join(', '),
+    SingleLine: line,
     outSR: '4326',
     maxLocations: '5',
     outFields: 'Num,Odonyme,City,ZIP',

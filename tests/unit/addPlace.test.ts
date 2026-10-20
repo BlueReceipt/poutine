@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { placementFor, splitStreet, type AddressCandidate } from '../../src/domain/addresses.ts';
+import {
+  placementFor,
+  quebecLookups,
+  splitStreet,
+  type AddressCandidate,
+} from '../../src/domain/addresses.ts';
 import { possibleDuplicates } from '../../src/domain/duplicates.ts';
 import { withAdded, type Place } from '../../src/domain/osmPlaces.ts';
 import { approvedPlace, checkNewPlace } from '../../src/domain/submission.ts';
@@ -96,6 +101,46 @@ describe('placementFor (Terrain’s rules)', () => {
       placementFor({ ...query, street: '996 Rachel Est' }, [candidate({ number: '', lat: 45.53 })]),
     ).toMatchObject({ precision: 'street', lat: 45.53 });
     expect(placementFor(query, [candidate({ town: 'Laval' })])).toBeNull();
+  });
+
+  it('reads a direction written short, and tells Ouest from Est', () => {
+    const typed = {
+      street: '1225 Boulevard Curé-Poirier O',
+      town: 'Longueuil',
+      postalCode: 'J4K 2G4',
+      province: 'QC',
+    };
+    const building = candidate({
+      number: '1225',
+      street: 'boulevard Curé-Poirier Ouest',
+      town: 'Longueuil',
+    });
+    expect(placementFor(typed, [building])?.precision).toBe('address');
+    expect(placementFor(typed, [{ ...building, street: 'boulevard Curé-Poirier Est' }])).toBeNull();
+    expect(
+      placementFor({ ...query, street: '12 rue du Nord' }, [
+        candidate({ number: '12', street: 'Rue du Nord' }),
+      ])?.precision,
+    ).toBe('address');
+  });
+
+  it('asks Adresses Québec as typed, then written out, then without the street’s type', () => {
+    expect(
+      quebecLookups({
+        street: '1225 Boul. Curé-Poirier O',
+        town: 'Longueuil',
+        postalCode: 'J4K 2G4',
+        province: 'QC',
+      }),
+    ).toEqual([
+      '1225 Boul. Curé-Poirier O, Longueuil, QC J4K 2G4',
+      '1225 boulevard Curé-Poirier Ouest, Longueuil',
+      '1225 Curé-Poirier Ouest, Longueuil',
+    ]);
+    expect(quebecLookups({ ...query, street: 'Route 132' })).toEqual([
+      'Route 132, Montreal, QC',
+      'Route 132, Montreal',
+    ]);
   });
 
   it('splits the civic number from the street', () => {

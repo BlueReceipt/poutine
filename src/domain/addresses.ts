@@ -161,8 +161,22 @@ const TYPES = new Map<string, string>(
 );
 const SMALL = new Set(['de', 'du', 'des', 'la', 'le', 'les', 'l', 'd', 'et', 'of', 'the']);
 
-/** A street's type and the words of its name: "780, rue St-Jean" is rue and "st jean". */
-function streetParts(text: string): { type: string | null; name: string[] } {
+// A street's direction, however written at its end: "Curé-Poirier O", "Rachel E", "Main St W".
+const DIRECTION = new Map<string, string>(
+  Object.entries({
+    ouest: ['o', 'w', 'west'],
+    est: ['e', 'east'],
+    nord: ['n', 'north'],
+    sud: ['s', 'south'],
+  }).flatMap(([way, short]) => [[way, way] as const, ...short.map((s) => [s, way] as const)]),
+);
+
+/**
+ * A street's type, the words of its name and its direction: "780, rue St-Jean" is rue and "st
+ * jean"; "Boulevard Curé-Poirier O" is boulevard, "cure poirier" and ouest. A name that is only a
+ * direction keeps it ("Rue du Nord").
+ */
+function streetParts(text: string): { type: string | null; name: string[]; way: string | null } {
   const tokens = fold(text)
     .split(/[^a-z0-9]+/)
     .filter(Boolean);
@@ -174,13 +188,15 @@ function streetParts(text: string): { type: string | null; name: string[] } {
     if (kind && type === null) type = kind;
     else if (!SMALL.has(token)) name.push(SAME.get(token) ?? token);
   });
-  return { type, name };
+  const way = name.length > 1 ? DIRECTION.get(name[name.length - 1] ?? '') : undefined;
+  if (way) name.pop();
+  return { type, name, way: way ?? null };
 }
 
 /**
  * The service's street is the one typed: every word of its name is in the typed one, and both
- * name the same type when both name one ("Rideau Terrace" is not "Rideau Street", "rue Saint-Jean"
- * is "Saint-Jean").
+ * name the same type and direction when both name one ("Rideau Terrace" is not "Rideau Street",
+ * "rue Saint-Jean" is "Saint-Jean", "Curé-Poirier O" is "Curé-Poirier Ouest", not "Est").
  */
 function sameStreet(query: AddressQuery, candidate: AddressCandidate): boolean {
   const asked = streetParts(query.street.replace(/^\s*\d+[a-z]?\b[\s,-]*/i, ''));
@@ -188,8 +204,66 @@ function sameStreet(query: AddressQuery, candidate: AddressCandidate): boolean {
   return (
     named.name.length > 0 &&
     named.name.every((word) => asked.name.includes(word)) &&
-    (asked.type === null || named.type === null || asked.type === named.type)
+    (asked.type === null || named.type === null || asked.type === named.type) &&
+    (asked.way === null || named.way === null || asked.way === named.way)
   );
+}
+
+// Short words written out as Adresses Québec reads them best.
+const LONG_TYPE: Record<string, string> = {
+  boul: 'boulevard',
+  bd: 'boulevard',
+  blvd: 'boulevard',
+  ch: 'chemin',
+  av: 'avenue',
+  ave: 'avenue',
+  rte: 'route',
+  rg: 'rang',
+  mtee: 'montée',
+  pl: 'place',
+};
+const LONG_WAY: Record<string, string> = {
+  o: 'Ouest',
+  w: 'Ouest',
+  west: 'Ouest',
+  e: 'Est',
+  east: 'Est',
+  n: 'Nord',
+  north: 'Nord',
+  s: 'Sud',
+  south: 'Sud',
+};
+
+/**
+ * The ways to ask Adresses Québec for an address, in turn: its search finds some better than
+ * others (2026-10-20: "1225 Boulevard Curé-Poirier O, Longueuil, QC J4K 2G4" found nothing,
+ * "1225 Boulevard Curé-Poirier Ouest, Longueuil" only the street, "1225 Curé-Poirier Ouest,
+ * Longueuil" the building). As typed with its town, province and postal code; its short words
+ * written out ("boul", "O"), with its town only; then without the street's type.
+ */
+export function quebecLookups(address: AddressQuery): string[] {
+  const area = [address.province, address.postalCode].filter(Boolean).join(' ');
+  const { housenumber, street } = splitStreet(address.street);
+  const words = street.split(/[\s,]+/).filter(Boolean);
+  const written = words.map((word, i) => {
+    const key = fold(word);
+    if (i === 0 && LONG_TYPE[key]) return LONG_TYPE[key];
+    if (i === words.length - 1 && i > 0 && LONG_WAY[key]) return LONG_WAY[key];
+    return word.replace(/\.$/, '');
+  });
+  // Without its type, a street still has a name: "Route 132" doesn't become "132".
+  const rest = written.slice(1);
+  const typeless =
+    TYPES.has(fold(words[0] ?? '')) && rest.some((word) => /\p{L}/u.test(word)) ? rest : [];
+  const line = (parts: readonly string[]) =>
+    [[housenumber, ...parts].filter(Boolean).join(' '), address.town].filter(Boolean).join(', ');
+  return [
+    ...new Set([
+      [address.street, address.town, area].filter(Boolean).join(', '),
+      line(written),
+      ...(typeless.length > 0 ? [line(typeless)] : []),
+    ]),
+  ];
 }
 
 function sameTownOrPostalCode(query: AddressQuery, candidate: AddressCandidate): boolean {
