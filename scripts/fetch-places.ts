@@ -23,6 +23,7 @@ import {
   type Place,
   type Town,
 } from '../src/domain/osmPlaces.ts';
+import { assignLinks } from '../src/domain/shortLinks.ts';
 
 const DATA = join(import.meta.dirname, '..', 'data');
 const SERVERS = [
@@ -281,6 +282,32 @@ function reviewCsv(places: readonly Place[]): string {
   return `\uFEFF${[header.join(','), ...lines].join('\r\n')}\r\n`;
 }
 
+/**
+ * Every place's short link (data/links.json, never changed once given), set on each place. The
+ * file keeps the links of places since dropped, so no link ever moves to another place.
+ */
+function withLinks(places: Place[]): Place[] {
+  const file = join(DATA, 'links.json');
+  const given = existsSync(file)
+    ? (JSON.parse(readFileSync(file, 'utf8')) as { links: Record<string, string> }).links
+    : {};
+  const links = assignLinks(places, given);
+  writeFileSync(
+    file,
+    `${JSON.stringify(
+      {
+        about:
+          'Each place’s short link, poutines.app/<link>: given once by npm run places (src/domain/shortLinks.ts), never changed or given to another place.',
+        links,
+      },
+      null,
+      1,
+    )}
+`,
+  );
+  return places.map((place) => ({ ...place, link: links[place.osm] }));
+}
+
 async function main(): Promise<void> {
   const { places: picks } = JSON.parse(readFileSync(join(DATA, 'picked.json'), 'utf8')) as {
     places: Pick[];
@@ -298,7 +325,7 @@ async function main(): Promise<void> {
     const saved = JSON.parse(readFileSync(join(DATA, 'places.json'), 'utf8')) as {
       places: Place[];
     };
-    const places = withAdded(applyPicks(saved.places, picks), added);
+    const places = withLinks(withAdded(applyPicks(saved.places, picks), added));
     writeFileSync(join(DATA, 'places.json'), `${JSON.stringify({ ...saved, places }, null, 1)}\n`);
     mkdirSync(join(DATA, 'review'), { recursive: true });
     writeFileSync(join(DATA, 'review', 'places.csv'), reviewCsv(places));
@@ -339,7 +366,7 @@ async function main(): Promise<void> {
     found.filter((p) => p.province === 'QC' && p.housenumber && p.street),
     checkAddress,
   );
-  const places = withAdded(found, added);
+  const places = withLinks(withAdded(found, added));
 
   const missingPicks = picks.filter((pick) => !places.some((p) => p.osm === pick.osm));
   writeFileSync(

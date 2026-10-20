@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import placesUrl from '../../data/places.json?url';
 import { groupByAddress } from '../domain/groups.ts';
 import { placeIdFromPath, placePath, starsFromSearch } from '../domain/links.ts';
+import { linkFromPath, searchFor } from '../domain/shortLinks.ts';
 import type { Place } from '../domain/osmPlaces.ts';
 import type { RatingTotal } from '../domain/ratings.ts';
 import { nearest, searchPlaces } from '../domain/search.ts';
@@ -123,24 +124,33 @@ export function App({ strings }: { strings: Strings }) {
     [groupOf],
   );
 
-  // A place's link (poutines.app/p/…) opens its card once the places are in; a friend's stars in
-  // it ("?s=4") show on that card for the visit.
-  const linked = useRef(placeIdFromPath(window.location.pathname));
+  // A place's link (poutines.app/labanquise, or an older /p/… one) opens its card once the places
+  // are in; a friend's stars in it ("?s=4") show on that card for the visit.
+  // Another word in the address (a name several places share, a town) goes to the search.
+  const linked = useRef<string | null>(window.location.pathname);
   const [friend, setFriend] = useState<{ place: string; stars: number } | null>(null);
   useEffect(() => {
-    if (!places || !linked.current) return;
-    const id = linked.current;
+    if (!places || linked.current === null) return;
+    const path = linked.current;
     linked.current = null;
-    const chosen = places.find((candidate) => candidate.osm === id);
-    if (!chosen) return;
-    const stars = starsFromSearch(window.location.search);
-    if (stars !== null) setFriend({ place: chosen.osm, stars });
-    show(chosen);
+    const id = placeIdFromPath(path);
+    const word = id ? null : linkFromPath(path);
+    const chosen = places.find((candidate) =>
+      id ? candidate.osm === id : word !== null && candidate.link === word,
+    );
+    if (chosen) {
+      const stars = starsFromSearch(window.location.search);
+      if (stars !== null) setFriend({ place: chosen.osm, stars });
+      show(chosen);
+      return;
+    }
+    const looked = word ? searchFor(word, places) : null;
+    if (looked) setQuery(looked);
   }, [places, show]);
 
   // The address bar names the open place, so the browser's own Share and Copy link give its link.
   useEffect(() => {
-    if (!places || linked.current) return;
+    if (!places || linked.current !== null) return;
     const path = place ? placePath(place) : '/';
     if (window.location.pathname !== path) history.replaceState(null, '', path);
     document.title = place ? `${place.name} · ${strings.appName}` : strings.appName;

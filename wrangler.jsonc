@@ -1,6 +1,6 @@
 // How Cloudflare publishes the map: the `poutine` Worker serves the built `dist` folder at
-// poutines.app, and runs worker/index.ts for /api/* (address lookup, Add a place, ratings) and /p/*
-// (a place's link, its preview naming the place).
+// poutines.app, and runs worker/index.ts for /api/* (address lookup, Add a place, ratings) and a
+// place's short link (/labanquise, its preview naming the place).
 // Connected to the GitHub repository (Workers Builds), each push to main runs `npm run build`,
 // then `npx wrangler deploy` with this file. Deploying your own copy: change the name, the address
 // and the database ID to yours, and set the TURNSTILE_SECRET secret.
@@ -11,7 +11,16 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    "run_worker_first": ["/api/*", "/p/*"],
+    // Everything but the app's own files, so a place's short link (/labanquise) reaches the Worker
+    // while the map's files stay plain static assets (free, never counted as Worker requests).
+    "run_worker_first": [
+      "/*",
+      "!/assets/*",
+      "!/fonts/*",
+      "!/map-assets/*",
+      "!/icon.svg",
+      "!/share.png",
+    ],
   },
   // Places visitors send, waiting for approval. migrations/ holds its tables.
   "d1_databases": [

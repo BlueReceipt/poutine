@@ -31,8 +31,13 @@ export function slugOf(name: string): string {
   return slug;
 }
 
-/** "/p/la-banquise-n265847671": the name to read, then the place's ID in short. */
-export function placePath(place: Pick<Place, 'osm' | 'name'>): string {
+/**
+ * The place's path: its short link ("/labanquise", shortLinks.ts) once the list gives it one;
+ * until then, and for the links shared before short links, "/p/la-banquise-n265847671": the name
+ * to read, then the place's ID in short.
+ */
+export function placePath(place: Pick<Place, 'osm' | 'name' | 'link'>): string {
+  if (place.link) return `/${place.link}`;
   const [kind = '', number = ''] = place.osm.split('/');
   const slug = slugOf(place.name);
   return `/p/${slug ? `${slug}-` : ''}${KINDS[kind] ?? ''}${number}`;
@@ -43,7 +48,10 @@ export function placePath(place: Pick<Place, 'osm' | 'name'>): string {
  * sharer's stars (Alex, 2026-10-20: "What would you give?"), the link carries them, and only them:
  * "?s=4". They're a friend's word, never counted as a rating.
  */
-export function placeUrl(place: Pick<Place, 'osm' | 'name'>, stars?: number | null): string {
+export function placeUrl(
+  place: Pick<Place, 'osm' | 'name' | 'link'>,
+  stars?: number | null,
+): string {
   const given = stars && isStars(stars) ? `?s=${String(stars)}` : '';
   return `${SITE}${placePath(place)}${given}`;
 }

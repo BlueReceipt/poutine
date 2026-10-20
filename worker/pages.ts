@@ -1,13 +1,32 @@
-// A place's link (/p/la-banquise-n265847671): the app's own page, its title and link preview naming
-// the place and its stars (or a friend's, from "?s=4"), for WhatsApp, Messenger, Facebook and the
-// rest. The page then opens the place's card itself. Cloudflare keeps each page five minutes.
+// A place's short link (/labanquise): the app's own page, its title and link preview naming the
+// place and its stars (or a friend's, from "?s=4"), for WhatsApp, Messenger, Facebook and the
+// rest. The page then opens the place's card itself. Cloudflare keeps each page five minutes. The
+// links shared before short links (/p/la-banquise-n5228808422) are sent to the short one.
 import list from '../data/places.json';
-import { placeIdFromPath, placeUrl, previewOf, starsFromSearch } from '../src/domain/links.ts';
+import {
+  placeIdFromPath,
+  placePath,
+  placeUrl,
+  previewOf,
+  starsFromSearch,
+} from '../src/domain/links.ts';
 import type { Place } from '../src/domain/osmPlaces.ts';
+import { linkFromPath } from '../src/domain/shortLinks.ts';
 import type { RatingTotal } from '../src/domain/ratings.ts';
 import { phoneLanguage, stringsFor, type Language } from '../src/ui/strings.ts';
 
-const places = new Map((list as unknown as { places: Place[] }).places.map((p) => [p.osm, p]));
+const all = (list as unknown as { places: Place[] }).places;
+const byId = new Map(all.map((p) => [p.osm, p]));
+const byLink = new Map(all.flatMap((p) => (p.link ? [[p.link, p] as const] : [])));
+
+/** A link from before short links: to the place's short link, a friend's stars kept. */
+export function oldPlaceLink(request: Request, env: Env): Promise<Response> | Response {
+  const url = new URL(request.url);
+  const id = placeIdFromPath(url.pathname);
+  const place = id ? byId.get(id) : undefined;
+  if (!place) return env.ASSETS.fetch(new URL('/', url));
+  return Response.redirect(`${url.origin}${placePath(place)}${url.search}`, 301);
+}
 
 /** The reader's language from the request; a preview robot rarely says, and most readers are French. */
 function languageOf(request: Request): Language {
@@ -48,8 +67,9 @@ export async function placePage(
   ctx: ExecutionContext,
 ): Promise<Response> {
   const url = new URL(request.url);
-  const id = placeIdFromPath(url.pathname);
-  const place = id ? places.get(id) : undefined;
+  const word = linkFromPath(url.pathname);
+  const place = word ? byLink.get(word) : undefined;
+  // A word that's no place's link: the app's page, which looks it up (a shared name, a town).
   if (!place) return env.ASSETS.fetch(new URL('/', url));
 
   const language = languageOf(request);

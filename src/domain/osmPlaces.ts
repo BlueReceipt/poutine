@@ -91,6 +91,8 @@ export interface Place {
   poutine: PoutineEvidence;
   /** One of Alex's picks: kept whatever the rules say. */
   picked: boolean;
+  /** Its short link, poutines.app/<link> (data/links.json), set when the list is written. */
+  link?: string;
 }
 
 const PROVINCES: Record<string, string> = {

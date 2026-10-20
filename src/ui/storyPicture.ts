@@ -146,6 +146,29 @@ function nameLines(context: CanvasRenderingContext2D, name: string, width: numbe
 }
 
 /**
+ * The place's own address under the card (poutines.app/labanquise: viewers of a story can type it),
+ * as big as fits on one line; a long one breaks after "poutines.app/".
+ */
+function siteLines(
+  context: CanvasRenderingContext2D,
+  link: string | undefined,
+): { text: string; size: number }[] {
+  const fits = (text: string, size: number): boolean => {
+    context.font = font(800, size);
+    return context.measureText(text).width <= WIDTH - 180;
+  };
+  const whole = link ? `${SITE_NAME}/${link}` : SITE_NAME;
+  for (let size = 92; size >= 56; size -= 4) if (fits(whole, size)) return [{ text: whole, size }];
+  const rest = link ?? '';
+  let size = 72;
+  while (size > 36 && !fits(rest, size)) size -= 4;
+  return [
+    { text: `${SITE_NAME}/`, size: 72 },
+    { text: rest, size },
+  ];
+}
+
+/**
  * The story picture of a rating: the app (or the visitor's photo, with the app's badge on it), the
  * stars given, the place and its town, the address. The photo is only drawn in: canvas keeps none
  * of its data (place, camera), and it never leaves the phone unless the visitor shares the picture.
@@ -172,11 +195,13 @@ export async function storyPicture(
   const name = nameLines(context, place.name, 760);
   const nameHeight = name.lines.length * name.size * 1.15;
   const cardHeight = 70 + 52 + 40 + 120 + 56 + nameHeight + (town ? 80 : 0) + 60;
+  const site = siteLines(context, place.link);
+  const siteHeight = site.reduce((height, line) => height + line.size * 1.1, 0);
   context.font = font(400, 40);
   const tagline = balancedLines(strings.tagline, 860, (line) => context.measureText(line).width);
   // Instagram's and Facebook's own buttons cover about 250 px at the top and the bottom: the whole
   // picture sits in the middle of what's left. A photo takes what the card leaves, within limits.
-  const below = cardHeight + 130 + tagline.length * 58 + 15;
+  const below = cardHeight + 40 + siteHeight + tagline.length * 58 + 15;
   const photoHeight = Math.min(640, Math.max(380, 1420 - 40 - below));
   const header = photo ? photoHeight + 40 : 390;
   const top = Math.max(200, 250 + (1420 - header - below) / 2);
@@ -221,10 +246,14 @@ export async function storyPicture(
   }
 
   // The address to type, under the card.
-  y = cardTop + cardHeight + 130;
+  y = cardTop + cardHeight + 40;
   context.fillStyle = CREAM;
-  context.font = font(800, 92);
-  context.fillText(SITE_NAME, middle, y);
+  for (const line of site) {
+    y += line.size;
+    context.font = font(800, line.size);
+    context.fillText(line.text, middle, y);
+    y += line.size * 0.1;
+  }
   context.font = font(400, 40);
   for (const line of tagline) {
     y += 58;
