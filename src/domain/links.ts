@@ -56,12 +56,12 @@ export interface FriendStars {
 const FRIEND_CODE = /^[A-Za-z0-9_-]{8}$/;
 
 /**
- * The pictures link previews show: French without a caption, English with "Pootsin, not poo-teen"
+ * The pictures link previews show: French without a caption, English with "Pronounced pootsin"
  * under the poop (Alex, 2026-10-20). Raise `?v=` when one is redrawn, so apps fetch it again.
  */
 export const PREVIEW_PICTURE = {
   fr: `${SITE}/share.png?v=2`,
-  en: `${SITE}/share-en.png?v=1`,
+  en: `${SITE}/share-en.png?v=2`,
 } as const;
 
 /**

@@ -245,7 +245,7 @@ const english: Strings = {
   language: 'en',
   appName: 'Poutine',
   pronounced: 'pronounced Pootsin',
-  previewCaption: 'Pootsin, not poo-teen',
+  previewCaption: 'Pronounced pootsin',
   preview: {
     kinds: {
       'casse-croute': 'Casse-croûte',
