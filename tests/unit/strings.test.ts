@@ -47,7 +47,7 @@ describe('language', () => {
   it('welcomes a first visit in Alex’s words, French typography in French', () => {
     expect(stringsFor('en').welcome).toMatchObject({
       title: 'Poutines.app',
-      strap: 'Poutine, not poo-teen',
+      strap: 'Poots in, not poo-teen',
     });
     expect(stringsFor('en').welcome.text).toMatch(/^Mapping Canada’s poutine expansion/);
     const nbsp = String.fromCharCode(0xa0);

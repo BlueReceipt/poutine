@@ -61,7 +61,7 @@ const FRIEND_CODE = /^[A-Za-z0-9_-]{8}$/;
  */
 export const PREVIEW_PICTURE = {
   fr: `${SITE}/share.png?v=3`,
-  en: `${SITE}/share-en.png?v=3`,
+  en: `${SITE}/share-en.png?v=4`,
 } as const;
 
 /**

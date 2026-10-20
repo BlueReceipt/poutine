@@ -265,7 +265,7 @@ const english: Strings = {
     'Poutine, not poo-teen: mapping Canada’s poutine expansion from its humble beginnings in central Québec.',
   welcome: {
     title: 'Poutines.app',
-    strap: 'Poutine, not poo-teen',
+    strap: 'Poots in, not poo-teen',
     text: 'Mapping Canada’s poutine expansion from its humble beginnings in central Québec. This map is for independent spots and small local chains.',
   },
   placeCount: (count) => `${count.toLocaleString('en-CA')} poutine places`,
