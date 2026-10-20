@@ -79,7 +79,7 @@ function cover(context: CanvasRenderingContext2D, photo: ImageBitmap) {
   );
 }
 
-/** The five bowls of a rating, sad to loaded, filled to the stars given (halves too). */
+/** The five bowls of a rating, sad to loaded, filled to the stars given. */
 function bowls(context: CanvasRenderingContext2D, stars: number, middle: number, top: number) {
   const left = middle - (5 * BOWL + 4 * BOWL_GAP) / 2;
   for (let i = 0; i < 5; i += 1)

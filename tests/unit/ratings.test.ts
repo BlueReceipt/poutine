@@ -25,13 +25,13 @@ describe('checkRating', () => {
     });
   });
 
-  it('takes half stars, from ½ to 5', () => {
-    for (const stars of [0.5, 3.5, 5])
+  it('takes whole stars, from 1 to 5', () => {
+    for (const stars of [1, 3, 5])
       expect(checkRating(sent({ stars }))).toMatchObject({ rating: { stars } });
   });
 
-  it('refuses other stars', () => {
-    for (const stars of [0, 6, 3.25, 0.3, 5.5, '4', null])
+  it('refuses other stars, halves too since whole bowls', () => {
+    for (const stars of [0, 6, 0.5, 3.5, 3.25, 0.3, 5.5, '4', null])
       expect(checkRating(sent({ stars }))).toEqual({ problems: ['stars'] });
   });
 

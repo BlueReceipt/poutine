@@ -35,7 +35,7 @@ export function RatingSummary({ total, strings }: { total?: RatingTotal; strings
   );
 }
 
-/** A quick second tap (a half star more or less) sends once: the rating leaves this long after. */
+/** A quick second tap (a bowl more or less) sends once: the rating leaves this long after. */
 const SEND_AFTER = 700;
 /** How long a share waits for the rating in flight (its code goes in the link). */
 const SHARE_WAITS = 3000;
@@ -62,7 +62,7 @@ export interface Rating {
 }
 
 /**
- * The rating of a place (Alex, 2026-10-20: one tap rates, half stars too): a tap sends 0.7 s later
+ * The rating of a place (Alex, 2026-10-20: one tap rates, whole bowls): a tap sends 0.7 s later
  * (a quick correction sends once), one send at a time, the bot check out of sight and renewed after
  * each. The browser remembers what it gave.
  */
@@ -228,9 +228,9 @@ export function useRating(place: Place, onRated: (total: RatingTotal) => void): 
 const DOUBLE_TAP = 350;
 
 /**
- * Five poutine bowls, sad to loaded, each in two halves: the left half gives a half. Two quick taps
- * on one bowl take the rating back (Alex, 2026-10-20: "remove all their stars by double tapping the
- * stars"). The words stay stars ("4,5 étoiles").
+ * Five poutine bowls, sad to loaded, whole ones only (Alex, 2026-10-20: "with whole numbers. no
+ * halfs"). Two quick taps on one bowl take the rating back ("remove all their stars by double
+ * tapping the stars"). The words stay stars ("4 étoiles"). A half given before shows as half a bowl.
  */
 function Bowls({ id, rating, strings }: { id: string; rating: Rating; strings: Strings }) {
   const last = useRef<{ nth: number; at: number } | null>(null);
@@ -239,24 +239,21 @@ function Bowls({ id, rating, strings }: { id: string; rating: Rating; strings: S
       {[1, 2, 3, 4, 5].map((nth) => (
         <span key={nth} class="bowl">
           <Bowl nth={nth} fill={fillOf(rating.shown, nth)} />
-          {[nth - 0.5, nth].map((value) => (
-            <button
-              key={value}
-              type="button"
-              role="radio"
-              class={value === nth ? 'half right' : 'half left'}
-              aria-checked={rating.shown === value}
-              aria-label={strings.ratings.star(value)}
-              onClick={(event) => {
-                const before = last.current;
-                last.current = { nth, at: event.timeStamp };
-                if (before && before.nth === nth && event.timeStamp - before.at < DOUBLE_TAP) {
-                  last.current = null;
-                  rating.clear();
-                } else rating.tap(value);
-              }}
-            />
-          ))}
+          <button
+            type="button"
+            role="radio"
+            class="pick"
+            aria-checked={rating.shown === nth}
+            aria-label={strings.ratings.star(nth)}
+            onClick={(event) => {
+              const before = last.current;
+              last.current = { nth, at: event.timeStamp };
+              if (before && before.nth === nth && event.timeStamp - before.at < DOUBLE_TAP) {
+                last.current = null;
+                rating.clear();
+              } else rating.tap(nth);
+            }}
+          />
         </span>
       ))}
     </div>

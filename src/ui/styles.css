@@ -558,9 +558,8 @@ button.action.primary {
   gap: 4px;
 }
 
-/* Each bowl in two halves (half stars, Alex 2026-10-20): the left half of a bowl gives a half,
-   the right half the whole bowl. Each half is a 30 × 52 px target. */
-/* No double-tap zoom on the bowls: two quick taps take a rating back. */
+/* Whole bowls only (Alex, 2026-10-20: "no halfs"): each bowl one 60 × 52 px target. No
+   double-tap zoom on the bowls: two quick taps take a rating back. */
 .bowls {
   touch-action: manipulation;
 }
@@ -572,28 +571,17 @@ button.action.primary {
   padding: 2px;
 }
 
-.bowls .half {
+.bowls .pick {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 50%;
+  inset: 0;
   padding: 0;
   border: 0;
+  border-radius: 12px;
   background: transparent;
   cursor: pointer;
 }
 
-.bowls .half.left {
-  left: 0;
-  border-radius: 26px 0 0 26px;
-}
-
-.bowls .half.right {
-  right: 0;
-  border-radius: 0 26px 26px 0;
-}
-
-.bowls .half:focus-visible {
+.bowls .pick:focus-visible {
   outline: 2px solid var(--ink);
 }
 

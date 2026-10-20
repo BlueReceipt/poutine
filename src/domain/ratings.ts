@@ -33,7 +33,7 @@ export function isRaterId(text: unknown): text is string {
 export interface Rating {
   place: string;
   rater: string;
-  /** ½ to 5, in halves. */
+  /** 1 to 5, whole. */
   stars: number;
   /** Empty while reviews are switched off. */
   comment: string;
@@ -63,14 +63,22 @@ export function confirmedByRaters(total: RatingTotal | undefined): boolean {
   return yes >= CONFIRM_AT && yes > (total?.no ?? 0);
 }
 
-/** Stars a rating may give: ½ to 5, in halves. */
+/** Stars a rating may give: 1 to 5, whole (Alex, 2026-10-20: "whole numbers. no halfs"). */
 export function isRatingStars(stars: unknown): stars is number {
+  return typeof stars === 'number' && Number.isInteger(stars) && stars >= 1 && stars <= 5;
+}
+
+/**
+ * Stars a rating may have given: also the halves given on 2026-10-20 before whole bowls, which stay
+ * in D1 and in the links shared with them (`?s=4.5`).
+ */
+export function isGivenStars(stars: unknown): stars is number {
   return typeof stars === 'number' && Number.isInteger(stars * 2) && stars >= 0.5 && stars <= 5;
 }
 
 /**
  * A sent rating checked the same way in the card and in the Worker: only these fields, a place
- * and rater of the right form, stars from ½ to 5 in halves, and a comment only when reviews are on.
+ * and rater of the right form, whole stars from 1 to 5, and a comment only when reviews are on.
  */
 export function checkRating(
   input: unknown,

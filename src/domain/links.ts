@@ -1,6 +1,6 @@
 import type { Place } from './osmPlaces.ts';
 import { townText } from './placeText.ts';
-import { averageOf, isRatingStars, type RatingTotal } from './ratings.ts';
+import { averageOf, isGivenStars, type RatingTotal } from './ratings.ts';
 import { fold } from './text.ts';
 
 /**
@@ -61,7 +61,7 @@ export function placeUrl(
   friend?: FriendStars | null,
 ): string {
   const given =
-    friend && isRatingStars(friend.stars) && FRIEND_CODE.test(friend.code)
+    friend && isGivenStars(friend.stars) && FRIEND_CODE.test(friend.code)
       ? `?s=${String(friend.stars)}&c=${friend.code}`
       : '';
   return `${SITE}${placePath(place)}${given}`;
@@ -72,7 +72,7 @@ export function friendFromSearch(search: string): FriendStars | null {
   const params = new URLSearchParams(search);
   const stars = Number(params.get('s'));
   const code = params.get('c') ?? '';
-  return isRatingStars(stars) && FRIEND_CODE.test(code) ? { stars, code } : null;
+  return isGivenStars(stars) && FRIEND_CODE.test(code) ? { stars, code } : null;
 }
 
 const PLACE_PATH = /^\/p\/(?:[a-z0-9-]*-)?([nwra])(\d{1,20})\/?$/i;
