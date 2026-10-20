@@ -5,7 +5,11 @@ describe('language', () => {
   it('follows the phone: French for any French, English otherwise', () => {
     expect(phoneLanguage(['fr-CA', 'en-CA'])).toBe('fr');
     expect(phoneLanguage(['FR'])).toBe('fr');
+    for (const french of ['fr', 'fr-FR', 'fr-BE', 'fr-CH', 'fr-HT', 'fr_CA', 'fr-Latn-CA'])
+      expect(phoneLanguage([french])).toBe('fr');
     expect(phoneLanguage(['en-CA', 'fr-CA'])).toBe('en');
+    for (const other of ['es-MX', 'de', 'pt-BR', 'zh-Hans-CN', 'fy', 'frr', ''])
+      expect(phoneLanguage([other])).toBe('en');
     expect(phoneLanguage([])).toBe('en');
   });
 

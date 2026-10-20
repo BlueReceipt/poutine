@@ -709,9 +709,13 @@ const french: Strings = {
   },
 };
 
-/** French when the phone's first language is French, English otherwise. */
+/**
+ * French when the phone's first language is any French (fr, fr-CA, fr-FR, fr-BE, fr_CA...), English
+ * for every other (Alex, 2026-10-20: "anyone who's phone isn't french should be routed to the
+ * english side. any variant of french should be on the french side").
+ */
 export function phoneLanguage(languages: readonly string[]): Language {
-  return languages[0]?.toLowerCase().startsWith('fr') ? 'fr' : 'en';
+  return /^fr(?:[-_]|$)/i.test(languages[0]?.trim() ?? '') ? 'fr' : 'en';
 }
 
 export function stringsFor(language: Language): Strings {

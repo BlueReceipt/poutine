@@ -3,7 +3,7 @@
  * poutine bowls"; option C, "sad to loaded"; "make the bowl closer to this" (a round foil tray); bowl
  * 1 "more like a poop emoji", with no tray, "make the eyes cheese. and the bottom some fries").
  * Each bowl is a list of shapes in its own 50 × 38 box, drawn by the card (`Bowl.tsx`, as SVG) and by
- * the story picture (`drawBowl`, on canvas) alike: bowl 1 the gravy swirled on fries, bowls 2 to 5 a
+ * the story picture (`drawBowl`, on canvas) alike: bowl 1 Mr. Poo-teen, bowls 2 to 5 a
  * foil tray ever fuller of fries under gravy and curds. A bowl not given is the same drawing in grey.
  */
 
@@ -209,8 +209,12 @@ function crimps(p: Palette, from: number, to: number, count: number): Shape[] {
   return lines;
 }
 
-/** Bowl 1: the gravy in three swirled tiers and a curl, on a bed of fries, curds for eyes, a grin. */
-function swirl(p: Palette): Shape[] {
+/**
+ * Bowl 1, "Mr. Poo-teen's poop on fries and cheese curds" (Alex named it, 2026-10-20; the name stays
+ * out of what people see: "don't mention poo-teen on the user facing sign"): the gravy in three
+ * swirled tiers and a curl, on a bed of fries, curds for eyes, a grin.
+ */
+function mrPooTeen(p: Palette): Shape[] {
   const tier = (d: string): Shape => ({
     kind: 'path',
     d,
@@ -412,7 +416,7 @@ export function bowlShapes(nth: number, palette: Palette): Shape[] {
   const key = `${String(nth)}${palette === COLOUR ? 'c' : 'g'}`;
   let shapes = drawings.get(key);
   if (!shapes) {
-    shapes = nth === 1 ? swirl(palette) : tray(palette, nth);
+    shapes = nth === 1 ? mrPooTeen(palette) : tray(palette, nth);
     drawings.set(key, shapes);
   }
   return shapes;
