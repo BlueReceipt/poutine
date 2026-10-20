@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
+  friendFromSearch,
+  isEnglishLink,
   kindOf,
   placeIdFromPath,
   placePath,
   placeUrl,
+  PREVIEW_PICTURE,
   previewOf,
   slugOf,
-  friendFromSearch,
 } from '../../src/domain/links.ts';
 import type { Place } from '../../src/domain/osmPlaces.ts';
 import { balancedLines, wrapLines } from '../../src/domain/text.ts';
@@ -199,5 +201,26 @@ describe('wrapLines', () => {
       'Québec sur une carte',
     ]);
     expect(balancedLines('La Banquise', 34, measure)).toEqual(['La Banquise']);
+  });
+});
+
+describe('links shared from an English phone', () => {
+  const trempette = { osm: 'node/265847671', name: 'Casse-croûte Trempette', link: 'trempette' };
+
+  it('say so with ?en, after a friend’s stars', () => {
+    expect(placeUrl(trempette, null, true)).toBe('https://poutines.app/trempette?en');
+    expect(placeUrl(trempette, { stars: 4, code: 'x7Kq2m-_' }, true)).toBe(
+      'https://poutines.app/trempette?s=4&c=x7Kq2m-_&en',
+    );
+    expect(placeUrl(trempette, null)).toBe('https://poutines.app/trempette');
+  });
+
+  it('are read back, with or without stars; their preview picture is the English one', () => {
+    expect(isEnglishLink('?en')).toBe(true);
+    expect(isEnglishLink('?s=4&c=x7Kq2m-_&en')).toBe(true);
+    expect(friendFromSearch('?s=4&c=x7Kq2m-_&en')).toEqual({ stars: 4, code: 'x7Kq2m-_' });
+    expect(isEnglishLink('')).toBe(false);
+    expect(isEnglishLink('?s=4&c=x7Kq2m-_')).toBe(false);
+    expect(PREVIEW_PICTURE.en).toBe('https://poutines.app/share-en.png?v=1');
   });
 });

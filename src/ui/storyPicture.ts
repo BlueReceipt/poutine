@@ -305,17 +305,31 @@ export async function storyPicture(
  * name, the address and what the site is in both languages, since a preview can't know its
  * reader's. Made once in a browser.
  */
-export async function linkPreview(english: Strings, french: Strings): Promise<Blob> {
+export async function linkPreview(english: Strings, french: Strings, caption = ''): Promise<Blob> {
   const names = french.appName;
-  await ready([names, SITE_NAME, english.tagline, french.tagline]);
+  await ready([names, SITE_NAME, english.tagline, french.tagline, caption]);
   const context = canvasOf(1200, 630);
   context.fillStyle = GRAVY;
   context.fillRect(0, 0, 1200, 630);
+  // With a caption under it, the disc sits higher and a little smaller.
+  const disc = caption ? { y: 270, radius: 150 } : { y: 315, radius: 170 };
+  const poop = (280 * disc.radius) / 170;
   context.fillStyle = CREAM;
   context.beginPath();
-  context.arc(260, 315, 170, 0, Math.PI * 2);
+  context.arc(260, disc.y, disc.radius, 0, Math.PI * 2);
   context.fill();
-  drawBowl(context, 1, 1, 260 - 140, 315 - 150, 280);
+  drawBowl(context, 1, 1, 260 - poop / 2, disc.y - poop * 0.535, poop);
+  if (caption) {
+    context.fillStyle = CHEESE;
+    context.textAlign = 'center';
+    context.font = font(800, 36);
+    const lines = balancedLines(caption, 420, (line) => context.measureText(line).width);
+    let below = disc.y + disc.radius + 62;
+    for (const line of lines) {
+      context.fillText(line, 260, below);
+      below += 46;
+    }
+  }
   context.textAlign = 'left';
   context.fillStyle = CREAM;
   context.font = font(800, 84);

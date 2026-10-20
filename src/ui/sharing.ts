@@ -58,7 +58,7 @@ const cancelled = (error: unknown): boolean =>
 export async function sharePlace(place: Place, strings: Strings): Promise<Shared> {
   counted('share-place');
   const friend = myFriendStars(place.osm);
-  const url = placeUrl(place, friend);
+  const url = placeUrl(place, friend, strings.language === 'en');
   const text = friend
     ? strings.share.text(place.name, friend.stars)
     : strings.share.placeText(place.name);
@@ -101,7 +101,7 @@ export async function shareStory(
   kind: 'share-story' | 'share-photo' = 'share-story',
 ): Promise<Shared> {
   counted(kind);
-  const url = placeUrl(place, myFriendStars(place.osm));
+  const url = placeUrl(place, myFriendStars(place.osm), strings.language === 'en');
   const copied = await copy(url);
   let ready: File;
   try {

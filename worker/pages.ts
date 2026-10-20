@@ -3,11 +3,13 @@
 // rest. The page then opens the place's card itself. Cloudflare keeps each page five minutes. The
 // links shared before short links (/p/la-banquise-n5228808422) are sent to the short one.
 import {
+  isEnglishLink,
   placeIdFromPath,
   placePath,
   placeUrl,
   previewOf,
   friendFromSearch,
+  PREVIEW_PICTURE,
 } from '../src/domain/links.ts';
 import { linkFromPath } from '../src/domain/shortLinks.ts';
 import { friendCodeFits } from './codes.ts';
@@ -34,7 +36,8 @@ function languageOf(request: Request): Language {
   const accepted = (request.headers.get('Accept-Language') ?? '')
     .split(',')
     .map((part) => part.split(';')[0]?.trim() ?? '')
-    .filter(Boolean);
+    // "*" (any language, as some robots say) is no preference: French.
+    .filter((language) => language && language !== '*');
   return accepted.length > 0 ? phoneLanguage(accepted) : 'fr';
 }
 
@@ -77,7 +80,9 @@ export async function placePage(
   if (!place) return env.ASSETS.fetch(new URL('/', url));
 
   if (request.method === 'GET') countLater(env, ctx, 'link-open');
-  const language = languageOf(request);
+  // A link shared from an English phone carries ?en: its preview is English whoever asks.
+  const english = isEnglishLink(url.search);
+  const language = english ? 'en' : languageOf(request);
   // A friend's stars count only when their code fits: anyone can type "?s=5".
   const asked = friendFromSearch(url.search);
   const friend =
@@ -90,7 +95,7 @@ export async function placePage(
   if (!page.ok) return page;
   const version = page.headers.get('ETag') ?? '';
   const key = new Request(
-    `${url.origin}/p/${place.osm}?lang=${language}&s=${friend ? `${String(friend.stars)}&c=${friend.code}` : ''}&v=${encodeURIComponent(version)}`,
+    `${url.origin}/p/${place.osm}?lang=${language}&s=${friend ? `${String(friend.stars)}&c=${friend.code}` : ''}&en=${english ? '1' : ''}&v=${encodeURIComponent(version)}`,
   );
   const kept = await caches.default.match(key);
   if (kept) return forBrowser(kept, request.method);
@@ -127,8 +132,9 @@ export async function placePage(
     .on('meta[property="og:site_name"]', set('content', strings.appName))
     .on('meta[property="og:title"]', set('content', title))
     .on('meta[property="og:description"]', set('content', description))
-    // Facebook reads the page at og:url again: it keeps the friend's stars.
-    .on('meta[property="og:url"]', set('content', placeUrl(place, friend)))
+    // Facebook reads the page at og:url again: it keeps the friend's stars and the ?en.
+    .on('meta[property="og:url"]', set('content', placeUrl(place, friend, english)))
+    .on('meta[property="og:image"]', set('content', PREVIEW_PICTURE[language]))
     .on('meta[property="og:locale"]', set('content', language === 'fr' ? 'fr_CA' : 'en_CA'))
     // The page shows the friend's line only from here: the code was checked.
     .on('head', {

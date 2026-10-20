@@ -55,16 +55,34 @@ export interface FriendStars {
 
 const FRIEND_CODE = /^[A-Za-z0-9_-]{8}$/;
 
+/**
+ * The pictures link previews show: French without a caption, English with "Pootsin, not poo-teen"
+ * under the poop (Alex, 2026-10-20). Raise `?v=` when one is redrawn, so apps fetch it again.
+ */
+export const PREVIEW_PICTURE = {
+  fr: `${SITE}/share.png?v=2`,
+  en: `${SITE}/share-en.png?v=1`,
+} as const;
+
+/**
+ * A link shared from an English phone says so (`?en`, Alex 2026-10-20: "in an english language
+ * side shares a link"): its preview comes out in English, since the apps that make previews
+ * rarely say which language they want.
+ */
+export const isEnglishLink = (search: string): boolean => new URLSearchParams(search).has('en');
+
 /** The place's link on the site's own address, wherever the page that shares it runs. */
 export function placeUrl(
   place: Pick<Place, 'osm' | 'name' | 'link'>,
   friend?: FriendStars | null,
+  english = false,
 ): string {
   const given =
     friend && isGivenStars(friend.stars) && FRIEND_CODE.test(friend.code)
       ? `?s=${String(friend.stars)}&c=${friend.code}`
       : '';
-  return `${SITE}${placePath(place)}${given}`;
+  const language = english ? `${given ? '&' : '?'}en` : '';
+  return `${SITE}${placePath(place)}${given}${language}`;
 }
 
 /** The friend's stars and code a link carries; null for none or anything malformed. */

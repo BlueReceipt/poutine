@@ -11,11 +11,14 @@ const NBSP = String.fromCharCode(0xa0);
  * "to get them to stop saying pooteeen".
  */
 export interface Strings {
+  language: Language;
   appName: string;
   /** Beside the name in the search bar: how to say it (English only). */
   pronounced: string;
   /** What the site is: in link previews and on the story picture. */
   tagline: string;
+  /** Under the poop on the link preview picture (English only: public/share-en.png). */
+  previewCaption: string;
   /** The closable box of a first visit (Alex's words, 2026-10-19). */
   welcome: string;
   /** Link previews: what a place is, from its name, and where. */
@@ -239,8 +242,10 @@ const distanceIn =
   };
 
 const english: Strings = {
+  language: 'en',
   appName: 'Poutine',
   pronounced: 'pronounced Pootsin',
+  previewCaption: 'Pootsin, not poo-teen',
   preview: {
     kinds: {
       'casse-croute': 'Casse-croûte',
@@ -461,8 +466,10 @@ const english: Strings = {
 };
 
 const french: Strings = {
+  language: 'fr',
   appName: 'Poutine',
   pronounced: '',
+  previewCaption: '',
   preview: {
     kinds: {
       'casse-croute': 'Casse-croûte',
