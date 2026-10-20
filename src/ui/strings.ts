@@ -105,8 +105,16 @@ export interface Strings {
       title: string;
       items: readonly string[];
       not: string;
-      /** What loaded fries look like, so nobody calls them poutine. */
+      /** French: the end of `not`, linked to the menu of loaded fries sold as poutine; English: none. */
+      notLinked: string;
+      /**
+       * English only (French needn't: Alex, 2026-10-20): what loaded fries look like, before the link
+       * to a menu of them sold as poutine, the link's words and its source.
+       */
       example: string;
+      seeOne: string;
+      oneSold: string;
+      source: string;
       /** Before the link to r/PoutineCrimes. */
       dare: string;
     };
@@ -395,8 +403,12 @@ const english: Strings = {
         'Cheese curds: typically cheddar, never melted or shredded. They need to squeak as you eat them, for that true fresh quality.',
       ],
       not: 'Missing one of the three? It’s not poutine. Call it disco fries, loaded fries or even POO-teen, but that ain’t it, chef.',
+      notLinked: '',
       example:
         'Loaded fries, for example: fries under shawarma chicken and garlic-mayo zigzags, currywurst, or pulled pork and slaw, with melted cheese and not one fresh curd. Tasty maybe. Not poutine.',
+      seeOne: 'Like these, sold in Germany:',
+      oneSold: 'a menu of “poutines”',
+      source: 'picture from Frittenwerk’s website',
       dare: 'If you dare, share it to',
     },
   },
@@ -658,8 +670,12 @@ const french: Strings = {
         `De la sauce brune, la version québécoise de la sauce espagnole (une des sauces mères françaises). Ou une autre sauce${NBSP}: shoutout à l’italienne, à la BBQ ou aux fruits de mer.`,
         `Du fromage en grains frais, ou «${NBSP}squeek squeek${NBSP}».`,
       ],
-      not: `Si t’as pas au moins ça, t’as pas une poutine${NBSP}: t’as des frites loadées, ou quelque chose d’autre.`,
-      example: `Des frites loadées, par exemple${NBSP}: des frites sous du poulet shawarma et des zigzags de mayo à l’ail, de la currywurst ou du porc effiloché avec de la salade de chou, du fromage fondu et pas un seul grain de fromage frais. Peut-être bon. Pas une poutine.`,
+      not: `Si t’as pas au moins ça, t’as pas une poutine${NBSP}: t’as des frites loadées, `,
+      notLinked: 'ou quelque chose d’autre',
+      example: '',
+      seeOne: '',
+      oneSold: '',
+      source: '',
       dare: `T’es pas sûr${NBSP}? Va voir sur`,
     },
   },

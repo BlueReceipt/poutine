@@ -24,6 +24,7 @@
       "!/manifest.webmanifest",
       "!/share.png",
       "!/share-en.png",
+      "!/examples/*",
     ],
   },
   // Places visitors send, waiting for approval. migrations/ holds its tables.

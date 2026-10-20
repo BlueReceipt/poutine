@@ -11,6 +11,13 @@ interface Props {
 
 /** Where the poutines that aren't go (Alex, 2026-10-20: "IF you dare, share it to r/PoutineCrimes"). */
 const POUTINE_CRIMES = 'https://www.reddit.com/r/PoutineCrimes/';
+/**
+ * Loaded fries sold as poutine: the picture of a menu Alex sent (2026-10-20: "add a hyperlink to the
+ * frittenwerk picture i gave you, for not poutine"; "just put a link to the static picture"), its
+ * source named beside the link in English; in French the link is on "ou quelque chose d'autre", with
+ * no example ("french doesn't need it. only the english side").
+ */
+const SOLD_AS_POUTINE = '/examples/not-poutine.webp';
 
 /**
  * The secret menu (Alex, 2026-10-20: "a cheeky settings tab hidden when someone taps the poutine
@@ -70,8 +77,26 @@ export function Settings({ strings, chosen, onLanguage, onClose }: Props) {
           <li key={item}>{item}</li>
         ))}
       </ul>
-      <p>{words.counts.not}</p>
-      <p>{words.counts.example}</p>
+      <p>
+        {words.counts.not}
+        {words.counts.notLinked && (
+          <>
+            <a href={SOLD_AS_POUTINE} target="_blank" rel="noopener noreferrer">
+              {words.counts.notLinked}
+            </a>
+            .
+          </>
+        )}
+      </p>
+      {words.counts.example && (
+        <p>
+          {words.counts.example} {words.counts.seeOne}{' '}
+          <a href={SOLD_AS_POUTINE} target="_blank" rel="noopener noreferrer">
+            {words.counts.oneSold}
+          </a>{' '}
+          ({words.counts.source}).
+        </p>
+      )}
       <p>
         {words.counts.dare}{' '}
         <a href={POUTINE_CRIMES} target="_blank" rel="noopener noreferrer">
