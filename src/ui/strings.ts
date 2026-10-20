@@ -95,8 +95,19 @@ export interface Strings {
     language: string;
     /** Follow the phone's language. */
     phone: string;
-    /** Each language in its own words. */
+    /** Each language, named in the menu's own language. */
     names: Readonly<Record<Language, string>>;
+    /** Poutine's history: articles to read (Alex, 2026-10-20). */
+    history: string;
+    articles: readonly { title: string; source: string; url: string }[];
+    /** What counts as poutine: the three, then what anything less is. */
+    counts: {
+      title: string;
+      items: readonly string[];
+      not: string;
+      /** Before the link to r/PoutineCrimes. */
+      dare: string;
+    };
   };
   hours: HoursWords;
 }
@@ -360,7 +371,30 @@ const english: Strings = {
     found: 'You found it. Tap the name again any time.',
     language: 'Language',
     phone: 'Same as my phone',
-    names: { fr: 'Français', en: 'English' },
+    names: { fr: 'French', en: 'English' },
+    history: 'Poutine’s history',
+    articles: [
+      {
+        title: 'How the Québécois came to love poutine',
+        source: 'BBC Travel, 2013',
+        url: 'https://www.bbc.co.uk/travel/article/20130531-how-the-quebecois-came-to-love-poutine',
+      },
+      {
+        title: 'Why only Québec can claim poutine',
+        source: 'BBC Travel, 2021',
+        url: 'https://www.bbc.com/travel/article/20210505-why-only-quebec-can-claim-poutine',
+      },
+    ],
+    counts: {
+      title: 'What counts as poutine',
+      items: [
+        'Potato fries (red potatoes, for that roadside feel).',
+        'Sauce brune: Québec’s take on sauce espagnole, one of the French mother sauces. NOT GRAVY.',
+        'Cheese curds, typically cheddar.',
+      ],
+      not: 'Missing one of the three? It’s not poutine. Call it disco fries, loaded fries or even POO-teen, but that ain’t it, chef.',
+      dare: 'If you dare, share it to',
+    },
   },
   share: {
     place: 'Share',
@@ -599,7 +633,30 @@ const french: Strings = {
     found: 'Vous l’avez trouvé. Touchez le nom quand vous voulez.',
     language: 'Langue',
     phone: 'Comme mon téléphone',
-    names: { fr: 'Français', en: 'English' },
+    names: { fr: 'Français', en: 'Anglais' },
+    history: 'L’histoire de la poutine',
+    articles: [
+      {
+        title: 'Comment les Québécois ont appris à aimer la poutine',
+        source: 'BBC Travel, en anglais, 2013',
+        url: 'https://www.bbc.co.uk/travel/article/20130531-how-the-quebecois-came-to-love-poutine',
+      },
+      {
+        title: 'Pourquoi seul le Québec peut revendiquer la poutine',
+        source: 'BBC Travel, en anglais, 2021',
+        url: 'https://www.bbc.com/travel/article/20210505-why-only-quebec-can-claim-poutine',
+      },
+    ],
+    counts: {
+      title: 'Ce qui fait une poutine',
+      items: [
+        'Des frites (des patates rouges, pour le goût de casse-croûte au bord de la route).',
+        `De la sauce brune${NBSP}: la version québécoise de la sauce espagnole, une des sauces mères françaises. PAS du gravy.`,
+        'Du fromage en grains, souvent du cheddar.',
+      ],
+      not: `Il en manque un des trois${NBSP}? Ce n’est pas une poutine. Appelez ça des disco fries, des frites garnies ou même une POO-teen, mais c’est pas ça, chef.`,
+      dare: 'Si vous osez, partagez-la sur',
+    },
   },
   share: {
     place: 'Partager',

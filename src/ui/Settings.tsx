@@ -9,11 +9,16 @@ interface Props {
   onClose: () => void;
 }
 
+/** Where the poutines that aren't go (Alex, 2026-10-20: "IF you dare, share it to r/PoutineCrimes"). */
+const POUTINE_CRIMES = 'https://www.reddit.com/r/PoutineCrimes/';
+
 /**
  * The secret menu (Alex, 2026-10-20: "a cheeky settings tab hidden when someone taps the poutine
  * pronounced pootsin area. Where people can select french or english, and eventually we can add
  * other things"): opened by the app's name in the search bar. The language: the phone's, French or
- * English, kept on this phone.
+ * English, kept on this phone, every word in the menu's own language ("French secret menu
+ * shouldn't have English on its tab"). Then poutine's history, two articles, and what counts as
+ * poutine: fries, sauce brune, curds, nothing less.
  */
 export function Settings({ strings, chosen, onLanguage, onClose }: Props) {
   const heading = useRef<HTMLHeadingElement>(null);
@@ -58,6 +63,31 @@ export function Settings({ strings, chosen, onLanguage, onClose }: Props) {
           </button>
         ))}
       </div>
+      <h3>{words.history}</h3>
+      <ul class="articles">
+        {words.articles.map((article) => (
+          <li key={article.url}>
+            <a href={article.url} target="_blank" rel="noopener noreferrer">
+              {article.title}
+            </a>
+            <span class="where">{article.source}</span>
+          </li>
+        ))}
+      </ul>
+      <h3>{words.counts.title}</h3>
+      <ul class="counts">
+        {words.counts.items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+      <p>{words.counts.not}</p>
+      <p>
+        {words.counts.dare}{' '}
+        <a href={POUTINE_CRIMES} target="_blank" rel="noopener noreferrer">
+          r/PoutineCrimes
+        </a>
+        .
+      </p>
     </section>
   );
 }

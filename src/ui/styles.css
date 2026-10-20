@@ -384,6 +384,29 @@ body,
   color: var(--sheet);
 }
 
+/* Poutine's history: each article a line, its source under it; what counts: the three, listed. */
+.card.settings ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.card.settings li {
+  margin: 6px 0;
+}
+
+.card.settings .articles .where {
+  display: block;
+}
+
+.card.settings p {
+  margin: 8px 0;
+}
+
+/* Links in ink, like the card's own. */
+.card.settings a {
+  color: var(--ink);
+}
+
 /* À côté with nothing within 15 km: "La plus proche :" over the one place. */
 .card .closest {
   margin: 4px 0 0;
