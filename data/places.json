@@ -16358,6 +16358,31 @@
    "link": "cassecroutenormand"
   },
   {
+   "osm": "node/12128712526",
+   "name": "Votre Maison",
+   "housenumber": "1225",
+   "street": "Boulevard Curé-Poirier Ouest",
+   "city": "Longueuil",
+   "citySource": "adresses-quebec",
+   "province": "QC",
+   "postcode": "J4K 2G4",
+   "addressCheck": "confirmed",
+   "lat": 45.5136676,
+   "lon": -73.4921692,
+   "phone": "+14503323931",
+   "website": "https://www.restaurantvotremaison.com/",
+   "facebook": "",
+   "instagram": "",
+   "menu": "",
+   "openingHours": "Su-Th 10:00-22:00; Fr-Sa 10:00-23:00",
+   "cuisine": [
+    "greek"
+   ],
+   "poutine": "confirmed",
+   "picked": true,
+   "link": "votremaison"
+  },
+  {
    "osm": "node/12132631477",
    "name": "Holy Burgers",
    "housenumber": "126",

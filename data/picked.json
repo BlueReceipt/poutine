@@ -473,6 +473,12 @@
      "hot_dog"
     ]
    }
+  },
+  {
+   "osm": "node/12128712526",
+   "name": "Votre Maison",
+   "confirmed": true,
+   "note": "1225 boulevard Curé-Poirier Ouest, Longueuil: a Greek restaurant OpenStreetMap tags greek, so the rules left it out (Alex, 2026-10-20: \"it is greek. but they make amazing poutine.\")."
   }
  ]
 }
