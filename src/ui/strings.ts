@@ -305,7 +305,7 @@ const english: Strings = {
     sending: 'Sending…',
     thanks: (count) => `Thanks! Place #${String(count)}, green on your map now.`,
     cleared: 'Rating removed.',
-    clearHint: 'Double-tap a star to remove your rating.',
+    clearHint: 'Double-tap a poutine to remove your rating.',
     comment: 'A few words',
     reviews: 'What people say',
     report: 'Report',
@@ -529,7 +529,7 @@ const french: Strings = {
     thanks: (count) =>
       `Merci${NBSP}! ${count === 1 ? '1re' : `${String(count)}e`} place, maintenant verte sur votre carte.`,
     cleared: 'Note retirée.',
-    clearHint: 'Touchez deux fois une étoile pour retirer votre note.',
+    clearHint: 'Touchez deux fois sur une poutine pour retirer votre note.',
     comment: 'Quelques mots',
     reviews: 'Ce qu’on en dit',
     report: 'Signaler',
