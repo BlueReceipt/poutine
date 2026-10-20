@@ -151,7 +151,7 @@ export interface RatingWords {
   cleared: string;
   /** Under the stars once rated: how to take the rating back. */
   clearHint: string;
-  /** Once sent: the how-manyth place this phone rated, green on the map now. */
+  /** Once sent: the how-manyth place this phone rated, its bowl on the map now. */
   thanks: (count: number) => string;
   comment: string;
   reviews: string;
@@ -318,7 +318,7 @@ const english: Strings = {
     number: starNumber('en-CA'),
     send: 'Send my rating',
     sending: 'Sending…',
-    thanks: (count) => `Thanks! Place #${String(count)}, green on your map now.`,
+    thanks: (count) => `Thanks! Place #${String(count)}, your bowl is on the map now.`,
     cleared: 'Rating removed.',
     clearHint: 'Double-tap a poutine to remove your rating.',
     comment: 'A few words',
@@ -549,7 +549,7 @@ const french: Strings = {
     send: 'Envoyer ma note',
     sending: 'Envoi…',
     thanks: (count) =>
-      `Merci${NBSP}! ${count === 1 ? '1re' : `${String(count)}e`} place, maintenant verte sur votre carte.`,
+      `Merci${NBSP}! ${count === 1 ? '1re' : `${String(count)}e`} place, votre bol est maintenant sur la carte.`,
     cleared: 'Note retirée.',
     clearHint: 'Touchez deux fois sur une poutine pour retirer votre note.',
     comment: 'Quelques mots',

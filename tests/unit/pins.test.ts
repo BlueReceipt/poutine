@@ -41,31 +41,32 @@ describe('pins', () => {
       ]),
     );
     expect(features.map((feature) => feature.properties)).toEqual([
-      { id: 'node/-73.6', count: 1, poutine: 'name', visited: false },
-      { id: 'node/-73.61', count: 2, poutine: 'cuisine', visited: false },
-      { id: 'node/-73.7', count: 1, poutine: 'unconfirmed', visited: false },
+      { id: 'node/-73.6', count: 1, poutine: 'name', bowl: 0 },
+      { id: 'node/-73.61', count: 2, poutine: 'cuisine', bowl: 0 },
+      { id: 'node/-73.7', count: 1, poutine: 'unconfirmed', bowl: 0 },
     ]);
     expect(features[0]?.geometry.coordinates).toEqual([-73.6, 45.5]);
   });
 
-  it('turns green the pins of places this visitor rated, shared pins included', () => {
+  it('shows the bowl this visitor gave, the best at a shared pin, the empty tray before', () => {
     const shared = { housenumber: '1', street: 'Rue Principale', city: 'Saint-Rémi' };
     const groups = groupByAddress([
       at(-73.6, 45.5),
       at(-73.61, 45.26, shared),
       at(-73.62, 45.26, shared),
     ]);
-    const visited = (rated: string[]) =>
-      pinFeatures(groups, new Set(rated)).features.map((feature) => feature.properties.visited);
-    expect(visited([])).toEqual([false, false]);
-    expect(visited(['node/-73.6'])).toEqual([true, false]);
-    expect(visited(['node/-73.62'])).toEqual([false, true]);
+    const bowls = (rated: Record<string, number>) =>
+      pinFeatures(groups, rated).features.map((feature) => feature.properties.bowl);
+    expect(bowls({})).toEqual([0, 0]);
+    expect(bowls({ 'node/-73.6': 1 })).toEqual([1, 0]);
+    expect(bowls({ 'node/-73.62': 4, 'node/-73.61': 2 })).toEqual([0, 4]);
+    expect(bowls({ 'node/-73.6': 4.5 })).toEqual([5, 0]);
   });
 
   it('makes solid the pin of a place raters confirmed', () => {
     const groups = groupByAddress([at(-73.7, 45.3, { poutine: 'unconfirmed' })]);
     const evidence = (confirmed: string[]) =>
-      pinFeatures(groups, new Set(), new Set(confirmed)).features[0]?.properties.poutine;
+      pinFeatures(groups, {}, new Set(confirmed)).features[0]?.properties.poutine;
     expect(evidence([])).toBe('unconfirmed');
     expect(evidence(['node/-73.7'])).toBe('confirmed');
   });

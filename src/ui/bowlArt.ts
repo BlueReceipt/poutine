@@ -325,25 +325,30 @@ const JITTER = [
 ];
 const jitter = (i: number): number => JITTER[i % JITTER.length] ?? 0;
 
-/** Bowls 2 to 5: a round foil tray, the fries under the gravy and curds sitting in it. */
+/**
+ * Bowls 2 to 5: a round foil tray, the fries under the gravy and curds sitting in it. Bowl 0: the
+ * tray empty, a place's pin on the map until this phone rates it (Alex, 2026-10-20: "if its not
+ * reviewed, we just show the empty aluminium tray").
+ */
 function tray(p: Palette, nth: number): Shape[] {
-  const { fries, pile, curds } = FULLER[nth] ?? { fries: 9, pile: 1, curds: 8 };
+  const { fries, pile, curds } = FULLER[nth] ?? { fries: 0, pile: 1, curds: 0 };
   const k = 0.55 + 0.45 * pile;
   const food: Shape[] = FRIES.slice(0, fries).map((f) => fry(p, f));
-  food.push(
-    {
-      kind: 'path',
-      d: 'M10.2 27.6 C8.6 24 11 20.6 14 20 C15.6 17 19.6 15.6 23 16.2 C26.2 15 30.6 15.8 32.6 17.8 C36.2 18 39.6 21.6 38.6 25 C38.2 27.2 36.4 28.4 34 28.4 L12.2 28.6 C11.2 28.5 10.5 28.1 10.2 27.6 Z',
-      fill: p.sauce,
-    },
-    drip(p, 13.4, 27.5, 30.4),
-    drip(p, 30.6, 27.8, 30),
-    drip(p, 22, 28, 29.6),
-    drip(p, 37.2, 25.5, 27.6),
-    shine(p, 'M15 21.2 Q19 17.4 24.5 17.6'),
-    { kind: 'ellipse', x: 33.6, y: 20.8, rx: 1.1, ry: 0.7, fill: p.sauceLight },
-    { kind: 'ellipse', x: 19.4, y: 25.6, rx: 0.9, ry: 0.6, fill: p.sauceLight },
-  );
+  if (fries > 0)
+    food.push(
+      {
+        kind: 'path',
+        d: 'M10.2 27.6 C8.6 24 11 20.6 14 20 C15.6 17 19.6 15.6 23 16.2 C26.2 15 30.6 15.8 32.6 17.8 C36.2 18 39.6 21.6 38.6 25 C38.2 27.2 36.4 28.4 34 28.4 L12.2 28.6 C11.2 28.5 10.5 28.1 10.2 27.6 Z',
+        fill: p.sauce,
+      },
+      drip(p, 13.4, 27.5, 30.4),
+      drip(p, 30.6, 27.8, 30),
+      drip(p, 22, 28, 29.6),
+      drip(p, 37.2, 25.5, 27.6),
+      shine(p, 'M15 21.2 Q19 17.4 24.5 17.6'),
+      { kind: 'ellipse', x: 33.6, y: 20.8, rx: 1.1, ry: 0.7, fill: p.sauceLight },
+      { kind: 'ellipse', x: 19.4, y: 25.6, rx: 0.9, ry: 0.6, fill: p.sauceLight },
+    );
   if (fries >= 8) food.push(fry(p, ON_TOP));
   for (const [x, y, a, w, h] of CURDS.slice(0, curds)) food.push(curd(p, x, y, a, w, h));
 
@@ -411,7 +416,7 @@ function tray(p: Palette, nth: number): Shape[] {
 
 const drawings = new Map<string, Shape[]>();
 
-/** The nth bowl (1 to 5) in colour or in grey. */
+/** The nth bowl (1 to 5; 0 the empty tray) in colour or in grey. */
 export function bowlShapes(nth: number, palette: Palette): Shape[] {
   const key = `${String(nth)}${palette === COLOUR ? 'c' : 'g'}`;
   let shapes = drawings.get(key);

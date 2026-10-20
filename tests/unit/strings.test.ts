@@ -34,10 +34,10 @@ describe('language', () => {
     const fr = stringsFor('fr');
     const en = stringsFor('en');
     expect(fr.ratings.thanks(1).replaceAll(nbsp, ' ')).toBe(
-      'Merci ! 1re place, maintenant verte sur votre carte.',
+      'Merci ! 1re place, votre bol est maintenant sur la carte.',
     );
     expect(fr.ratings.thanks(7)).toContain('7e place');
-    expect(en.ratings.thanks(7)).toBe('Thanks! Place #7, green on your map now.');
+    expect(en.ratings.thanks(7)).toBe('Thanks! Place #7, your bowl is on the map now.');
     expect(fr.tally.title(7)).toBe('7 places mangées');
     expect(fr.tally.motto.replaceAll(nbsp, ' ')).toBe('Mange-les toutes !');
     expect(en.tally.title(1)).toBe('1 place eaten');

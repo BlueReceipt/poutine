@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'preact/hooks';
 import type { PinGroup } from '../domain/groups.ts';
 import type { Place } from '../domain/osmPlaces.ts';
 import type { PickStart } from '../ui/AddPlace.tsx';
+import { BOX, drawBowl } from '../ui/bowlArt.ts';
 import type { Strings } from '../ui/strings.ts';
 import { loadMapLibre } from './maplibre.ts';
 import {
@@ -14,7 +15,10 @@ import {
   meFeatures,
   meLayer,
   pinFeatures,
+  pinImage,
   pinLayers,
+  PIN_PIXELS,
+  PIN_RATIO,
   selectedFilter,
 } from './pins.ts';
 import { mapStyle } from './style.ts';
@@ -47,8 +51,8 @@ interface Props {
   selectedId: string | null;
   /** Where you are, once Near me found it. */
   me: { lat: number; lon: number } | null;
-  /** The places this visitor rated: their pins turn green. */
-  rated: ReadonlySet<string>;
+  /** The stars this visitor gave, by place: their pins show that bowl. */
+  rated: Readonly<Record<string, number>>;
   /** The places raters confirmed serve poutine. */
   confirmed: ReadonlySet<string>;
   request: MapRequest | null;
@@ -57,6 +61,36 @@ interface Props {
   onPicked: (center: { lat: number; lon: number }) => void;
   onSelect: (id: string | null) => void;
   onFailed: () => void;
+}
+
+/** How far each pin's soft shadow reaches, in the pictures' pixels. */
+const SHADOW = 14;
+
+/**
+ * The pins' pictures: the empty tray and the five bowls, each over a soft shadow so the silver stands
+ * out on the grey map (Alex, 2026-10-20, choosing "B: the trays with a shadow"), drawn once on canvas.
+ */
+function pinImages(map: MapLibreMap): void {
+  const height = Math.round((PIN_PIXELS * BOX.height) / BOX.width);
+  for (let bowl = 0; bowl <= 5; bowl += 1) {
+    const art = document.createElement('canvas');
+    art.width = PIN_PIXELS;
+    art.height = height;
+    const drawn = art.getContext('2d');
+    const pin = document.createElement('canvas');
+    pin.width = PIN_PIXELS + SHADOW * 2;
+    pin.height = height + SHADOW * 2;
+    const context = pin.getContext('2d');
+    if (!drawn || !context) return;
+    drawBowl(drawn, bowl, 1, 0, (height - PIN_PIXELS) / 2, PIN_PIXELS);
+    context.shadowColor = 'rgba(0, 0, 0, 0.55)';
+    context.shadowBlur = 10;
+    context.shadowOffsetY = 3;
+    context.drawImage(art, SHADOW, SHADOW);
+    map.addImage(pinImage(bowl), context.getImageData(0, 0, pin.width, pin.height), {
+      pixelRatio: PIN_RATIO,
+    });
+  }
 }
 
 /** The pin nearest the tap among those within reach, or null. */
@@ -170,6 +204,7 @@ export function MapView(props: Props) {
             type: 'geojson',
             data: pinFeatures(groups, ratedNow.current, confirmedNow.current),
           });
+          pinImages(loaded);
           for (const layer of pinLayers) loaded.addLayer(layer);
           loaded.setFilter('selected', selectedFilter(selectedNow.current));
           loaded.addSource(ME, { type: 'geojson', data: meNow.current });
@@ -225,7 +260,7 @@ export function MapView(props: Props) {
     mapRef.current?.getSource<GeoJSONSource>(ME)?.setData(meFeatures(me));
   }, [me]);
 
-  // A place just rated turns green at once; one raters just confirmed turns solid.
+  // A place just rated shows its bowl at once; one raters just confirmed turns solid.
   useEffect(() => {
     mapRef.current
       ?.getSource<GeoJSONSource>(PLACES)

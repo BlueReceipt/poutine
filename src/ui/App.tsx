@@ -49,7 +49,7 @@ export function App({ strings }: { strings: Strings }) {
   const [picked, setPicked] = useState<{ lat: number; lon: number } | null>(null);
   const [totals, setTotals] = useState<Record<string, RatingTotal>>({});
   const [ratedAt, setRatedAt] = useState<Record<string, number>>({});
-  // The places this browser rated, for their green pins.
+  // The places this browser rated and the stars it gave, for their pins' bowls.
   const [mine, setMine] = useState<Record<string, number>>(() => myRatings());
   // A first visit's welcome box: until it's closed, or the visitor opens something else.
   const [welcome, setWelcome] = useState(nothingSaved);
@@ -98,7 +98,6 @@ export function App({ strings }: { strings: Strings }) {
     setRatedAt((before) => ({ ...before, [place]: Date.now() }));
     setMine(myRatings());
   }, []);
-  const ratedPlaces = useMemo(() => new Set(Object.keys(mine)), [mine]);
   const confirmed = useMemo(
     () =>
       new Set(
@@ -252,7 +251,7 @@ export function App({ strings }: { strings: Strings }) {
           strings={strings}
           selectedId={group?.id ?? null}
           me={me}
-          rated={ratedPlaces}
+          rated={mine}
           confirmed={confirmed}
           request={request}
           picking={picking}
