@@ -20,7 +20,7 @@ describe('language', () => {
     );
     const nbsp = String.fromCharCode(0xa0);
     expect(stringsFor('fr').welcome).toBe(
-      `Poutines.app te permet de trouver ta prochaine poutine. Rate-la pis partage ta photo${nbsp}! Fini les chaînes${nbsp}!`,
+      `Poutines.app te permet de trouver ta prochaine poutine. Note-la pis partage ta photo${nbsp}! Fini les chaînes${nbsp}!`,
     );
   });
 

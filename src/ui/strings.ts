@@ -322,7 +322,7 @@ const english: Strings = {
 const french: Strings = {
   appName: 'Poutine',
   tagline: 'Les casse-croûtes et cantines du Québec sur une carte',
-  welcome: `Poutines.app te permet de trouver ta prochaine poutine. Rate-la pis partage ta photo${NBSP}! Fini les chaînes${NBSP}!`,
+  welcome: `Poutines.app te permet de trouver ta prochaine poutine. Note-la pis partage ta photo${NBSP}! Fini les chaînes${NBSP}!`,
   placeCount: (count) => `${count.toLocaleString('fr-CA')} places à poutine`,
   loading: 'Chargement de la carte…',
   mapFailed: 'La carte n’a pas chargé. Vérifiez votre connexion et rechargez la page.',
