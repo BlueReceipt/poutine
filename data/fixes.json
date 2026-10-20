@@ -1,0 +1,1238 @@
+{
+ "about": "Corrections Alex accepted, laid over OpenStreetMap’s details by npm run places (picks’ own details still win), each with its source and what the list said before. Proposed by npm run addresses.",
+ "fixes": {
+  "node/444774762": {
+   "name": "Petite boufffe",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "772 Route 343, Saint-Alphonse-Rodriguez",
+   "street": "Rue Principale",
+   "postcode": "J0K 1W0"
+  },
+  "node/470769195": {
+   "name": "Chez Bolduc",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Beaupré",
+   "housenumber": "10969",
+   "street": "Boulevard Sainte-Anne"
+  },
+  "node/472411583": {
+   "name": "Cantine chez Guylaine",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Joseph-de-Coleraine",
+   "housenumber": "37",
+   "street": "Avenue Saint-Patrick",
+   "postcode": "G0N 1B0"
+  },
+  "node/488558396": {
+   "name": "Casse-Croûte Chez Hilda",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Camille-de-Lellis",
+   "housenumber": "523",
+   "street": "Rue Principale",
+   "postcode": "G0R 2S0"
+  },
+  "node/494095682": {
+   "name": "Casse-Croute Archie",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Yamachiche",
+   "housenumber": "821",
+   "street": "Rue Sainte-Anne",
+   "postcode": "G0X 3L0"
+  },
+  "node/570125141": {
+   "name": "Stop",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Châteauguay",
+   "housenumber": "212",
+   "street": "Boulevard Saint-Jean-Baptiste",
+   "postcode": "J6K 3B8"
+  },
+  "node/667532191": {
+   "name": "Restaurant Les Marmitons",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Beauharnois",
+   "housenumber": "300",
+   "street": "Boulevard de Maple Grove",
+   "postcode": "J6N 1M1"
+  },
+  "node/675162133": {
+   "name": "Chez le père",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Jérôme",
+   "housenumber": "601",
+   "street": "Rue De Martigny Ouest",
+   "postcode": "J5L 1Z6"
+  },
+  "node/747084221": {
+   "name": "Rest-o-Coq",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Stanstead",
+   "housenumber": "3",
+   "street": "Chemin de Fairfax",
+   "postcode": "J0B 3E0"
+  },
+  "node/761480764": {
+   "name": "Déso",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Bruno-de-Montarville",
+   "housenumber": "2080",
+   "street": "Boulevard Sir-Wilfrid-Laurier",
+   "postcode": "J3V 4P6"
+  },
+  "node/803061251": {
+   "name": "Cantine Cartier",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Sainte-Anne-des-Monts",
+   "housenumber": "239",
+   "street": "1re Avenue Ouest",
+   "postcode": "G4V 3P6"
+  },
+  "node/1396617468": {
+   "name": "Resto Voyage",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Gracefield",
+   "housenumber": "115",
+   "street": "Rue Saint-Joseph",
+   "postcode": "J0X 1W0"
+  },
+  "node/1475156545": {
+   "name": "Terrasse Rossi",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Montréal",
+   "housenumber": "500",
+   "street": "Chemin des Iroquois",
+   "postcode": "H8S 4J5"
+  },
+  "node/1528961447": {
+   "name": "Cantine Lagacé",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Matapédia",
+   "housenumber": "18",
+   "street": "Boulevard Perron Est",
+   "postcode": "G0J 1V0"
+  },
+  "node/1764246930": {
+   "name": "Chez Jack",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Pontiac",
+   "housenumber": "3329",
+   "street": "Route 148",
+   "postcode": "J0X 2G0"
+  },
+  "node/1788815228": {
+   "name": "Resto-Chef Café",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Québec",
+   "housenumber": "11085",
+   "street": "Boulevard Valcartier",
+   "postcode": "G2A 2M4"
+  },
+  "node/1803629520": {
+   "name": "Pignon Rouge",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Michel-des-Saints",
+   "housenumber": "591",
+   "street": "Rue Brassard",
+   "postcode": "J0K 3B0"
+  },
+  "node/1843395458": {
+   "name": "Chez Félix",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Boulevard Saint-Jude, Alma",
+   "housenumber": "980",
+   "postcode": "G8B 3K8"
+  },
+  "node/1899402992": {
+   "name": "La Fringale Glacée",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Québec",
+   "housenumber": "7254",
+   "street": "Boulevard Wilfrid-Hamel",
+   "postcode": "G2G 1B7"
+  },
+  "node/2250620785": {
+   "name": "Restaurant Belle Plage",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "1310 Rue de Matane sur Me, Matane",
+   "street": "Rue de Matane-sur-Mer",
+   "postcode": "G4W 3M6"
+  },
+  "node/2260948591": {
+   "name": "Le petit palace",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Masson, Sainte-Thècle",
+   "housenumber": "204",
+   "street": "Rue Masson",
+   "postcode": "G0X 3G0"
+  },
+  "node/2359518175": {
+   "name": "Chez Micheline",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Augustin-de-Desmaures",
+   "housenumber": "225",
+   "street": "Route 138",
+   "postcode": "G3A 0G2"
+  },
+  "node/2363807543": {
+   "name": "Chez Victor",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Québec",
+   "housenumber": "4252B",
+   "street": "Rue Saint-Félix",
+   "postcode": "G1Y 1X5"
+  },
+  "node/2387998721": {
+   "name": "La Soliel",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Val-des-Bois",
+   "housenumber": "103",
+   "street": "Chemin Graham",
+   "postcode": "J0X 3C0"
+  },
+  "node/2439975987": {
+   "name": "Le Roi du Hot-Dog",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Chambly",
+   "housenumber": "1737A",
+   "street": "Avenue Bourgogne",
+   "postcode": "J3L 1Y8"
+  },
+  "node/2500240183": {
+   "name": "Rosty",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "3171 Rue Saint-Jacques Ouest, Montréal",
+   "street": "Rue Saint-Jacques"
+  },
+  "node/2716409572": {
+   "name": "Restaurant Lussier",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Hyacinthe",
+   "housenumber": "2005",
+   "street": "Rue Saint-Pierre Ouest",
+   "postcode": "J2T 1P8"
+  },
+  "node/2899379561": {
+   "name": "Casse-Croute Chez Bouchard",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Baie-Trinité",
+   "housenumber": "10A",
+   "street": "Route 138",
+   "postcode": "G0H 1A0"
+  },
+  "node/2951341618": {
+   "name": "Patates des 4 As",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Pontiac",
+   "housenumber": "1544",
+   "street": "Route 148",
+   "postcode": "J0X 2G0"
+  },
+  "node/2966720828": {
+   "name": "Casse-Croûte",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Notre-Dame-de-Pontmain",
+   "housenumber": "17",
+   "street": "Chemin de la Pointe",
+   "postcode": "J0W 1S0"
+  },
+  "node/2990302555": {
+   "name": "Gérard Patate",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Joseph-du-Lac",
+   "housenumber": "3904",
+   "street": "Chemin d'Oka",
+   "postcode": "J0N 1M0"
+  },
+  "node/3037564182": {
+   "name": "Le M&R",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Chelsea",
+   "housenumber": "152C",
+   "street": "Chemin d'Old Chelsea",
+   "postcode": "J9B 1J3"
+  },
+  "node/3458611861": {
+   "name": "Burger de Ville",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "7093 Rue Jarry E, Anjou",
+   "street": "Rue Jarry Est"
+  },
+  "node/3516664324": {
+   "name": "Casse-croûte de la Pointe",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Rue Notre-Dame Est, Trois-Rivières",
+   "housenumber": "911",
+   "postcode": "G8T 4J4"
+  },
+  "node/3786513670": {
+   "name": "Auberge du Trappeur",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Mathieu-du-Parc",
+   "housenumber": "2120",
+   "street": "Chemin Saint-François",
+   "postcode": "G0X 1N0"
+  },
+  "node/3797628344": {
+   "name": "Cantine chez Maye",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Rimouski",
+   "housenumber": "133",
+   "street": "Rue J.-Romuald-Bérubé",
+   "postcode": "G0L 1B0"
+  },
+  "node/4164010839": {
+   "name": "St-André Casse-Croute",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-André-d'Argenteuil",
+   "housenumber": "6",
+   "street": "Rue Legault",
+   "postcode": "J0V 1X0"
+  },
+  "node/4192515675": {
+   "name": "Casse-croûte Le St-Fidèle",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "La Malbaie",
+   "housenumber": "2825",
+   "street": "Boulevard Malcolm-Fraser",
+   "postcode": "G5A 2J3"
+  },
+  "node/4195115257": {
+   "name": "Casse-croûte du quai",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Petite-Rivière-Saint-François",
+   "housenumber": "50",
+   "street": "Rue du Quai",
+   "postcode": "G0A 2L0"
+  },
+  "node/4214578989": {
+   "name": "Cantine la Principale",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Nazaire-d'Acton",
+   "housenumber": "370",
+   "street": "Rue Principale",
+   "postcode": "J0H 1V0"
+  },
+  "node/4224728647": {
+   "name": "Casse-croûte du Parc des Iles",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Salaberry-de-Valleyfield",
+   "housenumber": "240",
+   "street": "Rue Saint-Laurent",
+   "postcode": "J6S 6B9"
+  },
+  "node/4257043038": {
+   "name": "Ti-Jean Casse-Croute",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Gatineau",
+   "housenumber": "64",
+   "street": "Boulevard Saint-Raymond",
+   "postcode": "J8Y 1S2"
+  },
+  "node/4325614195": {
+   "name": "Dic Ann's",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Montréal",
+   "housenumber": "1010",
+   "street": "Rue Legendre Ouest",
+   "postcode": "H4N 3L9"
+  },
+  "node/4337446689": {
+   "name": "Casse-croute",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Gaspé",
+   "housenumber": "2052",
+   "street": "Boulevard de Grande-Grève",
+   "postcode": "G4X 6L6"
+  },
+  "node/4372110170": {
+   "name": "Resto des Chutes",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "342 Chemin Gosford Ouest, Ste-Agathe de Lotbinière",
+   "street": "Chemin Gosford"
+  },
+  "node/4461068853": {
+   "name": "Restaurant Mini-Golf",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "3023 boul. du Curé-Labelle, Prévost",
+   "street": "Boulevard du Curé-Labelle",
+   "postcode": "J0R 1T0"
+  },
+  "node/4461068854": {
+   "name": "Bar Laitier",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Prévost",
+   "housenumber": "3027",
+   "street": "Boulevard du Curé-Labelle",
+   "postcode": "J0R 1T0"
+  },
+  "node/4711449389": {
+   "name": "Patate Ben-Venue",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "1365 Route Trans-Canadienne, Mont-Tremblant",
+   "street": "Route 117"
+  },
+  "node/4732325883": {
+   "name": "Les délices de Suzanne",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "2081A Rang du Haut-de-la-Rivière Sud, Saint-Pie",
+   "street": "Rang de la Rivière Sud"
+  },
+  "node/4753116974": {
+   "name": "Chez Henri",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Chertsey",
+   "housenumber": "7160",
+   "street": "Route 125",
+   "postcode": "J0K 3K0"
+  },
+  "node/4833620235": {
+   "name": "Bar Laitier Fn",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Ferme-Neuve",
+   "housenumber": "296",
+   "street": "12e Avenue",
+   "postcode": "J0W 1C0"
+  },
+  "node/4901894310": {
+   "name": "l'Express",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Marc-des-Carrières",
+   "housenumber": "320",
+   "street": "Rue Paquin",
+   "postcode": "G0A 4B0"
+  },
+  "node/4919717777": {
+   "name": "Casse-Croûte Le Relais",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Pierre-les-Becquets",
+   "housenumber": "397A",
+   "street": "Route Marie-Victorin",
+   "postcode": "G0X 2Z0"
+  },
+  "node/4955880177": {
+   "name": "Bar Laitier La Berge Glacee",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Lac-Mégantic",
+   "housenumber": "5600",
+   "street": "Rue Papineau",
+   "postcode": "G6B 0E1"
+  },
+  "node/4964892026": {
+   "name": "Wing's 'n' things",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "220 Rue Missisicabi, Waskaganish",
+   "street": "Misshikapi Street",
+   "postcode": "J0M 1R0"
+  },
+  "node/4988607823": {
+   "name": "Chez Bergeron",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Bonaventure",
+   "housenumber": "118",
+   "street": "Avenue Beauséjour",
+   "postcode": "G0C 1E0"
+  },
+  "node/4998779502": {
+   "name": "Casse-Croûte Le Rubis",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Parisville",
+   "housenumber": "1236",
+   "street": "Route 265",
+   "postcode": "G0S 1X0"
+  },
+  "node/5254798328": {
+   "name": "La Fin d'la Faim",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Sainte-Agathe-de-Lotbinière",
+   "housenumber": "4482",
+   "street": "Rue Gosford Est",
+   "postcode": "G0S 2A0"
+  },
+  "node/5297597956": {
+   "name": "Marie et Cie",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "1277 ch. du clocher, St-Jean-sur-Richelieu",
+   "street": "Chemin du Clocher"
+  },
+  "node/5343115862": {
+   "name": "Casse Croute du Village",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Grand-Remous",
+   "housenumber": "1443",
+   "street": "Route Transcanadienne",
+   "postcode": "J0W 1E0"
+  },
+  "node/5567776867": {
+   "name": "Les Rotisseries Duhammel",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Rue Dufferin, Granby",
+   "housenumber": "799",
+   "postcode": "J2H 0T9"
+  },
+  "node/5599108354": {
+   "name": "Bistro Forik",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Rue Principale, Granby",
+   "housenumber": "740",
+   "postcode": "J2G 2Y4"
+  },
+  "node/5603389837": {
+   "name": "Bono pizzeria",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "152 Route Bégin, Sainte-Claire",
+   "street": "Boulevard Bégin"
+  },
+  "node/5941572785": {
+   "name": "bruneau",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Grandes-Piles",
+   "housenumber": "521",
+   "street": "5e Avenue",
+   "postcode": "G0X 1H0"
+  },
+  "node/5999367686": {
+   "name": "Casse-Croûte Le Petit Baril",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Brownsburg-Chatham",
+   "housenumber": "1789",
+   "street": "Route du Nord",
+   "postcode": "J8G 1E2"
+  },
+  "node/6456238889": {
+   "name": "Pub le Chalet",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "125 Rue Plage des Cantons, Magog",
+   "street": "Chemin de la Plage-des-Cantons",
+   "postcode": "J1X 0M4"
+  },
+  "node/6587465975": {
+   "name": "La Ferme d'Oc",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Sainte-Famille-de-l'Île-d'Orléans",
+   "housenumber": "2875",
+   "street": "Chemin Royal",
+   "postcode": "G0A 3P0"
+  },
+  "node/6638552819": {
+   "name": "Casse-Croûte Chez Kim",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Messines",
+   "housenumber": "197",
+   "street": "Route 105",
+   "postcode": "J0X 2J0"
+  },
+  "node/6721899491": {
+   "name": "Chez Sylvie",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Pontiac",
+   "housenumber": "3000",
+   "street": "Route 148",
+   "postcode": "J0X 2G0"
+  },
+  "node/6772991699": {
+   "name": "Cantine & Bar Laitier Le Bouche-Trou",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "11 Route 137 Sud, Ste-Céclie-de-Milton",
+   "city": "Sainte-Cécile-de-Milton"
+  },
+  "node/7102345409": {
+   "name": "Jersey's",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Kahnawake",
+   "housenumber": "929",
+   "street": "River Road",
+   "postcode": "J0L 1B0"
+  },
+  "node/7102345410": {
+   "name": "Fadee's",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Kahnawake",
+   "housenumber": "8",
+   "street": "Old Malone Highway",
+   "postcode": "J0L 1B0"
+  },
+  "node/7502987821": {
+   "name": "Le Croque",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Constant",
+   "housenumber": "70",
+   "street": "Rue Saint-Pierre",
+   "postcode": "J5A 1C1"
+  },
+  "node/7647565732": {
+   "name": "Quebeco Deli et burgers",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Drummondville",
+   "housenumber": "1040",
+   "street": "Rue Hains",
+   "postcode": "J2C 2Z9"
+  },
+  "node/7692908785": {
+   "name": "Le Roy Jucep",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Drummondville",
+   "housenumber": "1050",
+   "street": "Boulevard Saint-Joseph",
+   "postcode": "J2C 2C6"
+  },
+  "node/7707777233": {
+   "name": "Chez Gérard Patates Frites St-Eustache",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Eustache",
+   "housenumber": "535D",
+   "street": "Boulevard Arthur-Sauvé",
+   "postcode": "J7P 4X4"
+  },
+  "node/7732817886": {
+   "name": "Cantine Marilou",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "East Broughton",
+   "housenumber": "4282",
+   "street": "Route 112",
+   "postcode": "G0N 1G0"
+  },
+  "node/7792277619": {
+   "name": "L'Avant-Match Casse-Croûte",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Drummondville",
+   "housenumber": "4519B",
+   "street": "Boulevard Saint-Joseph",
+   "postcode": "J2A 1A9"
+  },
+  "node/7795741301": {
+   "name": "Rendez Vous",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Stanstead",
+   "housenumber": "765",
+   "street": "Rue Dufferin",
+   "postcode": "J0B 3E0"
+  },
+  "node/8058927608": {
+   "name": "Casse-croûte du coin",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Brownsburg-Chatham",
+   "housenumber": "207",
+   "street": "Route du Canton",
+   "postcode": "J8G 1R7"
+  },
+  "node/8111625945": {
+   "name": "La Poutinerie québécoise",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Châteauguay",
+   "housenumber": "101",
+   "street": "Boulevard D'Anjou",
+   "postcode": "J6J 2R2"
+  },
+  "node/8150248222": {
+   "name": "L'Escale",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Sainte-Catherine",
+   "housenumber": "4075",
+   "street": "Boulevard Marie-Victorin",
+   "postcode": "J5C 1X9"
+  },
+  "node/8221441117": {
+   "name": "Halte 191",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Notre-Dame-du-Bon-Conseil",
+   "housenumber": "1260B",
+   "street": "Chemin Quatre-Saisons",
+   "postcode": "J0C 1A0"
+  },
+  "node/8234737432": {
+   "name": "Côte-St-Luc BBQ",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Dollard-des-Ormeaux",
+   "housenumber": "4360",
+   "street": "Boulevard des Sources",
+   "postcode": "H8Y 3B7"
+  },
+  "node/8635731039": {
+   "name": "Rest'O Saints-Anges",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saints-Anges",
+   "housenumber": "397",
+   "street": "Route des Érables",
+   "postcode": "G0S 3E0"
+  },
+  "node/8676370018": {
+   "name": "Chez Gérard",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Laval",
+   "housenumber": "385",
+   "street": "Boulevard Curé-Labelle",
+   "postcode": "H7P 2P3"
+  },
+  "node/8676803330": {
+   "name": "La pataterie",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Laval",
+   "housenumber": "429",
+   "street": "Boulevard Curé-Labelle",
+   "postcode": "H7P 2P3"
+  },
+  "node/8697287534": {
+   "name": "Casse-Croute Chez Paul",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Val-des-Bois",
+   "housenumber": "463",
+   "street": "Route 309",
+   "postcode": "J0X 3C0"
+  },
+  "node/8892614617": {
+   "name": "Casse-croûte des Lacs",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Raymond",
+   "housenumber": "1601",
+   "street": "Grande Ligne",
+   "postcode": "G3L 2Z4"
+  },
+  "node/9115258614": {
+   "name": "Reine de la Patate",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Danville",
+   "housenumber": "246",
+   "street": "Rue Water",
+   "postcode": "J0A 1A0"
+  },
+  "node/9176360296": {
+   "name": "Chef Fred Poutinerie",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Mont-Joli",
+   "housenumber": "1030A",
+   "street": "Avenue de la Gaspésie",
+   "postcode": "G5H 0B2"
+  },
+  "node/9334739797": {
+   "name": "Casse-Croûte",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Chemin de Saint-Gérard, Shawinigan",
+   "housenumber": "256"
+  },
+  "node/9420080285": {
+   "name": "Casse-Croute D'Albertville",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Albertville",
+   "housenumber": "1065",
+   "street": "Rue Principale",
+   "postcode": "G0J 1A0"
+  },
+  "node/9622556624": {
+   "name": "Dixie Lee poulet frit",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Gaspé",
+   "housenumber": "84",
+   "street": "Rue Jacques-Cartier",
+   "postcode": "G4X 1M4"
+  },
+  "node/9723487617": {
+   "name": "Casse-croûte Marie",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "L'Ange-Gardien",
+   "housenumber": "282",
+   "street": "Route 315",
+   "postcode": "J8L 0J9"
+  },
+  "node/9969017581": {
+   "name": "Casse-Croûte des Chutes",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "137, Brébeuf",
+   "street": "Route 323",
+   "postcode": "J0T 1B0"
+  },
+  "node/10035290472": {
+   "name": "Le Corylus",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "L'Isle-aux-Coudres",
+   "housenumber": "3094",
+   "street": "Chemin des Coudriers",
+   "postcode": "G0A 2A0"
+  },
+  "node/10788293651": {
+   "name": "Cantine chez Kathy",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Aguanish",
+   "housenumber": "122",
+   "street": "Route Jacques-Cartier",
+   "postcode": "G0G 1R0"
+  },
+  "node/10914388192": {
+   "name": "Au delà de l'Érable",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Mathieu-du-Parc",
+   "housenumber": "1220",
+   "street": "Chemin Saint-Joseph",
+   "postcode": "G0X 1N0"
+  },
+  "node/10926288922": {
+   "name": "Casse-croûte Patate-O-Bec",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Lévis",
+   "housenumber": "4",
+   "street": "Route Lallemand",
+   "postcode": "G6Y 9E2"
+  },
+  "node/11067483077": {
+   "name": "Casse-croûte chez Ju-Ly",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Henri-de-Taillon",
+   "housenumber": "434",
+   "street": "Rue de l'Hôtel-de-Ville",
+   "postcode": "G0W 2X0"
+  },
+  "node/11148823786": {
+   "name": "Au P'tit Capitaine",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Les Îles-de-la-Madeleine",
+   "housenumber": "1244",
+   "street": "Chemin de La Vernière",
+   "postcode": "G4T 3E6"
+  },
+  "node/11517499173": {
+   "name": "B & J Casse-Croute",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Grosse-Île",
+   "housenumber": "110",
+   "street": "Chemin Principal",
+   "postcode": "G4T 6A7"
+  },
+  "node/11571431028": {
+   "name": "Dic Ann's Hamburgers",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Eustache",
+   "housenumber": "180",
+   "street": "25e Avenue",
+   "postcode": "J7P 2V2"
+  },
+  "node/11628073560": {
+   "name": "Chez Brian Josey",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Les Îles-de-la-Madeleine",
+   "housenumber": "2",
+   "street": "Chemin Main",
+   "postcode": "G4T 1Z6"
+  },
+  "node/11940623403": {
+   "name": "Snack bar chez Mimi",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Sept-Îles",
+   "housenumber": "144",
+   "street": "Rue des Plaquebières",
+   "postcode": "G4S 1T3"
+  },
+  "node/12132803592": {
+   "name": "La Maison du grand poulet",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Longueuil",
+   "housenumber": "30",
+   "street": "Boulevard Jacques-Cartier Est",
+   "postcode": "J4L 1C6"
+  },
+  "node/12178390535": {
+   "name": "Cantine Le Pignon",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Notre-Dame-du-Bon-Conseil",
+   "housenumber": "270",
+   "street": "Rue Notre-Dame",
+   "postcode": "J0C 1A0"
+  },
+  "node/12203212205": {
+   "name": "Cantine La Fringale",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "McMasterville",
+   "housenumber": "100",
+   "street": "Boulevard Laurier",
+   "postcode": "J3G 1P8"
+  },
+  "node/12211772544": {
+   "name": "Rockstar",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Mascouche",
+   "housenumber": "126",
+   "street": "Montée Masson",
+   "postcode": "J7K 3B5"
+  },
+  "node/12216892626": {
+   "name": "Au Coin du Hamburger",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Mascouche",
+   "housenumber": "3040",
+   "street": "Chemin Sainte-Marie",
+   "postcode": "J7K 1P3"
+  },
+  "node/12383446103": {
+   "name": "Fritou Côte-Vertu",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Montréal",
+   "housenumber": "685",
+   "street": "Boulevard de la Côte-Vertu",
+   "postcode": "H4L 1Y2"
+  },
+  "node/12511110371": {
+   "name": "Le 200",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "200 Rue Principale, Q",
+   "city": "Brownsburg-Chatham"
+  },
+  "node/12675425018": {
+   "name": "Restaurant Jumbos",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Montréal",
+   "housenumber": "2255",
+   "street": "54e Avenue",
+   "postcode": "H8T 3A8"
+  },
+  "node/12808949053": {
+   "name": "B12 Burger Acadie",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Montréal",
+   "housenumber": "9775A",
+   "street": "Boulevard de l'Acadie",
+   "postcode": "H4N 2W2"
+  },
+  "node/12857848159": {
+   "name": "Casse-croûte chez Gaston",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Québec",
+   "housenumber": "640",
+   "street": "Boulevard Wilfrid-Hamel",
+   "postcode": "G1M 3P9"
+  },
+  "node/12983336502": {
+   "name": "La Florida",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Batiscan",
+   "housenumber": "350",
+   "street": "Rue Principale",
+   "postcode": "G0X 1A0"
+  },
+  "node/13030699801": {
+   "name": "Resto du Village",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Frelighsburg",
+   "housenumber": "1",
+   "street": "Rue de l'Église",
+   "postcode": "J0J 1C0"
+  },
+  "node/13033279106": {
+   "name": "Casse-Croute",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Notre-Dame-de-Montauban",
+   "housenumber": "142",
+   "street": "Rue du Pont",
+   "postcode": "G0X 1W0"
+  },
+  "node/13050634501": {
+   "name": "Cantine du ruisseau",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Caplan",
+   "housenumber": "394",
+   "street": "Boulevard Perron Est",
+   "postcode": "G0C 1H0"
+  },
+  "node/13072363627": {
+   "name": "Le Vieux",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Les Îles-de-la-Madeleine",
+   "housenumber": "2",
+   "street": "Chemin du Bassin",
+   "postcode": "G4T 9E7"
+  },
+  "node/13085537674": {
+   "name": "Le Shack à Patates",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Ferréol-les-Neiges",
+   "housenumber": "3380",
+   "street": "Avenue Royale",
+   "postcode": "G0A 3R0"
+  },
+  "node/13281598945": {
+   "name": "Patates Plus",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Québec",
+   "housenumber": "1111",
+   "street": "Boulevard Pie-XI Nord",
+   "postcode": "G3K 2S8"
+  },
+  "node/13901934430": {
+   "name": "Mr. Crousty",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "5055 Ch. Queen Mary, Montréal",
+   "street": "Chemin Queen-Mary"
+  },
+  "node/13945487675": {
+   "name": "Vicky's Casse-croûte",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Henri",
+   "housenumber": "26B",
+   "street": "Route du Président-Kennedy",
+   "postcode": "G0R 3E0"
+  },
+  "node/14097440974": {
+   "name": "Casse-croûte Chez Demers",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Elzéar",
+   "housenumber": "577",
+   "street": "Avenue Principale",
+   "postcode": "G0S 2J2"
+  },
+  "node/14133638001": {
+   "name": "Aux Délices du Mont",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "1084 Rue Denison Est, Shefford",
+   "street": "Chemin Denison Est"
+  },
+  "way/100237500": {
+   "name": "Binerie chik",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Boulevard Gene-H.-Kruger, Trois-Rivières",
+   "housenumber": "4050",
+   "postcode": "G9A 4M7"
+  },
+  "way/161839043": {
+   "name": "La Double Fringale",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Lévis",
+   "housenumber": "3300",
+   "street": "Rue du Parc-des-Chutes",
+   "postcode": "G6X 1B7"
+  },
+  "way/190858247": {
+   "name": "Quebec broue",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "L'Ancienne-Lorette",
+   "housenumber": "6075",
+   "street": "Boulevard Wilfrid-Hamel",
+   "postcode": "G2E 2H3"
+  },
+  "way/208131938": {
+   "name": "Le Vieux Georges",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Eeyou Istchee Baie-James",
+   "housenumber": "61",
+   "street": "Avenue Des Groseilliers",
+   "postcode": "J0Y 2X0"
+  },
+  "way/238952146": {
+   "name": "Chez Carlo",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "La Pêche",
+   "housenumber": "117",
+   "street": "Route Principale Est",
+   "postcode": "J0X 2W0"
+  },
+  "way/340688487": {
+   "name": "Resto Bar Hélène",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Valcourt",
+   "housenumber": "9030",
+   "street": "Rue de la Montagne",
+   "postcode": "J0E 2L0"
+  },
+  "way/368505566": {
+   "name": "Cantine côtière",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Fabien",
+   "housenumber": "100",
+   "street": "Route 132 Est",
+   "postcode": "G0L 2Z0"
+  },
+  "way/389567354": {
+   "name": "Restaurant Le Bidon",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Salaberry-de-Valleyfield",
+   "housenumber": "333",
+   "street": "Chemin Larocque",
+   "postcode": "J6T 4C1"
+  },
+  "way/391947562": {
+   "name": "Casse-Croûte",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Québec",
+   "housenumber": "70",
+   "street": "Quai Saint-André",
+   "postcode": "G1K 3Y2"
+  },
+  "way/396165504": {
+   "name": "Cantine du Lac",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Magog",
+   "housenumber": "1025",
+   "street": "Rue Principale Ouest",
+   "postcode": "J1X 2B7"
+  },
+  "way/415077662": {
+   "name": "Pizza 3000",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "201 Chemin d'Oka, Saint-André-d'Argenteuil",
+   "street": "Route du Long-Sault",
+   "postcode": "J0V 1X0"
+  },
+  "way/426618585": {
+   "name": "Moulin Callières di Jasmin - Salle de Mariage",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Coteau-du-Lac",
+   "housenumber": "308B",
+   "street": "Chemin du Fleuve",
+   "postcode": "J0P 1B0"
+  },
+  "way/449271727": {
+   "name": "Casse-Croûte chez Papi",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Mont-Saint-Pierre",
+   "housenumber": "114",
+   "street": "Rue Prudent-Cloutier",
+   "postcode": "G0E 1V0"
+  },
+  "way/465035610": {
+   "name": "Le Roi des Patates Frites",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "120 Rue Maclaren Ouest, Gatineau",
+   "street": "Rue Maclaren Est"
+  },
+  "way/477486426": {
+   "name": "Jos Poutine",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "La Pêche",
+   "housenumber": "922",
+   "street": "Chemin Riverside",
+   "postcode": "J0X 3G0"
+  },
+  "way/512977787": {
+   "name": "Cantine Renard 2",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "La Martre",
+   "housenumber": "2",
+   "street": "Avenue de la Chapelle",
+   "postcode": "G0E 1C0"
+  },
+  "way/531291964": {
+   "name": "Casse-Croûte Havelock",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Havelock",
+   "housenumber": "502A",
+   "street": "Route 202",
+   "postcode": "J0S 2C0"
+  },
+  "way/557047282": {
+   "name": "Bistro Borealis",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Matane",
+   "housenumber": "985",
+   "street": "Avenue du Phare Ouest",
+   "postcode": "G4W 3M6"
+  },
+  "way/585981895": {
+   "name": "St-Ambroise",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Rue Principale, Granby",
+   "housenumber": "791",
+   "postcode": "J2G 2Y6"
+  },
+  "way/598383461": {
+   "name": "Restaurant Le Surcouf",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "168 Route 132, Percé",
+   "street": "Route 132 Ouest"
+  },
+  "way/624155421": {
+   "name": "Cantine du Quai",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "59 1e Avenue Ouest, Saint-Maxime-du-Mont-Louis",
+   "street": "1re Avenue Ouest",
+   "postcode": "G0E 1T0"
+  },
+  "way/665171749": {
+   "name": "Quartier général du Chic-Chac",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "550 Ave Dr. William May, Murdochville",
+   "street": "Avenue du Docteur-William-May"
+  },
+  "way/709360953": {
+   "name": "Cantine Au plein bedon",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Chandler",
+   "housenumber": "218",
+   "street": "Boulevard Pabos",
+   "postcode": "G0C 2H0"
+  },
+  "way/717426038": {
+   "name": "Casse croûte le connaisseur",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Tadoussac",
+   "housenumber": "452",
+   "street": "Rue du Bateau-Passeur",
+   "postcode": "G0T 2A0"
+  },
+  "way/755314570": {
+   "name": "Petit Québec",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Longueuil",
+   "housenumber": "1160",
+   "street": "Boulevard Curé-Poirier Ouest",
+   "postcode": "J4K 2E9"
+  },
+  "way/955893274": {
+   "name": "le Coq Rôti",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Cowansville",
+   "housenumber": "419",
+   "street": "Rue de la Rivière",
+   "postcode": "J2K 1N4"
+  },
+  "way/1016185382": {
+   "name": "Cantine Bernard",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Sainte-Madeleine",
+   "housenumber": "1400",
+   "street": "Boulevard Laurier",
+   "postcode": "J0H 1S0"
+  },
+  "way/1061513562": {
+   "name": "Traiteur Lafortune et Crèmerie",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Alexis",
+   "housenumber": "178",
+   "street": "Rue Principale",
+   "postcode": "J0K 1T0"
+  },
+  "way/1084315895": {
+   "name": "Kingburger",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "La Pêche",
+   "housenumber": "1848",
+   "street": "Route 105",
+   "postcode": "J0X 1T0"
+  },
+  "way/1107878733": {
+   "name": "Le Petit Moulin",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Labelle",
+   "housenumber": "6415",
+   "street": "Boulevard du Curé-Labelle",
+   "postcode": "J0T 1H0"
+  },
+  "way/1184916561": {
+   "name": "Restaurant S-kim-o Bar laitier",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Louiseville",
+   "housenumber": "590",
+   "street": "Boulevard Saint-Laurent Est",
+   "postcode": "J5V 1H9"
+  },
+  "way/1283412569": {
+   "name": "Resto Maxime",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "321 1e Avenue, Val-Des-Sources",
+   "street": "1re Avenue"
+  },
+  "way/1466036964": {
+   "name": "Cantine St-Rosalie",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
+   "was": "Saint-Hyacinthe",
+   "housenumber": "4940",
+   "street": "Boulevard Laurier Est",
+   "postcode": "J2R 2C2"
+  }
+ }
+}
