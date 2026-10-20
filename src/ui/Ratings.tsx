@@ -9,7 +9,8 @@ import {
   type Review,
 } from '../domain/ratings.ts';
 import { myStars, raterId, rememberStars } from './rater.ts';
-import type { RatingTrouble, Strings } from './strings.ts';
+import { shareRating, type Shared } from './sharing.ts';
+import type { RatingTrouble, ShareWords, Strings } from './strings.ts';
 import { useBotCheck } from './useBotCheck.ts';
 
 function Star({ filled }: { filled: boolean }) {
@@ -189,7 +190,68 @@ export function RatingBox({ place, strings, onRated }: BoxProps) {
           {words.problems[trouble]}
         </p>
       )}
+      {given !== null && chosen === null && (
+        <ShareRating place={place} stars={given} strings={strings} />
+      )}
     </section>
+  );
+}
+
+/**
+ * Share my rating, once this browser rated the place (Alex, 2026-10-19: "as a insta story, or
+ * facebook story. and it shares a url to the website"): the story picture and the place's link.
+ */
+function ShareRating({ place, stars, strings }: { place: Place; stars: number; strings: Strings }) {
+  const words = strings.share;
+  const [busy, setBusy] = useState(false);
+  const [shared, setShared] = useState<Shared | null>(null);
+  const share = async () => {
+    setBusy(true);
+    setShared(null);
+    setShared(await shareRating(place, stars, strings));
+    setBusy(false);
+  };
+  return (
+    <div class="share">
+      <button
+        type="button"
+        class="action"
+        disabled={busy}
+        onClick={() => {
+          void share();
+        }}
+      >
+        {busy ? words.making : words.button}
+      </button>
+      <p class="hint">{words.hint}</p>
+      {shared && <SharedLine shared={shared} words={words} />}
+    </div>
+  );
+}
+
+/** After sharing: a saved picture, a failure, or the link to copy by hand when it couldn't be. */
+function SharedLine({ shared, words }: { shared: Shared; words: ShareWords }) {
+  const { how, copied, url } = shared;
+  const said =
+    how === 'failed'
+      ? words.failed
+      : how === 'saved'
+        ? copied
+          ? `${words.saved} ${words.linkCopied}`
+          : words.saved
+        : '';
+  const link = !copied && how !== 'cancelled';
+  if (!said && !link) return null;
+  return (
+    <p class="notice-line" role="status">
+      {said}
+      {link && (
+        <>
+          {said && ' '}
+          {words.copyThis} <span class="share-link">{url}</span>
+        </>
+      )}
+    </p>
   );
 }
 

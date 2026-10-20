@@ -1,6 +1,6 @@
 # Poutine · Pootsin
 
-A map of Québec's casse-croûtes, cantines and potato shacks: **Poutine** in French, **Pootsin** in English, at [poutine.ederer.digital](https://poutine.ederer.digital). Tap a pin for the place's card (address, hours, phone, directions), search by name or town, find the places near you, rate it from 1 to 5 stars, and add a place that's missing: each place sent is checked before it shows.
+A map of Québec's casse-croûtes, cantines and potato shacks: **Poutine** in French, **Pootsin** in English, at [poutines.app](https://poutines.app). Tap a pin for the place's card (address, hours, phone, directions), search by name or town, find the places near you, rate it from 1 to 5 stars and share your rating as a story picture with the place's link, and add a place that's missing: each place sent is checked before it shows.
 
 ## The places
 
@@ -15,7 +15,7 @@ Node 24.
 - `npm install`, then `npm run dev` (http://localhost:5180) or `npm start` (the production build at http://localhost:4180).
 - `npm run check`: formatting, types, unit tests and the build, as the automatic checks run them.
 - `npm start` runs the Worker too (`wrangler dev`, a local D1 and Cloudflare Turnstile's test keys in `.dev.vars`: `TURNSTILE_SECRET=1x0000000000000000000000000000000AA`).
-- Publishing: Cloudflare Workers, connected to this repository. Each push to `main` runs `npm run build`, then `npx wrangler deploy` with `wrangler.jsonc`. The Worker (`worker/`) answers `/api/*`: the address lookup, Add a place (stored in D1 until checked) and ratings (D1, `migrations/`).
+- Publishing: Cloudflare Workers, connected to this repository. Each push to `main` runs `npm run build`, then `npx wrangler deploy` with `wrangler.jsonc`. The Worker (`worker/`) answers `/api/*`: the address lookup, Add a place (stored in D1 until checked) and ratings (D1, `migrations/`); and `/p/*`, a place's link, whose page names the place and its stars for link previews.
 
 Address lookups: [Adresses Québec](https://www.donneesquebec.ca/) (CC BY 4.0) and Natural Resources Canada's Geolocation Service (Open Government Licence – Canada). Places visitors add join `data/places.json` under the ODbL once approved.
 

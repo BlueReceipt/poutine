@@ -1,5 +1,6 @@
 // How Cloudflare publishes the map: the `poutine` Worker serves the built `dist` folder at
-// poutine.ederer.digital, and runs worker/index.ts for /api/* (address lookup, Add a place).
+// poutines.app, and runs worker/index.ts for /api/* (address lookup, Add a place, ratings) and /p/*
+// (a place's link, its preview naming the place).
 // Connected to the GitHub repository (Workers Builds), each push to main runs `npm run build`,
 // then `npx wrangler deploy` with this file. Deploying your own copy: change the name, the address
 // and the database ID to yours, and set the TURNSTILE_SECRET secret.
@@ -10,7 +11,7 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    "run_worker_first": ["/api/*"],
+    "run_worker_first": ["/api/*", "/p/*"],
   },
   // Places visitors send, waiting for approval. migrations/ holds its tables.
   "d1_databases": [
@@ -21,8 +22,14 @@
       "migrations_dir": "migrations",
     },
   ],
-  // Wrangler replaces the Worker's addresses with these on each deploy.
-  "routes": [{ "pattern": "poutine.ederer.digital", "custom_domain": true }],
+  // Wrangler replaces the Worker's addresses with these on each deploy. www and the first address
+  // (poutine.ederer.digital) answer with a redirect to poutines.app: Redirect Rules in Cloudflare,
+  // which run before the Worker. They stay here so their DNS records and certificates stay.
+  "routes": [
+    { "pattern": "poutines.app", "custom_domain": true },
+    { "pattern": "www.poutines.app", "custom_domain": true },
+    { "pattern": "poutine.ederer.digital", "custom_domain": true },
+  ],
   "workers_dev": false,
   "preview_urls": false,
 }

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import placesUrl from '../../data/places.json?url';
 import { groupByAddress } from '../domain/groups.ts';
+import { placeIdFromPath, placePath } from '../domain/links.ts';
 import type { Place } from '../domain/osmPlaces.ts';
 import type { RatingTotal } from '../domain/ratings.ts';
 import { nearest, searchPlaces } from '../domain/search.ts';
@@ -111,6 +112,24 @@ export function App({ strings }: { strings: Strings }) {
     },
     [groupOf],
   );
+
+  // A place's link (poutines.app/p/…) opens its card once the places are in.
+  const linked = useRef(placeIdFromPath(window.location.pathname));
+  useEffect(() => {
+    if (!places || !linked.current) return;
+    const id = linked.current;
+    linked.current = null;
+    const chosen = places.find((candidate) => candidate.osm === id);
+    if (chosen) show(chosen);
+  }, [places, show]);
+
+  // The address bar names the open place, so the browser's own Share and Copy link give its link.
+  useEffect(() => {
+    if (!places || linked.current) return;
+    const path = place ? placePath(place) : '/';
+    if (window.location.pathname !== path) history.replaceState(null, '', path);
+    document.title = place ? `${place.name} · ${strings.appName}` : strings.appName;
+  }, [places, place, strings]);
 
   const locate = useCallback(() => {
     if (!places) return;

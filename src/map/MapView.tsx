@@ -82,6 +82,32 @@ function nearestPin(map: MapLibreMap, x: number, y: number): MapGeoJSONFeature |
 
 const still = (): boolean => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/**
+ * A place chosen in a list: fly there, close enough to see the streets around it. Near me: show
+ * you and the closest places, above the list. `instant` when the map is only starting (a place's
+ * link).
+ */
+function go(map: MapLibreMap, request: MapRequest, groups: readonly PinGroup[], instant: boolean) {
+  const height = map.getContainer().clientHeight;
+  const duration = instant || still() ? 0 : 1200;
+  if (request.kind === 'place') {
+    const group = groups.find((candidate) => candidate.id === request.id);
+    if (!group) return;
+    map.flyTo({
+      center: [group.lon, group.lat],
+      zoom: Math.max(map.getZoom(), 14),
+      offset: [0, -height * 0.25],
+      duration,
+    });
+  } else {
+    map.fitBounds(request.bounds, {
+      padding: { top: 140, bottom: height * 0.5, left: 40, right: 40 },
+      maxZoom: 15,
+      duration,
+    });
+  }
+}
+
 export function MapView(props: Props) {
   const { places, groups, strings, selectedId, me, rated, request, picking, onSelect, onFailed } =
     props;
@@ -97,6 +123,12 @@ export function MapView(props: Props) {
   ratedNow.current = rated;
   const meNow = useRef<FeatureCollection<Point>>(meFeatures(me));
   meNow.current = meFeatures(me);
+  // What was asked before the map was ready (a place's link): it starts there.
+  const requestNow = useRef(request);
+  requestNow.current = request;
+  const selectedNow = useRef(selectedId);
+  selectedNow.current = selectedId;
+  const done = useRef(0);
 
   useEffect(() => {
     let map: MapLibreMap | undefined;
@@ -122,15 +154,24 @@ export function MapView(props: Props) {
         });
         window.poutineMap = map;
         const loaded = map;
+        const pending = () => {
+          const asked = requestNow.current;
+          if (!asked || asked.seq === done.current) return;
+          done.current = asked.seq;
+          go(loaded, asked, groups, true);
+        };
+        pending();
         loaded.on('load', () => {
           loaded.addSource(PLACES, {
             type: 'geojson',
             data: pinFeatures(groups, ratedNow.current),
           });
           for (const layer of pinLayers) loaded.addLayer(layer);
+          loaded.setFilter('selected', selectedFilter(selectedNow.current));
           loaded.addSource(ME, { type: 'geojson', data: meNow.current });
           loaded.addLayer(meLayer);
           mapRef.current = loaded;
+          pending();
         });
         loaded.on('click', (event) => {
           // While a new place's pin is placed, a tap only moves the map.
@@ -185,28 +226,11 @@ export function MapView(props: Props) {
     mapRef.current?.getSource<GeoJSONSource>(PLACES)?.setData(pinFeatures(groups, rated));
   }, [rated, groups]);
 
-  // A place chosen in a list: fly there, close enough to see the streets around it. Near me: show
-  // you and the closest places, above the list.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !request) return;
-    const height = map.getContainer().clientHeight;
-    if (request.kind === 'place') {
-      const group = groups.find((candidate) => candidate.id === request.id);
-      if (!group) return;
-      map.flyTo({
-        center: [group.lon, group.lat],
-        zoom: Math.max(map.getZoom(), 14),
-        offset: [0, -height * 0.25],
-        duration: still() ? 0 : 1200,
-      });
-    } else {
-      map.fitBounds(request.bounds, {
-        padding: { top: 140, bottom: height * 0.5, left: 40, right: 40 },
-        maxZoom: 15,
-        duration: still() ? 0 : 1200,
-      });
-    }
+    done.current = request.seq;
+    go(map, request, groups, false);
   }, [request, groups]);
 
   // Add a place: the map keeps the bottom of the screen for the sheet, so its center (where the pin

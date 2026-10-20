@@ -10,6 +10,8 @@ const NBSP = String.fromCharCode(0xa0);
  */
 export interface Strings {
   appName: string;
+  /** What the site is: in link previews and on the story picture. */
+  tagline: string;
   /** The map's label for how many places it shows. */
   placeCount: (count: number) => string;
   loading: string;
@@ -51,7 +53,25 @@ export interface Strings {
   };
   add: AddWords;
   ratings: RatingWords;
+  share: ShareWords;
   hours: HoursWords;
+}
+
+/** Sharing a rating: a story picture with the place's link, through the phone's share sheet. */
+export interface ShareWords {
+  button: string;
+  making: string;
+  /** Under the button: why the link is copied. */
+  hint: string;
+  /** On the picture, over the stars. */
+  gave: string;
+  /** Sent with the picture to apps that take words (WhatsApp, Messenger, texts). */
+  text: (name: string, stars: number) => string;
+  saved: string;
+  linkCopied: string;
+  /** The link couldn't be copied: it follows, to copy by hand. */
+  copyThis: string;
+  failed: string;
 }
 
 /** What Add a place says when sending fails, by the Worker's code or the form's own check. */
@@ -138,6 +158,7 @@ const distanceIn =
 
 const english: Strings = {
   appName: 'Pootsin',
+  tagline: 'Québec’s casse-croûtes and potato shacks on a map',
   placeCount: (count) => `${count.toLocaleString('en-CA')} poutine places`,
   loading: 'Loading the map…',
   mapFailed: 'The map didn’t load. Check your connection and reload the page.',
@@ -196,6 +217,18 @@ const english: Strings = {
       offline: 'It couldn’t be sent. Check your connection and try again.',
       unexpected: 'Something went wrong on our side. Try again in a moment.',
     },
+  },
+  share: {
+    button: 'Share my rating',
+    making: 'Making the picture…',
+    hint: 'Sharing also copies the link, for a story’s Link sticker.',
+    gave: 'I gave',
+    text: (name, stars) =>
+      `I gave ${name} ${stars === 1 ? '1 star' : `${String(stars)} stars`} on Pootsin.`,
+    saved: 'The picture is in your downloads.',
+    linkCopied: 'The link is copied.',
+    copyThis: 'In a story, add this link with the Link sticker:',
+    failed: 'This browser can’t share the picture.',
   },
   add: {
     title: 'Add a place',
@@ -284,6 +317,7 @@ const english: Strings = {
 
 const french: Strings = {
   appName: 'Poutine',
+  tagline: 'Les casse-croûtes et cantines du Québec sur une carte',
   placeCount: (count) => `${count.toLocaleString('fr-CA')} places à poutine`,
   loading: 'Chargement de la carte…',
   mapFailed: 'La carte n’a pas chargé. Vérifiez votre connexion et rechargez la page.',
@@ -344,6 +378,18 @@ const french: Strings = {
       offline: 'L’envoi n’a pas fonctionné. Vérifiez votre connexion et réessayez.',
       unexpected: 'Un problème de notre côté. Réessayez dans un moment.',
     },
+  },
+  share: {
+    button: 'Partager ma note',
+    making: 'Création de l’image…',
+    hint: 'Partager copie aussi le lien, pour l’autocollant Lien d’une story.',
+    gave: 'J’ai donné',
+    text: (name, stars) =>
+      `J’ai donné ${stars === 1 ? '1 étoile' : `${String(stars)} étoiles`} à ${name} sur Poutine.`,
+    saved: 'L’image est dans vos téléchargements.',
+    linkCopied: 'Le lien est copié.',
+    copyThis: `Dans une story, ajoutez ce lien avec l’autocollant Lien${NBSP}:`,
+    failed: 'Ce navigateur ne peut pas partager l’image.',
   },
   add: {
     title: 'Ajouter une place',

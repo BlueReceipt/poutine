@@ -9,9 +9,12 @@ const TEST_SITE_KEY = '1x00000000000000000000AA';
 
 /**
  * The real key per address (public by design: it's in every page that shows the check). Its
- * secret is the Worker's TURNSTILE_SECRET, set in Cloudflare, never here.
+ * secret is the Worker's TURNSTILE_SECRET, set in Cloudflare, never here: one secret, so only the
+ * widget whose secret the Worker holds passes (poutines.app's since the move; the first address
+ * then only redirects).
  */
 const SITE_KEYS: Record<string, string> = {
+  'poutines.app': '0x4AAAAAAFcTihu9zU1vT1KJ',
   'poutine.ederer.digital': '0x4AAAAAAFYoKVCK3kch26sY',
 };
 

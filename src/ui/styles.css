@@ -537,6 +537,26 @@ button.action.primary {
   outline: 2px solid var(--ink);
 }
 
+/* Share my rating: one button under the stars, why the link is copied, and the link itself when
+   it couldn't be (to copy by hand). */
+.share {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 12px;
+}
+
+.card .share .hint {
+  margin: 6px 0 0;
+  font-style: normal;
+}
+
+.share-link {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
 .field textarea {
   padding: 10px 12px;
   border: 2px solid #8a8d86;
