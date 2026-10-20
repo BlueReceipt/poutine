@@ -300,14 +300,17 @@ export async function storyPicture(
 }
 
 /**
- * The picture link previews show (public/share.png, 1200 × 630): the poutine poop of bowl 1 on a
- * cream disc (Alex, 2026-10-20: "change the picture to the share link to our poutine poop"), the
- * name, the address and what the site is in both languages, since a preview can't know its
- * reader's. Made once in a browser.
+ * The picture link previews show, one per language (Alex, 2026-10-20: "Have one picture for french,
+ * one for english"; in English "it reads what i wrote"): public/share.png in French, share-en.png in
+ * English, 1200 × 630. The poutine poop of bowl 1 on a cream disc, in English with `previewCaption`
+ * under it; beside it the language's welcome: its title, its strapline (the app's name in French),
+ * its words. Made once in a browser.
  */
-export async function linkPreview(english: Strings, french: Strings, caption = ''): Promise<Blob> {
-  const names = french.appName;
-  await ready([names, SITE_NAME, english.tagline, french.tagline, caption]);
+export async function linkPreview(strings: Strings): Promise<Blob> {
+  const title = strings.welcome.title || SITE_NAME.charAt(0).toUpperCase() + SITE_NAME.slice(1);
+  const strap = strings.welcome.strap || strings.appName;
+  const caption = strings.previewCaption;
+  await ready([title, strap, strings.welcome.text, caption]);
   const context = canvasOf(1200, 630);
   context.fillStyle = GRAVY;
   context.fillRect(0, 0, 1200, 630);
@@ -330,20 +333,24 @@ export async function linkPreview(english: Strings, french: Strings, caption = '
       below += 46;
     }
   }
+  // The welcome beside it, the block centred: title, strapline, then the words in lines.
   context.textAlign = 'left';
   context.fillStyle = CREAM;
-  context.font = font(800, 84);
-  context.fillText(SITE_NAME, 490, 250);
-  context.font = font(700, 48);
-  context.fillText(names, 490, 330);
   context.font = font(400, 30);
-  const measure = (line: string) => context.measureText(line).width;
-  let y = 400;
-  for (const tagline of [french.tagline, english.tagline])
-    for (const line of balancedLines(tagline, 640, measure)) {
-      context.fillText(line, 490, y);
-      y += 42;
-    }
+  const words = balancedLines(strings.welcome.text, 640, (line) => context.measureText(line).width);
+  const block = 66 + 62 + 56 + (words.length - 1) * 42 + 10;
+  let y = (630 - block) / 2 + 66;
+  context.font = font(800, 80);
+  context.fillText(title, 490, y);
+  y += 62;
+  context.font = font(700, 44);
+  context.fillText(strap, 490, y);
+  y += 56;
+  context.font = font(400, 30);
+  for (const line of words) {
+    context.fillText(line, 490, y);
+    y += 42;
+  }
   return blobOf(context);
 }
 

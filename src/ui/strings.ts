@@ -261,7 +261,8 @@ const english: Strings = {
     placedIn: (what, town) => `${what} in ${town}`,
     placedNear: (what, town) => `${what} near ${town}`,
   },
-  tagline: 'Québec’s casse-croûtes and potato shacks on a map',
+  tagline:
+    'Poutine, not poo-teen: mapping Canada’s poutine expansion from its humble beginnings in central Québec.',
   welcome: {
     title: 'Poutines.app',
     strap: 'Poutine, not poo-teen',
@@ -340,7 +341,7 @@ const english: Strings = {
   },
   share: {
     place: 'Share',
-    placeText: (name) => `${name}, on Poutine`,
+    placeText: (name) => `${name} on Poutines.app. Poutine, not poo-teen.`,
     copied: 'Link copied.',
     friend: (stars) => `A friend gave this place ${englishStars(stars)}. What would you give it?`,
     invite: 'Don’t be shy, show us the goods!',

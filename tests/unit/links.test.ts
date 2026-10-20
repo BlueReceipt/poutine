@@ -116,7 +116,7 @@ describe('link previews', () => {
     expect(previewOf(place(), { count: 3, total: 13 }, words('en'))).toEqual({
       title: 'Casse-Croûte Trempette · Saint-Rémi',
       description:
-        '4.3 out of 5 · 3 ratings. Casse-croûte in Saint-Rémi. Québec’s casse-croûtes and potato shacks on a map',
+        '4.3 out of 5 · 3 ratings. Casse-croûte in Saint-Rémi. Poutine, not poo-teen: mapping Canada’s poutine expansion from its humble beginnings in central Québec.',
     });
     expect(previewOf(place(), undefined, words('fr')).description).toBe(
       'Casse-croûte à Saint-Rémi. Les casse-croûtes et cantines du Québec sur une carte',
@@ -144,14 +144,16 @@ describe('link previews', () => {
     expect(
       previewOf(place({ name: 'La Banquise', city: 'Montréal' }), undefined, words('en'))
         .description,
-    ).toBe('Poutine in Montréal. Québec’s casse-croûtes and potato shacks on a map');
+    ).toBe(
+      'Poutine in Montréal. Poutine, not poo-teen: mapping Canada’s poutine expansion from its humble beginnings in central Québec.',
+    );
   });
 
   it('leads with a friend’s stars when the link carries them', () => {
     expect(previewOf(place(), { count: 3, total: 13 }, words('en'), 4)).toEqual({
       title: '4 ★ · Casse-Croûte Trempette · Saint-Rémi',
       description:
-        'A friend gave this place 4 stars. What would you give it? Québec’s casse-croûtes and potato shacks on a map',
+        'A friend gave this place 4 stars. What would you give it? Poutine, not poo-teen: mapping Canada’s poutine expansion from its humble beginnings in central Québec.',
     });
     const nbsp = String.fromCharCode(0xa0);
     expect(previewOf(place(), undefined, words('fr'), 1).description).toBe(
@@ -221,6 +223,6 @@ describe('links shared from an English phone', () => {
     expect(friendFromSearch('?s=4&c=x7Kq2m-_&en')).toEqual({ stars: 4, code: 'x7Kq2m-_' });
     expect(isEnglishLink('')).toBe(false);
     expect(isEnglishLink('?s=4&c=x7Kq2m-_')).toBe(false);
-    expect(PREVIEW_PICTURE.en).toBe('https://poutines.app/share-en.png?v=2');
+    expect(PREVIEW_PICTURE.en).toBe('https://poutines.app/share-en.png?v=3');
   });
 });
