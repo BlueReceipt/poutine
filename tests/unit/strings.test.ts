@@ -45,11 +45,14 @@ describe('language', () => {
   });
 
   it('welcomes a first visit in Alex’s words, French typography in French', () => {
-    expect(stringsFor('en').welcome).toMatch(
-      /^Poutine, pronounced pootsin, was invented in Québec\./,
-    );
+    expect(stringsFor('en').welcome).toMatchObject({
+      title: 'Poutines.app',
+      strap: 'Poutine, not poo-teen',
+    });
+    expect(stringsFor('en').welcome.text).toMatch(/^Mapping Canada’s poutine expansion/);
     const nbsp = String.fromCharCode(0xa0);
-    expect(stringsFor('fr').welcome).toBe(
+    expect(stringsFor('fr').welcome).toMatchObject({ title: '', strap: '' });
+    expect(stringsFor('fr').welcome.text).toBe(
       `Poutines.app te permet de trouver ta prochaine poutine. Note-la pis partage ta photo${nbsp}! Fini les chaînes${nbsp}!`,
     );
   });

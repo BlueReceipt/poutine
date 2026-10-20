@@ -19,8 +19,11 @@ export interface Strings {
   tagline: string;
   /** Under the poop on the link preview picture (English only: public/share-en.png). */
   previewCaption: string;
-  /** The closable box of a first visit (Alex's words, 2026-10-19). */
-  welcome: string;
+  /**
+   * The closable box of a first visit (Alex's words, 2026-10-19; English, 2026-10-20): a title and a
+   * strapline (English only), then the words.
+   */
+  welcome: { title: string; strap: string; text: string };
   /** Link previews: what a place is, from its name, and where. */
   preview: {
     kinds: Readonly<Record<PlaceKind, string>>;
@@ -259,8 +262,11 @@ const english: Strings = {
     placedNear: (what, town) => `${what} near ${town}`,
   },
   tagline: 'Québec’s casse-croûtes and potato shacks on a map',
-  welcome:
-    'Poutine, pronounced pootsin, was invented in Québec. If you’re going to appropriate its name, then at least call it by what it is, and eat at a real spot.',
+  welcome: {
+    title: 'Poutines.app',
+    strap: 'Poutine, not poo-teen',
+    text: 'Mapping Canada’s poutine expansion from its humble beginnings in central Québec. This map is for independent spots and small local chains.',
+  },
   placeCount: (count) => `${count.toLocaleString('en-CA')} poutine places`,
   loading: 'Loading the map…',
   mapFailed: 'The map didn’t load. Check your connection and reload the page.',
@@ -483,7 +489,11 @@ const french: Strings = {
     placedNear: (what, town) => `${what} près de ${town}`,
   },
   tagline: 'Les casse-croûtes et cantines du Québec sur une carte',
-  welcome: `Poutines.app te permet de trouver ta prochaine poutine. Note-la pis partage ta photo${NBSP}! Fini les chaînes${NBSP}!`,
+  welcome: {
+    title: '',
+    strap: '',
+    text: `Poutines.app te permet de trouver ta prochaine poutine. Note-la pis partage ta photo${NBSP}! Fini les chaînes${NBSP}!`,
+  },
   placeCount: (count) => `${count.toLocaleString('fr-CA')} places à poutine`,
   loading: 'Chargement de la carte…',
   mapFailed: 'La carte n’a pas chargé. Vérifiez votre connexion et rechargez la page.',

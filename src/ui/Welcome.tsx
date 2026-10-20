@@ -3,7 +3,8 @@ import type { Strings } from './strings.ts';
 
 /**
  * A first visit's welcome (Alex, 2026-10-19: "a box that can be shut", shown "only if there is no
- * saved info"): his words in a sheet over the bottom of the map; × or Escape closes it for good.
+ * saved info"): his words in a sheet over the bottom of the map; × or Escape closes it for good. In
+ * English a title and a strapline come first (2026-10-20: "Poutines.app / Poutine not poo-teen").
  */
 export function Welcome({ strings, onClose }: { strings: Strings; onClose: () => void }) {
   useEffect(() => {
@@ -20,7 +21,9 @@ export function Welcome({ strings, onClose }: { strings: Strings; onClose: () =>
       <button type="button" class="close" aria-label={strings.card.close} onClick={onClose}>
         ×
       </button>
-      <p>{strings.welcome}</p>
+      {strings.welcome.title && <h2>{strings.welcome.title}</h2>}
+      {strings.welcome.strap && <p class="strap">{strings.welcome.strap}</p>}
+      <p>{strings.welcome.text}</p>
     </aside>
   );
 }

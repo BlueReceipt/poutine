@@ -286,6 +286,13 @@ body,
   margin: 4px 48px 0 0;
 }
 
+/* English: "Poutines.app", then "Poutine, not poo-teen" in gravy over the words. */
+.card.welcome .strap {
+  margin: 0 48px 6px 0;
+  color: var(--gravy);
+  font-weight: 800;
+}
+
 .card .hint {
   margin: 0 0 8px;
   color: var(--graphite);
