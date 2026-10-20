@@ -1,5 +1,6 @@
 /**
- * Ratings (Alex, 2026-10-16): 1 to 5 stars per place, shown at once to everyone, no approval. A
+ * Ratings (Alex, 2026-10-16): 1 to 5 stars per place, shown at once to everyone, no approval; half
+ * stars too since 2026-10-20 ("can we do half a star too"), from ½ to 5. A
  * written review goes with the stars only once reviews are switched on ("review comments are
  * switched off"): until then the card offers no comment box and the Worker refuses comments.
  */
@@ -28,7 +29,8 @@ const RATER_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
 export interface Rating {
   place: string;
   rater: string;
-  stars: 1 | 2 | 3 | 4 | 5;
+  /** ½ to 5, in halves. */
+  stars: number;
   /** Empty while reviews are switched off. */
   comment: string;
   /** "Did you have poutine here?", asked at places not confirmed yet; null when not answered. */
@@ -57,9 +59,14 @@ export function confirmedByRaters(total: RatingTotal | undefined): boolean {
   return yes >= CONFIRM_AT && yes > (total?.no ?? 0);
 }
 
+/** Stars a rating may give: ½ to 5, in halves. */
+export function isRatingStars(stars: unknown): stars is number {
+  return typeof stars === 'number' && Number.isInteger(stars * 2) && stars >= 0.5 && stars <= 5;
+}
+
 /**
  * A sent rating checked the same way in the card and in the Worker: only these fields, a place
- * and rater of the right form, whole stars from 1 to 5, and a comment only when reviews are on.
+ * and rater of the right form, stars from ½ to 5 in halves, and a comment only when reviews are on.
  */
 export function checkRating(
   input: unknown,
@@ -84,13 +91,12 @@ export function checkRating(
   )
     return { problems: ['not-a-rating'] };
   const problems: RatingProblem[] = [];
-  if (typeof stars !== 'number' || !Number.isInteger(stars) || stars < 1 || stars > 5)
-    problems.push('stars');
+  if (!isRatingStars(stars)) problems.push('stars');
   const words = comment.trim();
   if (words && !reviewsOn) problems.push('reviews-off');
   if (words.length > MAX_COMMENT) problems.push('comment-too-long');
   if (problems.length > 0) return { problems };
-  return { rating: { place, rater, stars: stars as Rating['stars'], comment: words, poutine } };
+  return { rating: { place, rater, stars: stars as number, comment: words, poutine } };
 }
 
 /** The average, to one decimal: 4.33 → 4.3. Null with no rating. */

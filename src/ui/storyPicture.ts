@@ -64,48 +64,47 @@ function blobOf(context: CanvasRenderingContext2D, type = 'image/png'): Promise<
   });
 }
 
-/** The visitor's photo filling a rounded frame, cropped to it from the middle. */
-function framed(
-  context: CanvasRenderingContext2D,
-  photo: ImageBitmap,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-) {
+/** The visitor's photo filling the whole picture, cropped from the middle. */
+function cover(context: CanvasRenderingContext2D, photo: ImageBitmap) {
+  const { width, height } = context.canvas;
   const scale = Math.max(width / photo.width, height / photo.height);
   const shownWidth = photo.width * scale;
   const shownHeight = photo.height * scale;
-  context.save();
-  context.beginPath();
-  context.roundRect(x, y, width, height, 48);
-  context.clip();
   context.drawImage(
     photo,
-    x + (width - shownWidth) / 2,
-    y + (height - shownHeight) / 2,
+    (width - shownWidth) / 2,
+    (height - shownHeight) / 2,
     shownWidth,
     shownHeight,
   );
-  context.restore();
 }
 
+/** How much of the nth star (1 to 5) a rating fills: 0, a half or 1. */
+const fillOf = (stars: number, nth: number): number => Math.max(0, Math.min(1, stars - (nth - 1)));
+
+/** A star, cheese-filled to `fill` from the left (half stars), with its outline. */
 function star(
   context: CanvasRenderingContext2D,
   x: number,
   y: number,
   size: number,
-  filled: boolean,
+  fill: number,
+  outline = GRAVY,
 ) {
   context.save();
   context.translate(x, y);
   context.scale(size / 24, size / 24);
   context.lineJoin = 'round';
   context.lineWidth = 1.4;
-  context.strokeStyle = GRAVY;
-  if (filled) {
+  context.strokeStyle = outline;
+  if (fill > 0) {
+    context.save();
+    context.beginPath();
+    context.rect(0, 0, 24 * fill, 24);
+    context.clip();
     context.fillStyle = CHEESE;
     context.fill(STAR);
+    context.restore();
   }
   context.stroke(STAR);
   context.restore();
@@ -169,9 +168,78 @@ function siteLines(
 }
 
 /**
- * The story picture of a rating: the app (or the visitor's photo, with the app's badge on it), the
- * stars given, the place and its town, the address. The photo is only drawn in: canvas keeps none
- * of its data (place, camera), and it never leaves the phone unless the visitor shares the picture.
+ * The story with the visitor's photo (Alex, 2026-10-20: "put 5 stars on the picture as a filter"):
+ * the photo fills the picture; over its bottom, on a dark fade so they read on any photo, the
+ * stars given, the place, its town and its own link; the app's badge at the top left.
+ */
+function filterPicture(
+  context: CanvasRenderingContext2D,
+  icon: HTMLImageElement,
+  photo: ImageBitmap,
+  place: Place,
+  stars: number,
+  town: string,
+  strings: Strings,
+) {
+  const middle = WIDTH / 2;
+  cover(context, photo);
+  const name = nameLines(context, place.name, WIDTH - 180);
+  const nameHeight = name.lines.length * name.size * 1.15;
+  const site = siteLines(context, place.link);
+  const siteHeight = site.reduce((height, line) => height + line.size * 1.1, 0);
+  const size = 112;
+  const gap = 20;
+  // Instagram's and Facebook's own buttons cover about 250 px at the bottom: the words end above.
+  const block = size + 40 + nameHeight + (town ? 64 : 0) + 30 + siteHeight;
+  const top = 1660 - block;
+  const fade = context.createLinearGradient(0, top - 280, 0, HEIGHT);
+  fade.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  fade.addColorStop(0.35, 'rgba(0, 0, 0, 0.55)');
+  fade.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
+  context.fillStyle = fade;
+  context.fillRect(0, top - 280, WIDTH, HEIGHT - top + 280);
+
+  context.shadowColor = 'rgba(0, 0, 0, 0.5)';
+  context.shadowBlur = 18;
+  badge(context, icon, 150, 340, 54);
+  context.textAlign = 'left';
+  context.fillStyle = '#ffffff';
+  context.font = font(800, 50);
+  context.fillText(strings.appName, 222, 358);
+  context.textAlign = 'center';
+
+  const left = middle - (5 * size + 4 * gap) / 2;
+  for (let i = 0; i < 5; i += 1)
+    star(context, left + i * (size + gap), top, size, fillOf(stars, i + 1), '#ffffff');
+  let y = top + size + 40;
+  context.fillStyle = '#ffffff';
+  context.font = font(800, name.size);
+  for (const line of name.lines) {
+    y += name.size;
+    context.fillText(line, middle, y);
+    y += name.size * 0.15;
+  }
+  if (town) {
+    context.fillStyle = CREAM;
+    context.font = font(400, 52);
+    y += 64;
+    context.fillText(town, middle, y);
+  }
+  y += 30;
+  context.fillStyle = CHEESE;
+  for (const line of site) {
+    y += line.size;
+    context.font = font(800, line.size);
+    context.fillText(line.text, middle, y);
+    y += line.size * 0.1;
+  }
+}
+
+/**
+ * The story picture of a rating: with the visitor's photo, the photo with the rating laid over it
+ * (filterPicture); without, the app's card with the stars, the place and its town, the address.
+ * The photo is only drawn in: canvas keeps none of its data (place, camera), and it never leaves
+ * the phone unless the visitor shares the picture.
  */
 export async function storyPicture(
   place: Place,
@@ -189,6 +257,10 @@ export async function storyPicture(
   ]);
   const context = canvasOf(WIDTH, HEIGHT);
   const middle = WIDTH / 2;
+  if (photo) {
+    filterPicture(context, icon, photo, place, stars, town, strings);
+    return blobOf(context, 'image/jpeg');
+  }
   context.fillStyle = GRAVY;
   context.fillRect(0, 0, WIDTH, HEIGHT);
 
@@ -200,20 +272,14 @@ export async function storyPicture(
   context.font = font(400, 40);
   const tagline = balancedLines(strings.tagline, 860, (line) => context.measureText(line).width);
   // Instagram's and Facebook's own buttons cover about 250 px at the top and the bottom: the whole
-  // picture sits in the middle of what's left. A photo takes what the card leaves, within limits.
+  // picture sits in the middle of what's left.
   const below = cardHeight + 40 + siteHeight + tagline.length * 58 + 15;
-  const photoHeight = Math.min(640, Math.max(380, 1420 - 40 - below));
-  const header = photo ? photoHeight + 40 : 390;
+  const header = 390;
   const top = Math.max(200, 250 + (1420 - header - below) / 2);
-  if (photo) {
-    framed(context, photo, 90, top, WIDTH - 180, photoHeight);
-    badge(context, icon, 90 + 96, top + 96, 64);
-  } else {
-    badge(context, icon, middle, top + 100, 100);
-    context.fillStyle = CREAM;
-    context.font = font(700, 76);
-    context.fillText(strings.appName, middle, top + 300);
-  }
+  badge(context, icon, middle, top + 100, 100);
+  context.fillStyle = CREAM;
+  context.font = font(700, 76);
+  context.fillText(strings.appName, middle, top + 300);
 
   // The card: what was given, the stars, the place.
   const cardTop = top + header;
@@ -230,7 +296,8 @@ export async function storyPicture(
   const size = 120;
   const gap = 24;
   const left = middle - (5 * size + 4 * gap) / 2;
-  for (let i = 0; i < 5; i += 1) star(context, left + i * (size + gap), y, size, i < stars);
+  for (let i = 0; i < 5; i += 1)
+    star(context, left + i * (size + gap), y, size, fillOf(stars, i + 1));
   y += size + 56;
   context.fillStyle = INK;
   context.font = font(800, name.size);
@@ -259,7 +326,7 @@ export async function storyPicture(
     y += 58;
     context.fillText(line, middle, y);
   }
-  return blobOf(context, photo ? 'image/jpeg' : 'image/png');
+  return blobOf(context);
 }
 
 /**

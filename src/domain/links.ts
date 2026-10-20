@@ -1,6 +1,6 @@
 import type { Place } from './osmPlaces.ts';
 import { townText } from './placeText.ts';
-import { averageOf, type RatingTotal } from './ratings.ts';
+import { averageOf, isRatingStars, type RatingTotal } from './ratings.ts';
 import { fold } from './text.ts';
 
 /**
@@ -55,15 +55,13 @@ export interface FriendStars {
 
 const FRIEND_CODE = /^[A-Za-z0-9_-]{8}$/;
 
-const isStars = (stars: number): boolean => Number.isInteger(stars) && stars >= 1 && stars <= 5;
-
 /** The place's link on the site's own address, wherever the page that shares it runs. */
 export function placeUrl(
   place: Pick<Place, 'osm' | 'name' | 'link'>,
   friend?: FriendStars | null,
 ): string {
   const given =
-    friend && isStars(friend.stars) && FRIEND_CODE.test(friend.code)
+    friend && isRatingStars(friend.stars) && FRIEND_CODE.test(friend.code)
       ? `?s=${String(friend.stars)}&c=${friend.code}`
       : '';
   return `${SITE}${placePath(place)}${given}`;
@@ -74,7 +72,7 @@ export function friendFromSearch(search: string): FriendStars | null {
   const params = new URLSearchParams(search);
   const stars = Number(params.get('s'));
   const code = params.get('c') ?? '';
-  return isStars(stars) && FRIEND_CODE.test(code) ? { stars, code } : null;
+  return isRatingStars(stars) && FRIEND_CODE.test(code) ? { stars, code } : null;
 }
 
 const PLACE_PATH = /^\/p\/(?:[a-z0-9-]*-)?([nwra])(\d{1,20})\/?$/i;
@@ -110,6 +108,8 @@ export interface PreviewWords {
   near: (town: string) => string;
   /** A link carrying a friend's stars: what they gave, and the question back. */
   friend: (stars: number) => string;
+  /** Stars as a number, the language's way: 4.5, 4,5. */
+  number: (stars: number) => string;
   kinds: Readonly<Record<PlaceKind, string>>;
   /** "Casse-croûte à Drummondville", and near a town when that's all that's known. */
   placedIn: (what: string, town: string) => string;
@@ -131,7 +131,7 @@ export function previewOf(
   const named = town ? `${place.name} · ${town}` : place.name;
   if (friend !== null)
     return {
-      title: `${String(friend)} ★ · ${named}`,
+      title: `${words.number(friend)} ★ · ${named}`,
       description: `${words.friend(friend)} ${words.tagline}`,
     };
   const what = words.kinds[kindOf(place)];

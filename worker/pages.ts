@@ -103,6 +103,7 @@ export async function placePage(
       summary: strings.ratings.summary,
       near: strings.card.near,
       friend: strings.share.friend,
+      number: strings.ratings.number,
       ...strings.preview,
     },
     friend?.stars ?? null,

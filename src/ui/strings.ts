@@ -67,6 +67,12 @@ export interface Strings {
   admin: AdminWords;
   ratings: RatingWords;
   share: ShareWords;
+  /** The places eaten: the pill by Near me and its sheet. */
+  tally: {
+    label: (count: number) => string;
+    title: (count: number) => string;
+    motto: string;
+  };
   hours: HoursWords;
 }
 
@@ -80,13 +86,13 @@ export interface ShareWords {
   copied: string;
   /** On the card a friend's link opened, and in its preview. */
   friend: (stars: number) => string;
-  button: string;
-  /** Share my rating with a photo drawn in: it never leaves the phone. */
-  withPhoto: string;
+  /** Under the stars once rated (Alex, 2026-10-20): the invitation, then the photo button. */
+  invite: string;
+  addPhoto: string;
+  changePhoto: string;
+  /** The photo never leaves the phone: it's only drawn into the picture shared. */
   photoNote: string;
   photoFailed: string;
-  cancel: string;
-  making: string;
   /** Under the button: why the link is copied. */
   hint: string;
   /** On the picture, over the stars. */
@@ -119,15 +125,15 @@ export type RatingTrouble =
 export interface RatingWords {
   none: string;
   /** Asked with a rating where nothing confirms poutine yet. */
-  hadPoutine: string;
-  yes: string;
-  no: string;
   summary: (average: number, count: number) => string;
   yours: string;
   star: (stars: number) => string;
+  /** Stars as a number, the language's way: 4.5, 4,5. */
+  number: (stars: number) => string;
   send: string;
   sending: string;
-  thanks: string;
+  /** Once sent: the how-manyth place this phone rated, green on the map now. */
+  thanks: (count: number) => string;
   comment: string;
   reviews: string;
   report: string;
@@ -201,6 +207,16 @@ export type Language = 'en' | 'fr';
 
 const pad = (minutes: number): string => String(minutes).padStart(2, '0');
 
+/** Stars, half ones included: "4.5 stars", "1 star"; "4,5 étoiles", "1,5 étoile" (singular below 2). */
+const starNumber =
+  (locale: string) =>
+  (stars: number): string =>
+    stars.toLocaleString(locale, { maximumFractionDigits: 1 });
+const englishStars = (stars: number): string =>
+  stars === 1 ? '1 star' : `${starNumber('en-CA')(stars)} stars`;
+const frenchStars = (stars: number): string =>
+  `${starNumber('fr-CA')(stars)} ${stars < 2 ? 'étoile' : 'étoiles'}`;
+
 /** Metres to the nearest 10 under a kilometre (995 m is "1 km"), then km, one decimal under 10. */
 const distanceIn =
   (locale: string, space: string) =>
@@ -266,16 +282,14 @@ const english: Strings = {
   },
   ratings: {
     none: 'No ratings yet',
-    hadPoutine: 'Did you have poutine here?',
-    yes: 'Yes',
-    no: 'No',
     summary: (average, count) =>
       `${average.toLocaleString('en-CA', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} out of 5 · ${count === 1 ? '1 rating' : `${String(count)} ratings`}`,
     yours: 'Your rating',
-    star: (stars) => (stars === 1 ? '1 star' : `${String(stars)} stars`),
+    star: englishStars,
+    number: starNumber('en-CA'),
     send: 'Send my rating',
     sending: 'Sending…',
-    thanks: 'Thanks! Your rating counts, and this place is now green on your map.',
+    thanks: (count) => `Thanks! Place #${String(count)}, green on your map now.`,
     comment: 'A few words',
     reviews: 'What people say',
     report: 'Report',
@@ -291,22 +305,25 @@ const english: Strings = {
       unexpected: 'Something went wrong on our side. Try again in a moment.',
     },
   },
+  tally: {
+    label: (count) =>
+      `${count === 1 ? '1 place eaten' : `${String(count)} places eaten`}. Gotta eat ’em all!`,
+    title: (count) => (count === 1 ? '1 place eaten' : `${String(count)} places eaten`),
+    motto: 'Gotta eat ’em all!',
+  },
   share: {
     place: 'Share',
     placeText: (name) => `${name}, on Poutine`,
     copied: 'Link copied.',
-    friend: (stars) =>
-      `A friend gave this place ${stars === 1 ? '1 star' : `${String(stars)} stars`}. What would you give it?`,
-    button: 'Share my rating',
-    withPhoto: 'With my photo',
+    friend: (stars) => `A friend gave this place ${englishStars(stars)}. What would you give it?`,
+    invite: 'Don’t be shy, show us the goods!',
+    addPhoto: 'Add my photo',
+    changePhoto: 'Change photo',
     photoNote: 'Your photo stays on your phone: it’s only drawn into the picture you share.',
     photoFailed: 'That photo couldn’t be opened. Try another one.',
-    cancel: 'Cancel',
-    making: 'Making the picture…',
     hint: 'Sharing also copies the link, for a story’s Link sticker.',
     gave: 'I gave',
-    text: (name, stars) =>
-      `I gave ${name} ${stars === 1 ? '1 star' : `${String(stars)} stars`} on Poutine.`,
+    text: (name, stars) => `I gave ${name} ${englishStars(stars)} on Poutine.`,
     saved: 'The picture is in your downloads.',
     linkCopied: 'The link is copied.',
     copyThis: 'In a story, add this link with the Link sticker:',
@@ -482,16 +499,15 @@ const french: Strings = {
   },
   ratings: {
     none: 'Pas encore de note',
-    hadPoutine: `Avez-vous mangé une poutine ici${NBSP}?`,
-    yes: 'Oui',
-    no: 'Non',
     summary: (average, count) =>
       `${average.toLocaleString('fr-CA', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} sur 5 · ${count === 1 ? '1 note' : `${String(count)} notes`}`,
     yours: 'Votre note',
-    star: (stars) => (stars === 1 ? '1 étoile' : `${String(stars)} étoiles`),
+    star: frenchStars,
+    number: starNumber('fr-CA'),
     send: 'Envoyer ma note',
     sending: 'Envoi…',
-    thanks: `Merci${NBSP}! Votre note compte, et cette place est maintenant verte sur votre carte.`,
+    thanks: (count) =>
+      `Merci${NBSP}! ${count === 1 ? '1re' : `${String(count)}e`} place, maintenant verte sur votre carte.`,
     comment: 'Quelques mots',
     reviews: 'Ce qu’on en dit',
     report: 'Signaler',
@@ -507,22 +523,26 @@ const french: Strings = {
       unexpected: 'Un problème de notre côté. Réessayez dans un moment.',
     },
   },
+  tally: {
+    label: (count) =>
+      `${count === 1 ? '1 place mangée' : `${String(count)} places mangées`}. Mange-les toutes${NBSP}!`,
+    title: (count) => (count === 1 ? '1 place mangée' : `${String(count)} places mangées`),
+    motto: `Mange-les toutes${NBSP}!`,
+  },
   share: {
     place: 'Partager',
     placeText: (name) => `${name}, sur Poutine`,
     copied: 'Lien copié.',
     friend: (stars) =>
-      `Quelqu’un t’envoie sa note${NBSP}: ${stars === 1 ? '1 étoile' : `${String(stars)} étoiles`}. Et toi, tu lui donnes combien${NBSP}?`,
-    button: 'Partager ma note',
-    withPhoto: 'Avec ma photo',
+      `Quelqu’un t’envoie sa note${NBSP}: ${frenchStars(stars)}. Et toi, tu lui donnes combien${NBSP}?`,
+    invite: `Awaye, montre ta pouts${NBSP}!`,
+    addPhoto: 'Ajouter ma photo',
+    changePhoto: 'Changer de photo',
     photoNote: `Votre photo reste sur votre téléphone${NBSP}: elle est seulement dessinée dans l’image partagée.`,
     photoFailed: 'Cette photo n’a pas pu être ouverte. Essayez-en une autre.',
-    cancel: 'Annuler',
-    making: 'Création de l’image…',
     hint: 'Partager copie aussi le lien, pour l’autocollant Lien d’une story.',
     gave: 'J’ai donné',
-    text: (name, stars) =>
-      `J’ai donné ${stars === 1 ? '1 étoile' : `${String(stars)} étoiles`} à ${name} sur Poutine.`,
+    text: (name, stars) => `J’ai donné ${frenchStars(stars)} à ${name} sur Poutine.`,
     saved: 'L’image est dans vos téléchargements.',
     linkCopied: 'Le lien est copié.',
     copyThis: `Dans une story, ajoutez ce lien avec l’autocollant Lien${NBSP}:`,

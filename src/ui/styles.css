@@ -199,6 +199,18 @@ body,
   pointer-events: none;
 }
 
+/* The places eaten: the bowl and how many, by Near me. */
+.tally-pill {
+  gap: 6px;
+  font-weight: 800;
+}
+
+.card .tally-motto {
+  margin: 0 0 8px;
+  color: var(--graphite);
+  font-weight: 700;
+}
+
 .pill {
   pointer-events: auto;
   display: inline-flex;
@@ -537,19 +549,50 @@ button.action.primary {
   gap: 4px;
 }
 
-.stars button {
-  width: 48px;
-  height: 48px;
+/* Each star in two halves (half stars, Alex 2026-10-20): the left half of a star gives a half,
+   the right half the whole star. Each half is a 26 × 52 px target. */
+.stars .star {
+  position: relative;
+  width: 52px;
+  height: 52px;
   padding: 6px;
-  border: 0;
-  border-radius: 24px;
-  background: transparent;
   color: #7a4a2a;
+}
+
+.stars .half {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  padding: 0;
+  border: 0;
+  background: transparent;
   cursor: pointer;
 }
 
-.stars button:focus-visible {
+.stars .half.left {
+  left: 0;
+  border-radius: 26px 0 0 26px;
+}
+
+.stars .half.right {
+  right: 0;
+  border-radius: 0 26px 26px 0;
+}
+
+.stars .half:focus-visible {
   outline: 2px solid var(--ink);
+}
+
+/* Under the stars: the invitation to share a photo, then its button. */
+.invite-line {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.invite .action svg {
+  margin-right: 8px;
 }
 
 /* Share my rating: one button under the stars, why the link is copied, and the link itself when
@@ -595,35 +638,6 @@ button.action.primary {
   font-weight: 700;
   overflow-wrap: anywhere;
   user-select: all;
-}
-
-/* "Did you have poutine here?": Yes and No side by side, big enough for a thumb. */
-.had-poutine {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 20px;
-  margin: 12px 0 0;
-  padding: 0;
-  border: 0;
-}
-
-.had-poutine legend {
-  margin-bottom: 4px;
-  padding: 0;
-  font-weight: 700;
-}
-
-.had-poutine label {
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  min-height: 48px;
-}
-
-.had-poutine input {
-  width: 22px;
-  height: 22px;
-  accent-color: var(--ink);
 }
 
 .field textarea {

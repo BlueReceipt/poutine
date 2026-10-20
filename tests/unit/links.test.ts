@@ -80,6 +80,10 @@ describe('place links', () => {
         'https://poutines.app/p/casse-croute-trempette-n265847671',
       );
     expect(friendFromSearch('?s=4&c=x7Kq2m-_')).toEqual({ stars: 4, code: 'x7Kq2m-_' });
+    expect(friendFromSearch('?s=4.5&c=x7Kq2m-_')).toEqual({ stars: 4.5, code: 'x7Kq2m-_' });
+    expect(placeUrl(place(), { stars: 0.5, code: 'x7Kq2m-_' })).toBe(
+      'https://poutines.app/p/casse-croute-trempette-n265847671?s=0.5&c=x7Kq2m-_',
+    );
     expect(friendFromSearch('?c=AAAAAAAA&lang=fr&s=1')).toEqual({ stars: 1, code: 'AAAAAAAA' });
     for (const search of [
       '',
@@ -101,6 +105,7 @@ describe('link previews', () => {
       summary: strings.ratings.summary,
       near: strings.card.near,
       friend: strings.share.friend,
+      number: strings.ratings.number,
       ...strings.preview,
     };
   };

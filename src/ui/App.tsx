@@ -13,6 +13,7 @@ import { closeWelcome, myRatings, nothingSaved } from './rater.ts';
 import { NearbyList, type NearState } from './NearbyList.tsx';
 import { PlaceCard } from './PlaceCard.tsx';
 import { SearchBar } from './SearchBar.tsx';
+import { Tally } from './Tally.tsx';
 import { Welcome } from './Welcome.tsx';
 import type { Strings } from './strings.ts';
 
@@ -56,6 +57,8 @@ export function App({ strings }: { strings: Strings }) {
   const [mine, setMine] = useState<Record<string, number>>(() => myRatings());
   // A first visit's welcome box: until it's closed, or the visitor opens something else.
   const [welcome, setWelcome] = useState(nothingSaved);
+  // The places eaten (the ones this phone rated): the pill by Near me opens their list.
+  const [tally, setTally] = useState(false);
   const seq = useRef(0);
   const failed = useCallback(() => {
     setState({ kind: 'failed' });
@@ -111,6 +114,15 @@ export function App({ strings }: { strings: Strings }) {
   );
 
   const places = state.kind === 'ready' ? state.places : null;
+  // The places this phone rated that the map still has, by name, with the stars given.
+  const eaten = useMemo(
+    () =>
+      (places ?? [])
+        .filter((place) => mine[place.osm] !== undefined)
+        .map((place) => ({ place, stars: mine[place.osm] ?? 0 }))
+        .sort((a, b) => a.place.name.localeCompare(b.place.name, 'fr')),
+    [places, mine],
+  );
   const groups = useMemo(() => (places ? groupByAddress(places) : []), [places]);
   const groupOf = useMemo(
     () => new Map(groups.flatMap((group) => group.places.map((place) => [place.osm, group.id]))),
@@ -137,8 +149,8 @@ export function App({ strings }: { strings: Strings }) {
     setWelcome(false);
   }, []);
   useEffect(() => {
-    if (group || near || adding) setWelcome(false);
-  }, [group, near, adding]);
+    if (group || near || adding || tally) setWelcome(false);
+  }, [group, near, adding, tally]);
 
   /** A place picked in a list: its card opens and the map flies there. */
   const show = useCallback(
@@ -187,6 +199,7 @@ export function App({ strings }: { strings: Strings }) {
 
   const locate = useCallback(() => {
     if (!places) return;
+    setTally(false);
     setSelection(null);
     setQuery('');
     setNear({ kind: 'locating' });
@@ -274,6 +287,21 @@ export function App({ strings }: { strings: Strings }) {
       />
       {places && !query.trim() && !adding && (
         <div class="map-actions">
+          {eaten.length > 0 && (
+            <button
+              type="button"
+              class="pill tally-pill"
+              aria-label={strings.tally.label(eaten.length)}
+              onClick={() => {
+                setNear(null);
+                setSelection(null);
+                setTally(true);
+              }}
+            >
+              <img src="/icon.svg" alt="" width="24" height="24" />
+              {eaten.length}
+            </button>
+          )}
           <button type="button" class="pill near-me" onClick={locate}>
             <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
               <circle cx="12" cy="12" r="4" fill="currentColor" />
@@ -319,6 +347,18 @@ export function App({ strings }: { strings: Strings }) {
         />
       ) : near ? (
         <NearbyList state={near} strings={strings} onChoose={show} onClose={closeNearby} />
+      ) : tally ? (
+        <Tally
+          eaten={eaten}
+          strings={strings}
+          onChoose={(chosen) => {
+            setTally(false);
+            show(chosen);
+          }}
+          onClose={() => {
+            setTally(false);
+          }}
+        />
       ) : (
         welcome && places && <Welcome strings={strings} onClose={closeWelcomeBox} />
       )}
