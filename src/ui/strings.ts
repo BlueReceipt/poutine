@@ -265,7 +265,7 @@ const english: Strings = {
     placedNear: (what, town) => `${what} near ${town}`,
   },
   tagline:
-    'Poutine, not poo-teen: mapping Canada’s poutine expansion from its humble beginnings in central Québec.',
+    'Poots-in, not poo-teen: mapping Canada’s poutine expansion from its humble beginnings in central Québec.',
   welcome: {
     title: 'Poutines.app',
     strap: 'Poots in, not poo-teen',

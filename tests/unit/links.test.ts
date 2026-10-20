@@ -116,7 +116,7 @@ describe('link previews', () => {
     expect(previewOf(place(), { count: 3, total: 13 }, words('en'))).toEqual({
       title: 'Casse-Croûte Trempette · Saint-Rémi',
       description:
-        '4.3 out of 5 · 3 ratings. Casse-croûte in Saint-Rémi. Poutine, not poo-teen: mapping Canada’s poutine expansion from its humble beginnings in central Québec.',
+        '4.3 out of 5 · 3 ratings. Casse-croûte in Saint-Rémi. Poots-in, not poo-teen: mapping Canada’s poutine expansion from its humble beginnings in central Québec.',
     });
     expect(previewOf(place(), undefined, words('fr')).description).toBe(
       'Casse-croûte à Saint-Rémi. Les casse-croûtes et cantines du Québec sur une carte',
@@ -145,7 +145,7 @@ describe('link previews', () => {
       previewOf(place({ name: 'La Banquise', city: 'Montréal' }), undefined, words('en'))
         .description,
     ).toBe(
-      'Poutine in Montréal. Poutine, not poo-teen: mapping Canada’s poutine expansion from its humble beginnings in central Québec.',
+      'Poutine in Montréal. Poots-in, not poo-teen: mapping Canada’s poutine expansion from its humble beginnings in central Québec.',
     );
   });
 
@@ -153,7 +153,7 @@ describe('link previews', () => {
     expect(previewOf(place(), { count: 3, total: 13 }, words('en'), 4)).toEqual({
       title: '4 ★ · Casse-Croûte Trempette · Saint-Rémi',
       description:
-        'A friend gave this place 4 stars. What would you give it? Poutine, not poo-teen: mapping Canada’s poutine expansion from its humble beginnings in central Québec.',
+        'A friend gave this place 4 stars. What would you give it? Poots-in, not poo-teen: mapping Canada’s poutine expansion from its humble beginnings in central Québec.',
     });
     const nbsp = String.fromCharCode(0xa0);
     expect(previewOf(place(), undefined, words('fr'), 1).description).toBe(
