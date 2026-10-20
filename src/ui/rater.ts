@@ -4,6 +4,8 @@
  */
 const RATER = 'poutine.rater';
 const MINE = 'poutine.ratings';
+/** The welcome box was closed. Every key this browser keeps starts with "poutine.". */
+const WELCOMED = 'poutine.welcomed';
 
 let visitRater: string | null = null;
 
@@ -41,5 +43,25 @@ export function rememberStars(place: string, stars: number): void {
     localStorage.setItem(MINE, JSON.stringify({ ...myRatings(), [place]: stars }));
   } catch {
     // Nothing kept: the rating still counts.
+  }
+}
+
+/**
+ * Nothing saved yet in this browser (no rating, the welcome never closed): the welcome box shows
+ * only then. Storage that's off counts as nothing saved.
+ */
+export function nothingSaved(): boolean {
+  try {
+    return !Object.keys(localStorage).some((key) => key.startsWith('poutine.'));
+  } catch {
+    return true;
+  }
+}
+
+export function closeWelcome(): void {
+  try {
+    localStorage.setItem(WELCOMED, '1');
+  } catch {
+    // Nothing kept: it shows again on the next visit.
   }
 }

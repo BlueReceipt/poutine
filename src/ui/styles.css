@@ -255,6 +255,11 @@ body,
   right: 8px;
 }
 
+/* A first visit's welcome box: a short sheet, its words clear of the × */
+.card.welcome p {
+  margin: 4px 48px 0 0;
+}
+
 .card .hint {
   margin: 0 0 8px;
   color: var(--graphite);

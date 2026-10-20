@@ -14,6 +14,16 @@ describe('language', () => {
     expect(stringsFor('fr').appName).toBe('Poutine');
   });
 
+  it('welcomes a first visit in Alex’s words, French typography in French', () => {
+    expect(stringsFor('en').welcome).toMatch(
+      /^Poutine, pronounced pootsin, was invented in Québec\./,
+    );
+    const nbsp = String.fromCharCode(0xa0);
+    expect(stringsFor('fr').welcome).toBe(
+      `Poutines.app te permet de trouver ta prochaine poutine. Rate-la pis partage ta photo${nbsp}! Fini les chaînes${nbsp}!`,
+    );
+  });
+
   it('writes distances in metres, then kilometres, the language’s way', () => {
     const en = stringsFor('en').nearMe.distance;
     const fr = (meters: number): string =>

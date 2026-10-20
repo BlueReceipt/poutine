@@ -8,10 +8,11 @@ import { nearest, searchPlaces } from '../domain/search.ts';
 import { MapView, type MapRequest } from '../map/MapView.tsx';
 import { AddPlace, type PickStart } from './AddPlace.tsx';
 import { noFixOf, whereAmI } from './location.ts';
-import { myRatings } from './rater.ts';
+import { closeWelcome, myRatings, nothingSaved } from './rater.ts';
 import { NearbyList, type NearState } from './NearbyList.tsx';
 import { PlaceCard } from './PlaceCard.tsx';
 import { SearchBar } from './SearchBar.tsx';
+import { Welcome } from './Welcome.tsx';
 import type { Strings } from './strings.ts';
 
 type State = { kind: 'loading' } | { kind: 'ready'; places: Place[] } | { kind: 'failed' };
@@ -41,6 +42,8 @@ export function App({ strings }: { strings: Strings }) {
   const [ratedAt, setRatedAt] = useState<Record<string, number>>({});
   // The places this browser rated, for their green pins.
   const [mine, setMine] = useState<Record<string, number>>(() => myRatings());
+  // A first visit's welcome box: until it's closed, or the visitor opens something else.
+  const [welcome, setWelcome] = useState(nothingSaved);
   const seq = useRef(0);
   const failed = useCallback(() => {
     setState({ kind: 'failed' });
@@ -99,6 +102,13 @@ export function App({ strings }: { strings: Strings }) {
   const closeNearby = useCallback(() => {
     setNear(null);
   }, []);
+  const closeWelcomeBox = useCallback(() => {
+    closeWelcome();
+    setWelcome(false);
+  }, []);
+  useEffect(() => {
+    if (group || near || adding) setWelcome(false);
+  }, [group, near, adding]);
 
   /** A place picked in a list: its card opens and the map flies there. */
   const show = useCallback(
@@ -261,8 +271,10 @@ export function App({ strings }: { strings: Strings }) {
           }}
           onClose={closeCard}
         />
+      ) : near ? (
+        <NearbyList state={near} strings={strings} onChoose={show} onClose={closeNearby} />
       ) : (
-        near && <NearbyList state={near} strings={strings} onChoose={show} onClose={closeNearby} />
+        welcome && places && <Welcome strings={strings} onClose={closeWelcomeBox} />
       )}
     </main>
   );

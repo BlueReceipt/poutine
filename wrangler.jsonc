@@ -22,13 +22,13 @@
       "migrations_dir": "migrations",
     },
   ],
-  // Wrangler replaces the Worker's addresses with these on each deploy. www and the first address
-  // (poutine.ederer.digital) answer with a redirect to poutines.app: Redirect Rules in Cloudflare,
-  // which run before the Worker. They stay here so their DNS records and certificates stay.
+  // Wrangler replaces the Worker's addresses with these on each deploy. www answers with a redirect
+  // to poutines.app (a Redirect Rule, which runs before the Worker); it stays here for its DNS
+  // record and certificate. The first address, poutine.ederer.digital, belongs to another
+  // Cloudflare account, whose own Redirect Rule sends it here.
   "routes": [
     { "pattern": "poutines.app", "custom_domain": true },
     { "pattern": "www.poutines.app", "custom_domain": true },
-    { "pattern": "poutine.ederer.digital", "custom_domain": true },
   ],
   "workers_dev": false,
   "preview_urls": false,

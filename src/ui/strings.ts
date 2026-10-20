@@ -12,6 +12,8 @@ export interface Strings {
   appName: string;
   /** What the site is: in link previews and on the story picture. */
   tagline: string;
+  /** The closable box of a first visit (Alex's words, 2026-10-19). */
+  welcome: string;
   /** The map's label for how many places it shows. */
   placeCount: (count: number) => string;
   loading: string;
@@ -159,6 +161,8 @@ const distanceIn =
 const english: Strings = {
   appName: 'Pootsin',
   tagline: 'Québec’s casse-croûtes and potato shacks on a map',
+  welcome:
+    'Poutine, pronounced pootsin, was invented in Québec. If you’re going to appropriate its name, then at least call it by what it is, and eat at a real spot.',
   placeCount: (count) => `${count.toLocaleString('en-CA')} poutine places`,
   loading: 'Loading the map…',
   mapFailed: 'The map didn’t load. Check your connection and reload the page.',
@@ -318,6 +322,7 @@ const english: Strings = {
 const french: Strings = {
   appName: 'Poutine',
   tagline: 'Les casse-croûtes et cantines du Québec sur une carte',
+  welcome: `Poutines.app te permet de trouver ta prochaine poutine. Rate-la pis partage ta photo${NBSP}! Fini les chaînes${NBSP}!`,
   placeCount: (count) => `${count.toLocaleString('fr-CA')} places à poutine`,
   loading: 'Chargement de la carte…',
   mapFailed: 'La carte n’a pas chargé. Vérifiez votre connexion et rechargez la page.',
