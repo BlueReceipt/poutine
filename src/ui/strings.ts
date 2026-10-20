@@ -344,7 +344,7 @@ const english: Strings = {
   },
   share: {
     place: 'Share',
-    placeText: (name) => `${name} on Poutines.app. Poutine, not poo-teen.`,
+    placeText: (name) => `${name} on Poutines.app. Poots-in, not poo-teen.`,
     copied: 'Link copied.',
     friend: (stars) => `A friend gave this place ${englishStars(stars)}. What would you give it?`,
     invite: 'Don’t be shy, show us the goods!',
