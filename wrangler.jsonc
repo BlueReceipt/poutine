@@ -18,7 +18,7 @@
     {
       "binding": "DB",
       "database_name": "poutine",
-      "database_id": "d25cc4b1-fb54-4005-9b65-0c88236fee73",
+      "database_id": "cda35fa7-f7f0-4381-b063-5e8a209e97f3",
       "migrations_dir": "migrations",
     },
   ],
