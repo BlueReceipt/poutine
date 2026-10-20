@@ -17,8 +17,9 @@ const POUTINE_CRIMES = 'https://www.reddit.com/r/PoutineCrimes/';
  * pronounced pootsin area. Where people can select french or english, and eventually we can add
  * other things"): opened by the app's name in the search bar. The language: the phone's, French or
  * English, kept on this phone, every word in the menu's own language ("French secret menu
- * shouldn't have English on its tab"). Then poutine's history, two articles, and what counts as
- * poutine: fries, sauce brune, curds, nothing less.
+ * shouldn't have English on its tab"). Then what counts as poutine (fries, sauce brune, curds,
+ * nothing less), over poutine's history, two articles ("put what counts as poutine, over the
+ * history section").
  */
 export function Settings({ strings, chosen, onLanguage, onClose }: Props) {
   const heading = useRef<HTMLHeadingElement>(null);
@@ -63,17 +64,6 @@ export function Settings({ strings, chosen, onLanguage, onClose }: Props) {
           </button>
         ))}
       </div>
-      <h3>{words.history}</h3>
-      <ul class="articles">
-        {words.articles.map((article) => (
-          <li key={article.url}>
-            <a href={article.url} target="_blank" rel="noopener noreferrer">
-              {article.title}
-            </a>
-            <span class="where">{article.source}</span>
-          </li>
-        ))}
-      </ul>
       <h3>{words.counts.title}</h3>
       <ul class="counts">
         {words.counts.items.map((item) => (
@@ -88,6 +78,17 @@ export function Settings({ strings, chosen, onLanguage, onClose }: Props) {
         </a>
         .
       </p>
+      <h3>{words.history}</h3>
+      <ul class="articles">
+        {words.articles.map((article) => (
+          <li key={article.url}>
+            <a href={article.url} target="_blank" rel="noopener noreferrer">
+              {article.title}
+            </a>
+            <span class="where">{article.source}</span>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
