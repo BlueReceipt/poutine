@@ -50,3 +50,26 @@ export function nearest(
     .sort((a, b) => a.meters - b.meters)
     .slice(0, count);
 }
+
+/** How far À côté looks, in km: the first ring with any place in it (Alex, 2026-10-20). */
+export const RINGS_KM = [2, 5, 10, 15] as const;
+
+/** What À côté shows: every place within the ring found, or none and the closest anywhere. */
+export interface Around {
+  /** The ring, in km: where places were found, or the last one when none were. */
+  km: number;
+  /** Every place within the ring, nearest first; empty when none within the last ring. */
+  nearby: Nearby[];
+  /** When none: the closest place there is, however far. */
+  closest: Nearby | null;
+}
+
+/** The places within 2 km of a point; if none, within 5, then 10, then 15 km. */
+export function around(places: readonly Place[], point: { lat: number; lon: number }): Around {
+  const all = nearest(places, point, places.length);
+  for (const km of RINGS_KM) {
+    const nearby = all.filter(({ meters }) => meters <= km * 1000);
+    if (nearby.length > 0) return { km, nearby, closest: null };
+  }
+  return { km: RINGS_KM[RINGS_KM.length - 1] ?? 15, nearby: [], closest: all[0] ?? null };
+}

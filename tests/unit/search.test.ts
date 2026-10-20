@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Place } from '../../src/domain/osmPlaces.ts';
-import { nearest, searchPlaces } from '../../src/domain/search.ts';
+import { around, nearest, searchPlaces } from '../../src/domain/search.ts';
 
 const place = (name: string, city: string, street = '', lat = 45.5, lon = -73.6): Place =>
   ({ osm: `node/${name}`, name, city, street, lat, lon }) as Place;
@@ -49,5 +49,38 @@ describe('nearest', () => {
     );
     expect(near.map((n) => n.place.name)).toEqual(['Close', 'Middle']);
     expect(near[0]?.meters).toBeCloseTo(111, 0);
+  });
+});
+
+describe('around (À côté)', () => {
+  // About 111 m a thousandth of a degree north of the point.
+  const at = (name: string, km: number): Place =>
+    place(name, 'Montréal', '', 45.5 + km / 111.2, -73.6);
+  const here = { lat: 45.5, lon: -73.6 };
+  const listed = (found: ReturnType<typeof around>): string[] =>
+    found.nearby.map((n) => n.place.name);
+
+  it('lists every place within 2 km, nearest first', () => {
+    const found = around([at('Three', 3), at('One', 1), at('Half', 0.5), at('Two', 1.9)], here);
+    expect(found.km).toBe(2);
+    expect(listed(found)).toEqual(['Half', 'One', 'Two']);
+    expect(found.closest).toBeNull();
+  });
+
+  it('looks within 5, then 10, then 15 km when nothing is closer', () => {
+    expect(around([at('Nine', 9), at('Four', 4), at('Six', 6)], here)).toMatchObject({ km: 5 });
+    expect(listed(around([at('Nine', 9), at('Six', 6), at('Twelve', 12)], here))).toEqual([
+      'Six',
+      'Nine',
+    ]);
+    expect(around([at('Twelve', 12), at('Fourteen', 14.5)], here)).toMatchObject({ km: 15 });
+  });
+
+  it('nothing within 15 km: no list, and the closest place however far', () => {
+    const found = around([at('Forty', 40), at('Twenty', 20)], here);
+    expect(found.km).toBe(15);
+    expect(found.nearby).toEqual([]);
+    expect(found.closest?.place.name).toBe('Twenty');
+    expect(around([], here)).toEqual({ km: 15, nearby: [], closest: null });
   });
 });

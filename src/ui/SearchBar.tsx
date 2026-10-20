@@ -4,8 +4,6 @@ import type { Strings } from './strings.ts';
 
 interface Props {
   strings: Strings;
-  /** How many places the map holds, for the placeholder. */
-  count: number;
   query: string;
   results: readonly Place[];
   onQuery: (query: string) => void;
@@ -15,7 +13,7 @@ interface Props {
 }
 
 /** The app's name and the search field across the top; what matches drops down below it. */
-export function SearchBar({ strings, count, query, results, onQuery, onChoose, onAdd }: Props) {
+export function SearchBar({ strings, query, results, onQuery, onChoose, onAdd }: Props) {
   const words = strings.search;
   const searching = query.trim() !== '';
   return (
@@ -29,7 +27,7 @@ export function SearchBar({ strings, count, query, results, onQuery, onChoose, o
           type="search"
           value={query}
           aria-label={words.label}
-          placeholder={words.placeholder(count)}
+          placeholder={words.placeholder}
           enterKeyHint="search"
           autoComplete="off"
           spellcheck={false}

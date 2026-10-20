@@ -5,7 +5,7 @@ import { placeIdFromPath, placePath } from '../domain/links.ts';
 import { linkFromPath, searchFor } from '../domain/shortLinks.ts';
 import type { Place } from '../domain/osmPlaces.ts';
 import { confirmedByRaters, type RatingTotal } from '../domain/ratings.ts';
-import { nearest, searchPlaces } from '../domain/search.ts';
+import { around, searchPlaces } from '../domain/search.ts';
 import { MapView, type MapRequest } from '../map/MapView.tsx';
 import { AddPlace, type PickStart } from './AddPlace.tsx';
 import { noFixOf, whereAmI } from './location.ts';
@@ -35,10 +35,6 @@ interface Selection {
   groupId: string;
   placeId: string | null;
 }
-
-/** How many places Near me lists, and how many of them the map frames around you. */
-const NEARBY = 10;
-const FRAMED = 3;
 
 export function App({ strings }: { strings: Strings }) {
   const [state, setState] = useState<State>({ kind: 'loading' });
@@ -205,10 +201,12 @@ export function App({ strings }: { strings: Strings }) {
     setNear({ kind: 'locating' });
     whereAmI()
       .then((point) => {
-        const nearby = nearest(places, point, NEARBY);
+        const found = around(places, point);
         setMe(point);
-        setNear({ kind: 'found', nearby });
-        const framed = [point, ...nearby.slice(0, FRAMED).map(({ place: close }) => close)];
+        setNear({ kind: 'found', ...found });
+        // The map frames you and every place listed (or the closest, when none is within 15 km).
+        const listed = found.closest ? [found.closest] : found.nearby;
+        const framed = [point, ...listed.map(({ place: close }) => close)];
         const lons = framed.map((spot) => spot.lon);
         const lats = framed.map((spot) => spot.lat);
         seq.current += 1;
@@ -278,7 +276,6 @@ export function App({ strings }: { strings: Strings }) {
       )}
       <SearchBar
         strings={strings}
-        count={places?.length ?? 0}
         query={query}
         results={results}
         onQuery={setQuery}

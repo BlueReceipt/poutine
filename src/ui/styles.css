@@ -2,6 +2,10 @@
   --ink: #000000;
   --sheet: #ffffff;
   --graphite: #52564f;
+  /* Sauce et fromage (Alex, 2026-10-20): gravy-brown buttons, the cheese for small accents. */
+  --gravy: #7a4a2a;
+  --cheese: #f2c230;
+  --cheese-ink: #3d2412;
   --text: 17px;
   --text-secondary: 15px;
   --space: 16px;
@@ -199,9 +203,11 @@ body,
   pointer-events: none;
 }
 
-/* The places eaten: the bowl and how many, by Near me. */
-.tally-pill {
+/* The places eaten: the bowl and how many, by À côté, in cheese. */
+.pill.tally-pill {
   gap: 6px;
+  background: var(--cheese);
+  color: var(--cheese-ink);
   font-weight: 800;
 }
 
@@ -262,13 +268,11 @@ body,
   line-height: 1.2;
 }
 
-.card h2:focus {
-  outline: none;
-}
-
+/* The card's name takes focus when the card opens (for screen readers), but it is no control: no
+   ring, which a browser draws on a page opened from a link (a black frame around the name). */
+.card h2:focus,
 .card h2:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 2px;
+  outline: none;
 }
 
 .card .close {
@@ -307,15 +311,15 @@ body,
   justify-content: center;
   min-height: 48px;
   padding: 0 16px;
-  border: 2px solid var(--ink);
+  border: 2px solid var(--gravy);
   border-radius: 12px;
-  color: var(--ink);
+  color: var(--gravy);
   font-weight: 700;
   text-decoration: none;
 }
 
 .card .action.primary {
-  background: var(--ink);
+  background: var(--gravy);
   color: var(--sheet);
 }
 
@@ -330,6 +334,12 @@ body,
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/* À côté with nothing within 15 km: "La plus proche :" over the one place. */
+.card .closest {
+  margin: 4px 0 0;
+  color: var(--graphite);
 }
 
 .card .links {
@@ -473,7 +483,7 @@ button.action {
 }
 
 button.action.primary {
-  background: var(--ink);
+  background: var(--gravy);
 }
 
 .maybe-known {
@@ -531,12 +541,11 @@ button.action.primary {
   font-size: var(--text-secondary);
 }
 
-.star-small {
+.bowl-small {
   display: inline-block;
-  width: 16px;
-  height: 16px;
-  color: #7a4a2a;
-  vertical-align: -2px;
+  width: 24px;
+  height: 20px;
+  vertical-align: -4px;
 }
 
 .rating-box h3 {
@@ -544,27 +553,26 @@ button.action.primary {
   font-size: var(--text);
 }
 
-.stars {
+.bowls {
   display: flex;
   gap: 4px;
 }
 
-/* Each star in two halves (half stars, Alex 2026-10-20): the left half of a star gives a half,
-   the right half the whole star. Each half is a 26 × 52 px target. */
-/* No double-tap zoom on the stars: two quick taps take a rating back. */
-.stars {
+/* Each bowl in two halves (half stars, Alex 2026-10-20): the left half of a bowl gives a half,
+   the right half the whole bowl. Each half is a 30 × 52 px target. */
+/* No double-tap zoom on the bowls: two quick taps take a rating back. */
+.bowls {
   touch-action: manipulation;
 }
 
-.stars .star {
+.bowls .bowl {
   position: relative;
-  width: 52px;
+  width: 60px;
   height: 52px;
-  padding: 6px;
-  color: #7a4a2a;
+  padding: 2px;
 }
 
-.stars .half {
+.bowls .half {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -575,17 +583,17 @@ button.action.primary {
   cursor: pointer;
 }
 
-.stars .half.left {
+.bowls .half.left {
   left: 0;
   border-radius: 26px 0 0 26px;
 }
 
-.stars .half.right {
+.bowls .half.right {
   right: 0;
   border-radius: 0 26px 26px 0;
 }
 
-.stars .half:focus-visible {
+.bowls .half:focus-visible {
   outline: 2px solid var(--ink);
 }
 
@@ -594,7 +602,7 @@ button.action.primary {
   width: 100%;
 }
 
-/* The share step: back, the invitation, the photo button, the link alone, the stars. */
+/* The share step: back, the invitation, the photo button, the link alone, the bowls. */
 .share-panel .back {
   margin: 0 0 4px;
 }

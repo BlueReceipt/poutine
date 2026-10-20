@@ -1,15 +1,15 @@
 import { useEffect, useRef } from 'preact/hooks';
 import type { Place } from '../domain/osmPlaces.ts';
 import { townText } from '../domain/placeText.ts';
-import type { Nearby } from '../domain/search.ts';
+import type { Around, Nearby } from '../domain/search.ts';
 import type { Strings } from './strings.ts';
 
-/** Where Near me stands: asking the phone, refused, no fix, or the closest places. */
+/** Where À côté stands: asking the phone, refused, no fix, or the places around. */
 export type NearState =
   | { kind: 'locating' }
   | { kind: 'denied' }
   | { kind: 'unavailable' }
-  | { kind: 'found'; nearby: Nearby[] };
+  | ({ kind: 'found' } & Around);
 
 interface Props {
   state: NearState;
@@ -18,7 +18,11 @@ interface Props {
   onClose: () => void;
 }
 
-/** The sheet Near me opens: the closest places with their distance, or why there are none. */
+/**
+ * The sheet À côté opens (Alex, 2026-10-20: "limit it to a 2km radius, if there isn't then 5, then
+ * 10, then 15"): every place within the first ring with any, nearest first, with its distance; none
+ * within 15 km says so and shows the closest place; or why there is no position.
+ */
 export function NearbyList({ state, strings, onChoose, onClose }: Props) {
   const heading = useRef<HTMLHeadingElement>(null);
   const words = strings.nearMe;
@@ -42,14 +46,19 @@ export function NearbyList({ state, strings, onChoose, onClose }: Props) {
         ×
       </button>
       <h2 id="nearby-title" ref={heading} tabIndex={-1}>
-        {words.title}
+        {state.kind !== 'found'
+          ? words.title
+          : state.nearby.length > 0
+            ? words.within(state.km)
+            : words.none(state.km)}
       </h2>
       {state.kind === 'locating' && <p aria-live="polite">{words.locating}</p>}
       {state.kind === 'denied' && <p role="alert">{words.denied}</p>}
       {state.kind === 'unavailable' && <p role="alert">{words.unavailable}</p>}
+      {state.kind === 'found' && state.closest && <p class="closest">{words.closest}</p>}
       {state.kind === 'found' && (
         <ul class="choices">
-          {state.nearby.map(({ place, meters }) => (
+          {(state.closest ? [state.closest] : state.nearby).map(({ place, meters }: Nearby) => (
             <li key={place.osm}>
               <button
                 type="button"

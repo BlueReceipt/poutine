@@ -3,6 +3,7 @@ import type { Place } from '../domain/osmPlaces.ts';
 import { townText } from '../domain/placeText.ts';
 import { balancedLines, wrapLines } from '../domain/text.ts';
 import { GRAVY } from '../map/pins.ts';
+import { drawBowl, fillOf } from './bowlArt.ts';
 import type { Strings } from './strings.ts';
 
 /**
@@ -19,10 +20,9 @@ const CHEESE = '#f2c230';
 const INK = '#000000';
 const FAMILY = '"Atkinson Hyperlegible Next", sans-serif';
 
-/** Ratings.tsx's star, 24 units wide. */
-const STAR = new Path2D(
-  'M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z',
-);
+/** How wide each of the five poutine bowls is drawn, and the gap between them. */
+const BOWL = 150;
+const BOWL_GAP = 12;
 
 const font = (weight: number, size: number): string =>
   `${String(weight)} ${String(size)}px ${FAMILY}`;
@@ -79,35 +79,11 @@ function cover(context: CanvasRenderingContext2D, photo: ImageBitmap) {
   );
 }
 
-/** How much of the nth star (1 to 5) a rating fills: 0, a half or 1. */
-const fillOf = (stars: number, nth: number): number => Math.max(0, Math.min(1, stars - (nth - 1)));
-
-/** A star, cheese-filled to `fill` from the left (half stars), with its outline. */
-function star(
-  context: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  size: number,
-  fill: number,
-  outline = GRAVY,
-) {
-  context.save();
-  context.translate(x, y);
-  context.scale(size / 24, size / 24);
-  context.lineJoin = 'round';
-  context.lineWidth = 1.4;
-  context.strokeStyle = outline;
-  if (fill > 0) {
-    context.save();
-    context.beginPath();
-    context.rect(0, 0, 24 * fill, 24);
-    context.clip();
-    context.fillStyle = CHEESE;
-    context.fill(STAR);
-    context.restore();
-  }
-  context.stroke(STAR);
-  context.restore();
+/** The five bowls of a rating, sad to loaded, filled to the stars given (halves too). */
+function bowls(context: CanvasRenderingContext2D, stars: number, middle: number, top: number) {
+  const left = middle - (5 * BOWL + 4 * BOWL_GAP) / 2;
+  for (let i = 0; i < 5; i += 1)
+    drawBowl(context, i + 1, fillOf(stars, i + 1), left + i * (BOWL + BOWL_GAP), top, BOWL);
 }
 
 /** The icon on a cream disc. */
@@ -187,9 +163,8 @@ function filterPicture(
   const nameHeight = name.lines.length * name.size * 1.15;
   const site = siteLines(context, place.link);
   const siteHeight = site.reduce((height, line) => height + line.size * 1.1, 0);
-  // Not rated yet: no row of stars, only the place and its link.
-  const size = stars > 0 ? 112 : 0;
-  const gap = 20;
+  // Not rated yet: no row of bowls, only the place and its link.
+  const size = stars > 0 ? BOWL : 0;
   // Instagram's and Facebook's own buttons cover about 250 px at the bottom: the words end above.
   const block = (stars > 0 ? size + 40 : 0) + nameHeight + (town ? 64 : 0) + 30 + siteHeight;
   const top = 1660 - block;
@@ -209,10 +184,7 @@ function filterPicture(
   context.fillText(strings.appName, 222, 358);
   context.textAlign = 'center';
 
-  const left = middle - (5 * size + 4 * gap) / 2;
-  if (stars > 0)
-    for (let i = 0; i < 5; i += 1)
-      star(context, left + i * (size + gap), top, size, fillOf(stars, i + 1), '#ffffff');
+  if (stars > 0) bowls(context, stars, middle, top);
   let y = stars > 0 ? top + size + 40 : top;
   context.fillStyle = '#ffffff';
   context.font = font(800, name.size);
@@ -239,7 +211,7 @@ function filterPicture(
 
 /**
  * The story picture of a rating: with the visitor's photo, the photo with the rating laid over it
- * (filterPicture); without, the app's card with the stars, the place and its town, the address.
+ * (filterPicture); without, the app's card with the bowls, the place and its town, the address.
  * The photo is only drawn in: canvas keeps none of its data (place, camera), and it never leaves
  * the phone unless the visitor shares the picture.
  */
@@ -268,7 +240,7 @@ export async function storyPicture(
 
   const name = nameLines(context, place.name, 760);
   const nameHeight = name.lines.length * name.size * 1.15;
-  const cardHeight = 70 + 52 + 40 + 120 + 56 + nameHeight + (town ? 80 : 0) + 60;
+  const cardHeight = 70 + 52 + 40 + BOWL + 56 + nameHeight + (town ? 80 : 0) + 60;
   const site = siteLines(context, place.link);
   const siteHeight = site.reduce((height, line) => height + line.size * 1.1, 0);
   context.font = font(400, 40);
@@ -283,7 +255,7 @@ export async function storyPicture(
   context.font = font(700, 76);
   context.fillText(strings.appName, middle, top + 300);
 
-  // The card: what was given, the stars, the place.
+  // The card: what was given, the bowls, the place.
   const cardTop = top + header;
   context.fillStyle = CREAM;
   context.beginPath();
@@ -295,12 +267,8 @@ export async function storyPicture(
   context.font = font(400, 52);
   context.fillText(strings.share.gave, middle, y);
   y += 40;
-  const size = 120;
-  const gap = 24;
-  const left = middle - (5 * size + 4 * gap) / 2;
-  for (let i = 0; i < 5; i += 1)
-    star(context, left + i * (size + gap), y, size, fillOf(stars, i + 1));
-  y += size + 56;
+  bowls(context, stars, middle, y);
+  y += BOWL + 56;
   context.fillStyle = INK;
   context.font = font(800, name.size);
   for (const line of name.lines) {

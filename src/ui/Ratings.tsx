@@ -1,5 +1,5 @@
 import type { RefObject } from 'preact';
-import { useEffect, useId, useRef, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import type { Place } from '../domain/osmPlaces.ts';
 import {
   averageOf,
@@ -9,37 +9,12 @@ import {
   type RatingTotal,
   type Review,
 } from '../domain/ratings.ts';
+import { Bowl } from './Bowl.tsx';
+import { bowlFor, fillOf } from './bowlArt.ts';
 import { forgetStars, myRatings, myStars, raterId, rememberStars } from './rater.ts';
 import { photoOf, sharePlace, shareStory, storyFile, type Shared } from './sharing.ts';
 import type { RatingTrouble, ShareWords, Strings } from './strings.ts';
 import { useBotCheck } from './useBotCheck.ts';
-
-const STAR_PATH = 'M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z';
-
-/** A star filled to `fill` (0, ½ or 1) from the left. */
-function Star({ fill }: { fill: number }) {
-  const clip = useId();
-  return (
-    <svg viewBox="0 0 24 24" width="100%" height="100%" aria-hidden="true">
-      <defs>
-        <clipPath id={clip}>
-          <rect x="0" y="0" width={24 * fill} height="24" />
-        </clipPath>
-      </defs>
-      <path d={STAR_PATH} fill="currentColor" clip-path={`url(#${clip})`} />
-      <path
-        d={STAR_PATH}
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.6"
-        stroke-linejoin="round"
-      />
-    </svg>
-  );
-}
-
-/** How much of the nth star (1 to 5) a rating fills. */
-const fillOf = (stars: number, nth: number): number => Math.max(0, Math.min(1, stars - (nth - 1)));
 
 /** Under the place's name: its average and how many rated it, or that nobody has yet. */
 export function RatingSummary({ total, strings }: { total?: RatingTotal; strings: Strings }) {
@@ -50,8 +25,8 @@ export function RatingSummary({ total, strings }: { total?: RatingTotal; strings
         strings.ratings.none
       ) : (
         <>
-          <span class="star-small">
-            <Star fill={1} />
+          <span class="bowl-small">
+            <Bowl nth={bowlFor(average)} fill={1} />
           </span>
           {strings.ratings.summary(average, total.count)}
         </>
@@ -249,20 +224,21 @@ export function useRating(place: Place, onRated: (total: RatingTotal) => void): 
   };
 }
 
-/** Two taps on one star within this long: the rating taken back. */
+/** Two taps on one bowl within this long: the rating taken back. */
 const DOUBLE_TAP = 350;
 
 /**
- * Five stars, each in two halves: the left half gives a half star. Two quick taps on one star take
- * the rating back (Alex, 2026-10-20: "remove all their stars by double tapping the stars").
+ * Five poutine bowls, sad to loaded, each in two halves: the left half gives a half. Two quick taps
+ * on one bowl take the rating back (Alex, 2026-10-20: "remove all their stars by double tapping the
+ * stars"). The words stay stars ("4,5 étoiles").
  */
-function Stars({ id, rating, strings }: { id: string; rating: Rating; strings: Strings }) {
+function Bowls({ id, rating, strings }: { id: string; rating: Rating; strings: Strings }) {
   const last = useRef<{ nth: number; at: number } | null>(null);
   return (
-    <div class="stars" role="radiogroup" aria-labelledby={id}>
+    <div class="bowls" role="radiogroup" aria-labelledby={id}>
       {[1, 2, 3, 4, 5].map((nth) => (
-        <span key={nth} class="star">
-          <Star fill={fillOf(rating.shown, nth)} />
+        <span key={nth} class="bowl">
+          <Bowl nth={nth} fill={fillOf(rating.shown, nth)} />
           {[nth - 0.5, nth].map((value) => (
             <button
               key={value}
@@ -327,7 +303,7 @@ export function RatingBox({
   return (
     <section class="rating-box">
       <h3 id={id}>{words.yours}</h3>
-      <Stars id={id} rating={rating} strings={strings} />
+      <Bowls id={id} rating={rating} strings={strings} />
       {REVIEWS_ON && rating.shown > 0 && (
         <form
           onSubmit={(event) => {
@@ -406,7 +382,7 @@ export function SharePanel({ place, strings, rating, onBack }: PanelProps) {
         </p>
       )}
       <h3 id={id}>{strings.ratings.yours}</h3>
-      <Stars id={id} rating={rating} strings={strings} />
+      <Bowls id={id} rating={rating} strings={strings} />
       <RatingStatus rating={rating} strings={strings} />
     </section>
   );
@@ -622,8 +598,8 @@ export function ReviewList({ place, strings, version }: ListProps) {
           <li key={i}>
             <span class="review-stars" aria-label={strings.ratings.star(review.stars)}>
               {[1, 2, 3, 4, 5].map((nth) => (
-                <span key={nth} class="star-small">
-                  <Star fill={fillOf(review.stars, nth)} />
+                <span key={nth} class="bowl-small">
+                  <Bowl nth={nth} fill={fillOf(review.stars, nth)} />
                 </span>
               ))}
             </span>{' '}

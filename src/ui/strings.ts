@@ -47,7 +47,7 @@ export interface Strings {
   };
   search: {
     label: string;
-    placeholder: (count: number) => string;
+    placeholder: string;
     clear: string;
     none: (query: string) => string;
     /** How many places the search found, for screen readers. */
@@ -58,6 +58,11 @@ export interface Strings {
   nearMe: {
     button: string;
     title: string;
+    /** The sheet's title once places were found: the ring they are in. */
+    within: (km: number) => string;
+    /** Nothing within the last ring; the closest place follows. */
+    none: (km: number) => string;
+    closest: string;
     locating: string;
     denied: string;
     unavailable: string;
@@ -271,15 +276,18 @@ const english: Strings = {
   },
   search: {
     label: 'Search by name or town',
-    placeholder: (count) => `Search ${count.toLocaleString('en-CA')} places`,
+    placeholder: 'Find your next poutine',
     clear: 'Clear the search',
     none: (query) => `Nothing matches “${query}”. Try a town or part of a name.`,
     found: (count) => (count === 1 ? '1 place found' : `${String(count)} places found`),
     addMissing: (query) => `Can’t find it? Add “${query}”`,
   },
   nearMe: {
-    button: 'Near me',
-    title: 'Closest to you',
+    button: 'Nearby',
+    title: 'Nearby',
+    within: (km) => `Within ${String(km)} km`,
+    none: (km) => `Nothing within ${String(km)} km`,
+    closest: 'The closest:',
     locating: 'Finding where you are…',
     denied:
       'Location is off for this site. Allow it in your browser’s site settings to see the places near you.',
@@ -489,7 +497,7 @@ const french: Strings = {
   },
   search: {
     label: 'Chercher par nom ou par ville',
-    placeholder: (count) => `Chercher parmi ${count.toLocaleString('fr-CA')} places`,
+    placeholder: 'Cherche ta prochaine',
     clear: 'Effacer la recherche',
     none: (query) =>
       `Rien ne correspond à «${NBSP}${query}${NBSP}». Essayez une ville ou une partie du nom.`,
@@ -497,8 +505,11 @@ const french: Strings = {
     addMissing: (query) => `Pas dans la liste${NBSP}? Ajouter «${NBSP}${query}${NBSP}»`,
   },
   nearMe: {
-    button: 'Près de moi',
-    title: 'Les plus proches',
+    button: 'À côté',
+    title: 'À côté',
+    within: (km) => `À ${String(km)}${NBSP}km ou moins`,
+    none: (km) => `Rien à moins de ${String(km)}${NBSP}km`,
+    closest: `La plus proche${NBSP}:`,
     locating: 'Recherche de votre position…',
     denied:
       'La localisation est désactivée pour ce site. Autorisez-la dans les paramètres du navigateur pour voir les places près de vous.',
