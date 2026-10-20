@@ -26,6 +26,10 @@ export interface Review {
 /** The rater: a random ID the browser keeps (no account), one rating per place each. */
 const RATER_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
+export function isRaterId(text: unknown): text is string {
+  return typeof text === 'string' && RATER_ID.test(text);
+}
+
 export interface Rating {
   place: string;
   rater: string;

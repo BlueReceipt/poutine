@@ -11,8 +11,7 @@ import {
   telUrl,
 } from '../domain/placeText.ts';
 import { confirmedByRaters, type RatingTotal } from '../domain/ratings.ts';
-import { RatingBox, RatingSummary, ReviewList } from './Ratings.tsx';
-import { sharePlace, type Shared } from './sharing.ts';
+import { RatingBox, RatingSummary, ReviewList, SharePanel, useRating } from './Ratings.tsx';
 import type { Strings } from './strings.ts';
 
 interface Props {
@@ -107,11 +106,9 @@ interface DetailsProps {
 function PlaceDetails(props: DetailsProps) {
   const { place, strings, heading, total, ratedAt, friend, onRated } = props;
   const words = strings.card;
-  const [shared, setShared] = useState<Shared | null>(null);
-  const share = async () => {
-    setShared(null);
-    setShared(await sharePlace(place, strings));
-  };
+  const rating = useRating(place, onRated);
+  // Partager opens the share step (the invitation, the photo, the stars) in place of the card.
+  const [sharing, setSharing] = useState(false);
   const address = addressLines(place, words.near);
   const hours = place.openingHours
     ? (readableHours(place.openingHours, strings.hours) ?? [place.openingHours])
@@ -123,80 +120,91 @@ function PlaceDetails(props: DetailsProps) {
     [words.menu, place.menu],
   ].filter((link): link is [string, string] => Boolean(link[1]));
 
+  // One bot check for both views: it stays put while the card and its share step swap.
   return (
     <>
-      <h2 id="card-title" ref={heading} tabIndex={-1}>
-        {place.name}
-      </h2>
-      <RatingSummary total={total} strings={strings} />
-      {friend !== null && <p class="friend">{strings.share.friend(friend)}</p>}
-      {place.poutine === 'unconfirmed' && !confirmedByRaters(total) && (
-        <p class="hint">{words.unconfirmed}</p>
-      )}
-      {address.length > 0 && (
-        <p class="address">
-          {address.map((line, i) => (
-            <span key={i}>
-              {line}
-              <br />
-            </span>
-          ))}
-        </p>
-      )}
-      <div class="actions">
-        {place.phone && (
-          <a class="action primary" href={telUrl(place.phone)}>
-            {words.call} · {displayPhone(place.phone)}
-          </a>
-        )}
-        <a class="action" href={directionsUrl(place)} target="_blank" rel="noopener noreferrer">
-          {words.directions}
-        </a>
-        <button
-          type="button"
-          class="action"
-          onClick={() => {
-            void share();
-          }}
-        >
-          {strings.share.place}
-        </button>
-      </div>
-      {shared && (shared.how === 'copied' || shared.how === 'failed') && (
-        <p class="notice-line" role="status">
-          {shared.how === 'copied' ? (
-            strings.share.copied
-          ) : (
-            <span class="share-link">{shared.url}</span>
+      {sharing ? (
+        <>
+          <h2 id="card-title" ref={heading} tabIndex={-1}>
+            {place.name}
+          </h2>
+          <SharePanel
+            place={place}
+            strings={strings}
+            rating={rating}
+            onBack={() => {
+              setSharing(false);
+            }}
+          />
+        </>
+      ) : (
+        <>
+          <h2 id="card-title" ref={heading} tabIndex={-1}>
+            {place.name}
+          </h2>
+          <RatingSummary total={total} strings={strings} />
+          {friend !== null && <p class="friend">{strings.share.friend(friend)}</p>}
+          {place.poutine === 'unconfirmed' && !confirmedByRaters(total) && (
+            <p class="hint">{words.unconfirmed}</p>
           )}
-        </p>
-      )}
-      <RatingBox place={place} strings={strings} onRated={onRated} />
-      {hours.length > 0 && (
-        <section class="hours">
-          <h3>{words.hours}</h3>
-          <ul>
-            {hours.map((line, i) => (
-              <li key={i}>{line}</li>
-            ))}
-          </ul>
-        </section>
-      )}
-      <ul class="links">
-        {links.map(([label, url]) => (
-          <li key={label}>
-            <a href={url} target="_blank" rel="noopener noreferrer">
-              {label}
+          {address.length > 0 && (
+            <p class="address">
+              {address.map((line, i) => (
+                <span key={i}>
+                  {line}
+                  <br />
+                </span>
+              ))}
+            </p>
+          )}
+          <div class="actions">
+            {place.phone && (
+              <a class="action primary" href={telUrl(place.phone)}>
+                {words.call} · {displayPhone(place.phone)}
+              </a>
+            )}
+            <a class="action" href={directionsUrl(place)} target="_blank" rel="noopener noreferrer">
+              {words.directions}
             </a>
-          </li>
-        ))}
-        <li>
-          <a href={googleMapsUrl(place)} target="_blank" rel="noopener noreferrer">
-            {words.googleMaps}
-          </a>
-        </li>
-      </ul>
-      <ReviewList place={place} strings={strings} version={ratedAt} />
+          </div>
+          <button
+            type="button"
+            class="action primary share-open"
+            onClick={() => {
+              setSharing(true);
+            }}
+          >
+            {strings.share.place}
+          </button>
+          <RatingBox place={place} strings={strings} rating={rating} />
+          {hours.length > 0 && (
+            <section class="hours">
+              <h3>{words.hours}</h3>
+              <ul>
+                {hours.map((line, i) => (
+                  <li key={i}>{line}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+          <ul class="links">
+            {links.map(([label, url]) => (
+              <li key={label}>
+                <a href={url} target="_blank" rel="noopener noreferrer">
+                  {label}
+                </a>
+              </li>
+            ))}
+            <li>
+              <a href={googleMapsUrl(place)} target="_blank" rel="noopener noreferrer">
+                {words.googleMaps}
+              </a>
+            </li>
+          </ul>
+          <ReviewList place={place} strings={strings} version={ratedAt} />
+        </>
+      )}
+      <div ref={rating.botBox} class="bot-check" />
     </>
   );
 }

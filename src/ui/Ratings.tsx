@@ -1,3 +1,4 @@
+import type { RefObject } from 'preact';
 import { useEffect, useId, useRef, useState } from 'preact/hooks';
 import type { Place } from '../domain/osmPlaces.ts';
 import {
@@ -8,8 +9,8 @@ import {
   type RatingTotal,
   type Review,
 } from '../domain/ratings.ts';
-import { myRatings, myStars, raterId, rememberStars } from './rater.ts';
-import { photoOf, shareStory, storyFile, type Shared } from './sharing.ts';
+import { forgetStars, myRatings, myStars, raterId, rememberStars } from './rater.ts';
+import { photoOf, sharePlace, shareStory, storyFile, type Shared } from './sharing.ts';
 import type { RatingTrouble, ShareWords, Strings } from './strings.ts';
 import { useBotCheck } from './useBotCheck.ts';
 
@@ -59,35 +60,46 @@ export function RatingSummary({ total, strings }: { total?: RatingTotal; strings
   );
 }
 
-interface BoxProps {
-  place: Place;
-  strings: Strings;
-  onRated: (total: RatingTotal) => void;
-}
-
 /** A quick second tap (a half star more or less) sends once: the rating leaves this long after. */
 const SEND_AFTER = 700;
 /** How long a share waits for the rating in flight (its code goes in the link). */
 const SHARE_WAITS = 3000;
 
+/** One place's rating as the card and its share step both show it: one rating, never two. */
+export interface Rating {
+  /** The stars shown: just tapped, or the last sent from this phone; 0 before any. */
+  shown: number;
+  /** Sent from this phone (not just tapped). */
+  given: boolean;
+  tap: (stars: number) => void;
+  /** A double tap on a star: the rating taken back. */
+  clear: () => void;
+  /** With reviews on: the stars and the words, sent when Send is tapped. */
+  sendWords: (text: string) => void;
+  state: 'idle' | 'sending' | 'sent' | 'cleared';
+  /** How many places this phone has rated, once this one is sent. */
+  count: number;
+  trouble: RatingTrouble | null;
+  /** Resolves once the rating in flight is in (or after a few seconds). */
+  settled: () => Promise<void>;
+  /** Where the bot check sits: once per card, whichever view shows. */
+  botBox: RefObject<HTMLDivElement>;
+}
+
 /**
- * "Your rating" (Alex, 2026-10-20: one tap rates, half stars too): five stars, each in two halves;
- * a tap sends (the bot check runs out of sight), and the invitation to share shows at once. A
- * written review goes with the stars only once reviews are switched on. The browser remembers what
- * it gave.
+ * The rating of a place (Alex, 2026-10-20: one tap rates, half stars too): a tap sends 0.7 s later
+ * (a quick correction sends once), one send at a time, the bot check out of sight and renewed after
+ * each. The browser remembers what it gave.
  */
-export function RatingBox({ place, strings, onRated }: BoxProps) {
-  const words = strings.ratings;
+export function useRating(place: Place, onRated: (total: RatingTotal) => void): Rating {
   const [given, setGiven] = useState<number | null>(() => myStars(place.osm));
   const [chosen, setChosen] = useState<number | null>(null);
-  const [comment, setComment] = useState('');
-  const [state, setState] = useState<'idle' | 'sending' | 'sent'>('idle');
-  /** How many places this phone has rated, once this one is sent. */
+  const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'cleared'>('idle');
   const [count, setCount] = useState(0);
   const [trouble, setTrouble] = useState<RatingTrouble | null>(null);
   const [checking, setChecking] = useState(false);
-  const box = useRef<HTMLDivElement>(null);
-  const bot = useBotCheck(box, checking);
+  const botBox = useRef<HTMLDivElement>(null);
+  const bot = useBotCheck(botBox, checking);
   const timer = useRef<number | undefined>(undefined);
   const latest = useRef<number | null>(null);
   const inFlight = useRef<Promise<void> | null>(null);
@@ -100,8 +112,6 @@ export function RatingBox({ place, strings, onRated }: BoxProps) {
     },
     [],
   );
-
-  const shown = chosen ?? given ?? 0;
 
   const sendNow = async (stars: number, text: string): Promise<void> => {
     const fields = {
@@ -140,7 +150,6 @@ export function RatingBox({ place, strings, onRated }: BoxProps) {
           setChosen(null);
           setState('sent');
         }
-        setComment('');
         onRated(total);
         return;
       }
@@ -173,57 +182,158 @@ export function RatingBox({ place, strings, onRated }: BoxProps) {
     inFlight.current = run();
   };
 
-  const tap = (stars: number) => {
-    setChosen(stars);
+  /** The rating taken back on the Worker, then on this phone (`clear` runs it after any send). */
+  const takeBack = async () => {
+    if (myStars(place.osm) === null) return;
     setTrouble(null);
-    setChecking(true);
-    latest.current = stars;
-    window.clearTimeout(timer.current);
-    // With reviews on, the words go with the stars when Send is tapped.
-    if (!REVIEWS_ON)
-      timer.current = window.setTimeout(() => {
-        queue(stars);
-      }, SEND_AFTER);
+    try {
+      const response = await fetch('/api/ratings', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ place: place.osm, rater: raterId() }),
+      });
+      if (!response.ok) {
+        setTrouble('unexpected');
+        return;
+      }
+      const { total } = (await response.json()) as { total: RatingTotal };
+      forgetStars(place.osm);
+      setGiven(null);
+      setState('cleared');
+      onRated(total);
+    } catch {
+      setTrouble('offline');
+    }
   };
 
-  /** The share step waits (a little) for the rating in flight. */
-  const settled = () =>
-    Promise.race([
-      inFlight.current ?? Promise.resolve(),
-      new Promise<void>((resolve) => {
-        setTimeout(resolve, SHARE_WAITS);
-      }),
-    ]);
+  return {
+    shown: chosen ?? given ?? 0,
+    given: given !== null,
+    clear: () => {
+      window.clearTimeout(timer.current);
+      latest.current = null;
+      setChosen(null);
+      setState('idle');
+      const before = inFlight.current;
+      inFlight.current = (async () => {
+        await before;
+        await takeBack();
+      })();
+    },
+    tap: (stars) => {
+      setChosen(stars);
+      setTrouble(null);
+      setChecking(true);
+      latest.current = stars;
+      window.clearTimeout(timer.current);
+      // With reviews on, the words go with the stars when Send is tapped.
+      if (!REVIEWS_ON)
+        timer.current = window.setTimeout(() => {
+          queue(stars);
+        }, SEND_AFTER);
+    },
+    sendWords: (text) => {
+      if (latest.current !== null) queue(latest.current, text);
+    },
+    state,
+    count,
+    trouble,
+    settled: () =>
+      Promise.race([
+        inFlight.current ?? Promise.resolve(),
+        new Promise<void>((resolve) => {
+          setTimeout(resolve, SHARE_WAITS);
+        }),
+      ]),
+    botBox,
+  };
+}
 
+/** Two taps on one star within this long: the rating taken back. */
+const DOUBLE_TAP = 350;
+
+/**
+ * Five stars, each in two halves: the left half gives a half star. Two quick taps on one star take
+ * the rating back (Alex, 2026-10-20: "remove all their stars by double tapping the stars").
+ */
+function Stars({ id, rating, strings }: { id: string; rating: Rating; strings: Strings }) {
+  const last = useRef<{ nth: number; at: number } | null>(null);
+  return (
+    <div class="stars" role="radiogroup" aria-labelledby={id}>
+      {[1, 2, 3, 4, 5].map((nth) => (
+        <span key={nth} class="star">
+          <Star fill={fillOf(rating.shown, nth)} />
+          {[nth - 0.5, nth].map((value) => (
+            <button
+              key={value}
+              type="button"
+              role="radio"
+              class={value === nth ? 'half right' : 'half left'}
+              aria-checked={rating.shown === value}
+              aria-label={strings.ratings.star(value)}
+              onClick={(event) => {
+                const before = last.current;
+                last.current = { nth, at: event.timeStamp };
+                if (before && before.nth === nth && event.timeStamp - before.at < DOUBLE_TAP) {
+                  last.current = null;
+                  rating.clear();
+                } else rating.tap(value);
+              }}
+            />
+          ))}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/** Sending, sent (the how-manyth place), or what went wrong. */
+function RatingStatus({ rating, strings }: { rating: Rating; strings: Strings }) {
+  const words = strings.ratings;
+  return (
+    <>
+      {rating.state !== 'idle' && (
+        <p class="notice-line" role="status">
+          {rating.state === 'sending'
+            ? words.sending
+            : rating.state === 'cleared'
+              ? words.cleared
+              : words.thanks(rating.count)}
+        </p>
+      )}
+      {rating.given && rating.state !== 'sending' && <p class="hint">{words.clearHint}</p>}
+      {rating.trouble && (
+        <p class="problems" role="alert">
+          {words.problems[rating.trouble]}
+        </p>
+      )}
+    </>
+  );
+}
+
+/** "Your rating" on the card: the stars for a quick rating, without sharing. */
+export function RatingBox({
+  place,
+  strings,
+  rating,
+}: {
+  place: Place;
+  strings: Strings;
+  rating: Rating;
+}) {
+  const words = strings.ratings;
+  const [comment, setComment] = useState('');
+  const id = `yours-${place.osm}`;
   return (
     <section class="rating-box">
-      <h3 id={`yours-${place.osm}`}>{words.yours}</h3>
-      <div class="stars" role="radiogroup" aria-labelledby={`yours-${place.osm}`}>
-        {[1, 2, 3, 4, 5].map((nth) => (
-          <span key={nth} class="star">
-            <Star fill={fillOf(shown, nth)} />
-            {[nth - 0.5, nth].map((value) => (
-              <button
-                key={value}
-                type="button"
-                role="radio"
-                class={value === nth ? 'half right' : 'half left'}
-                aria-checked={shown === value}
-                aria-label={words.star(value)}
-                onClick={() => {
-                  tap(value);
-                }}
-              />
-            ))}
-          </span>
-        ))}
-      </div>
-      <div ref={box} class="bot-check" />
-      {REVIEWS_ON && chosen !== null && (
+      <h3 id={id}>{words.yours}</h3>
+      <Stars id={id} rating={rating} strings={strings} />
+      {REVIEWS_ON && rating.shown > 0 && (
         <form
           onSubmit={(event) => {
             event.preventDefault();
-            queue(chosen, comment);
+            rating.sendWords(comment);
+            setComment('');
           }}
         >
           <label class="field">
@@ -240,23 +350,64 @@ export function RatingBox({ place, strings, onRated }: BoxProps) {
             />
           </label>
           <div class="actions">
-            <button type="submit" class="action primary" disabled={state === 'sending'}>
+            <button type="submit" class="action primary" disabled={rating.state === 'sending'}>
               {words.send}
             </button>
           </div>
         </form>
       )}
-      {state !== 'idle' && (
+      <RatingStatus rating={rating} strings={strings} />
+    </section>
+  );
+}
+
+interface PanelProps {
+  place: Place;
+  strings: Strings;
+  rating: Rating;
+  onBack: () => void;
+}
+
+/**
+ * What the card's Partager opens (Alex, 2026-10-20: "When someone clicks on a poutine place. that
+ * should be the share button. when someone clicks it, then it should show the awaye montre ta
+ * pouts, and offer a button, and a rating button"): the invitation, the photo button (the photo
+ * becomes the story, the stars laid over it once given), a small "just the link" for chats, and the
+ * same stars as the card's.
+ */
+export function SharePanel({ place, strings, rating, onBack }: PanelProps) {
+  const words = strings.share;
+  const [linkShared, setLinkShared] = useState<Shared | null>(null);
+  const id = `share-yours-${place.osm}`;
+  return (
+    <section class="share-panel">
+      <button type="button" class="link back" onClick={onBack}>
+        ← {strings.add.back}
+      </button>
+      <p class="invite-line">{words.invite}</p>
+      <ShareRating place={place} stars={rating.shown} strings={strings} settled={rating.settled} />
+      <button
+        type="button"
+        class="link"
+        onClick={() => {
+          setLinkShared(null);
+          void sharePlace(place, strings).then(setLinkShared);
+        }}
+      >
+        {words.linkOnly}
+      </button>
+      {linkShared && (linkShared.how === 'copied' || linkShared.how === 'failed') && (
         <p class="notice-line" role="status">
-          {state === 'sending' ? words.sending : words.thanks(count)}
+          {linkShared.how === 'copied' ? (
+            words.copied
+          ) : (
+            <span class="share-link">{linkShared.url}</span>
+          )}
         </p>
       )}
-      {trouble && (
-        <p class="problems" role="alert">
-          {words.problems[trouble]}
-        </p>
-      )}
-      {shown > 0 && <ShareRating place={place} stars={shown} strings={strings} settled={settled} />}
+      <h3 id={id}>{strings.ratings.yours}</h3>
+      <Stars id={id} rating={rating} strings={strings} />
+      <RatingStatus rating={rating} strings={strings} />
     </section>
   );
 }
@@ -270,10 +421,9 @@ interface ShareProps {
 }
 
 /**
- * Under the stars once rated (Alex, 2026-10-20: "Don't be shy, show us the goods" / "Awaye, montre
- * ta pouts"): one button for a photo from the phone (Android offers the camera or the photos); the
- * photo becomes the story picture with the stars, the place and its link laid over it, then
- * Share opens the phone's share sheet. The photo never leaves the phone.
+ * The photo: a button for one from the phone (the camera or the photos); it becomes the story
+ * picture with the place and its link laid over it, and the stars once given (they follow each
+ * tap), then Share opens the phone's share sheet. The photo never leaves the phone.
  */
 function ShareRating({ place, stars, strings, settled }: ShareProps) {
   const words = strings.share;
@@ -368,36 +518,26 @@ function ShareRating({ place, stars, strings, settled }: ShareProps) {
           </div>
         </div>
       ) : (
-        <div class="invite">
-          <p class="invite-line">{words.invite}</p>
-          <button
-            type="button"
-            class="action primary"
-            disabled={busy}
-            onClick={() => {
-              picker.current?.click();
-            }}
-          >
-            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-              <path
-                d="M4 7h3l2-2.5h6L17 7h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linejoin="round"
-              />
-              <circle
-                cx="12"
-                cy="12.5"
-                r="3.5"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              />
-            </svg>
-            {words.addPhoto}
-          </button>
-        </div>
+        <button
+          type="button"
+          class="action primary photo-button"
+          disabled={busy}
+          onClick={() => {
+            picker.current?.click();
+          }}
+        >
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path
+              d="M4 7h3l2-2.5h6L17 7h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linejoin="round"
+            />
+            <circle cx="12" cy="12.5" r="3.5" fill="none" stroke="currentColor" stroke-width="2" />
+          </svg>
+          {words.addPhoto}
+        </button>
       )}
       <input
         ref={picker}

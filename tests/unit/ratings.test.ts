@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { averageOf, checkRating, confirmedByRaters, REVIEWS_ON } from '../../src/domain/ratings.ts';
+import {
+  averageOf,
+  checkRating,
+  confirmedByRaters,
+  isRaterId,
+  REVIEWS_ON,
+} from '../../src/domain/ratings.ts';
 
 const rater = '0b5c1e7a-3f2d-4c8e-9a61-2d4f8e6b7c90';
 const sent = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
@@ -77,5 +83,15 @@ describe('averageOf', () => {
     expect(averageOf({ count: 2, total: 9 })).toBe(4.5);
     expect(averageOf({ count: 0, total: 0 })).toBeNull();
     expect(averageOf(undefined)).toBeNull();
+  });
+});
+
+describe('isRaterId', () => {
+  it('takes the random ID a browser keeps, nothing else (a rating taken back names it)', () => {
+    expect(isRaterId(rater)).toBe(true);
+    expect(isRaterId(rater.toUpperCase())).toBe(false);
+    expect(isRaterId('')).toBe(false);
+    expect(isRaterId(`${rater}' OR 1=1`)).toBe(false);
+    expect(isRaterId(42)).toBe(false);
   });
 });

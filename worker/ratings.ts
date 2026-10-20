@@ -3,6 +3,7 @@
 import {
   checkRating,
   isPlaceId,
+  isRaterId,
   REVIEWS_ON,
   type RatingTotal,
   type Review,
@@ -45,6 +46,42 @@ export async function ratingTotals(
  * browser on the same connection can't rate the same place again that day. The place's new total
  * comes back for its card.
  */
+/** The place's totals again, without hidden ratings (scripts/review.ts hide does the same). */
+function totalsAgain(env: Env, place: string): D1PreparedStatement {
+  return env.DB.prepare(
+    `INSERT OR REPLACE INTO rating_totals (place, count, total, poutine_yes, poutine_no)
+      SELECT ?, COUNT(*), COALESCE(SUM(stars), 0), COALESCE(SUM(poutine = 1), 0),
+        COALESCE(SUM(poutine = 0), 0)
+      FROM ratings WHERE place = ? AND hidden = 0`,
+  ).bind(place, place);
+}
+
+/**
+ * DELETE /api/ratings {place, rater}: a rating taken back (Alex, 2026-10-20: "remove all their
+ * stars by double tapping the stars"). Only the browser that gave it knows its random rater ID; the
+ * place's totals are counted again, and its new total comes back for the card.
+ */
+export async function unrate(request: Request, env: Env): Promise<Response> {
+  if (!fromThisSite(request)) return problem(403, 'other-site');
+  const body = await jsonBody(request, 1024);
+  const { place, rater } = (body && typeof body === 'object' ? body : {}) as Record<
+    string,
+    unknown
+  >;
+  if (typeof place !== 'string' || !isPlaceId(place) || !isRaterId(rater))
+    return problem(400, 'not-a-rating');
+  await env.DB.batch([
+    env.DB.prepare('DELETE FROM ratings WHERE place = ? AND rater = ?').bind(place, rater),
+    totalsAgain(env, place),
+  ]);
+  const total = await env.DB.prepare(
+    'SELECT count, total, poutine_yes AS yes, poutine_no AS no FROM rating_totals WHERE place = ?',
+  )
+    .bind(place)
+    .first<RatingTotal>();
+  return json({ total: total ?? { count: 0, total: 0 } });
+}
+
 export async function rate(request: Request, env: Env): Promise<Response> {
   if (!fromThisSite(request)) return problem(403, 'other-site');
   const body = await jsonBody(request, 4 * 1024);
@@ -91,13 +128,7 @@ export async function rate(request: Request, env: Env): Promise<Response> {
       sender,
       rating.poutine === null ? null : Number(rating.poutine),
     ),
-    // The place's totals again, without hidden ratings (scripts/review.ts hide does the same).
-    env.DB.prepare(
-      `INSERT OR REPLACE INTO rating_totals (place, count, total, poutine_yes, poutine_no)
-        SELECT ?, COUNT(*), COALESCE(SUM(stars), 0), COALESCE(SUM(poutine = 1), 0),
-          COALESCE(SUM(poutine = 0), 0)
-        FROM ratings WHERE place = ? AND hidden = 0`,
-    ).bind(rating.place, rating.place),
+    totalsAgain(env, rating.place),
     env.DB.prepare("UPDATE ratings SET sender = '' WHERE sender != '' AND updated_at < ?").bind(
       monthAgo,
     ),

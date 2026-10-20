@@ -42,6 +42,20 @@ export function myStars(place: string): number | null {
   return typeof stars === 'number' ? stars : null;
 }
 
+/** A rating taken back: the place is no longer this browser's (its pin, the counter). */
+export function forgetStars(place: string): void {
+  try {
+    const mine = myRatings();
+    delete mine[place];
+    localStorage.setItem(MINE, JSON.stringify(mine));
+    const codes = savedCodes();
+    delete codes[place];
+    localStorage.setItem(CODES, JSON.stringify(codes));
+  } catch {
+    // Nothing kept anyway.
+  }
+}
+
 export function rememberStars(place: string, stars: number, code?: string): void {
   try {
     localStorage.setItem(MINE, JSON.stringify({ ...myRatings(), [place]: stars }));

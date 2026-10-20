@@ -90,6 +90,8 @@ export interface ShareWords {
   invite: string;
   addPhoto: string;
   changePhoto: string;
+  /** In the share step, for chats: the place's link alone. */
+  linkOnly: string;
   /** The photo never leaves the phone: it's only drawn into the picture shared. */
   photoNote: string;
   photoFailed: string;
@@ -132,6 +134,10 @@ export interface RatingWords {
   number: (stars: number) => string;
   send: string;
   sending: string;
+  /** A double tap on a star took the rating back. */
+  cleared: string;
+  /** Under the stars once rated: how to take the rating back. */
+  clearHint: string;
   /** Once sent: the how-manyth place this phone rated, green on the map now. */
   thanks: (count: number) => string;
   comment: string;
@@ -290,6 +296,8 @@ const english: Strings = {
     send: 'Send my rating',
     sending: 'Sending…',
     thanks: (count) => `Thanks! Place #${String(count)}, green on your map now.`,
+    cleared: 'Rating removed.',
+    clearHint: 'Double-tap a star to remove your rating.',
     comment: 'A few words',
     reviews: 'What people say',
     report: 'Report',
@@ -319,6 +327,7 @@ const english: Strings = {
     invite: 'Don’t be shy, show us the goods!',
     addPhoto: 'Add my photo',
     changePhoto: 'Change photo',
+    linkOnly: 'Just send the link',
     photoNote: 'Your photo stays on your phone: it’s only drawn into the picture you share.',
     photoFailed: 'That photo couldn’t be opened. Try another one.',
     hint: 'Sharing also copies the link, for a story’s Link sticker.',
@@ -508,6 +517,8 @@ const french: Strings = {
     sending: 'Envoi…',
     thanks: (count) =>
       `Merci${NBSP}! ${count === 1 ? '1re' : `${String(count)}e`} place, maintenant verte sur votre carte.`,
+    cleared: 'Note retirée.',
+    clearHint: 'Touchez deux fois une étoile pour retirer votre note.',
     comment: 'Quelques mots',
     reviews: 'Ce qu’on en dit',
     report: 'Signaler',
@@ -538,6 +549,7 @@ const french: Strings = {
     invite: `Awaye, montre ta pouts${NBSP}!`,
     addPhoto: 'Ajouter ma photo',
     changePhoto: 'Changer de photo',
+    linkOnly: 'Envoyer juste le lien',
     photoNote: `Votre photo reste sur votre téléphone${NBSP}: elle est seulement dessinée dans l’image partagée.`,
     photoFailed: 'Cette photo n’a pas pu être ouverte. Essayez-en une autre.',
     hint: 'Partager copie aussi le lien, pour l’autocollant Lien d’une story.',

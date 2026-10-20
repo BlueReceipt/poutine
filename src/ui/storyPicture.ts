@@ -187,10 +187,11 @@ function filterPicture(
   const nameHeight = name.lines.length * name.size * 1.15;
   const site = siteLines(context, place.link);
   const siteHeight = site.reduce((height, line) => height + line.size * 1.1, 0);
-  const size = 112;
+  // Not rated yet: no row of stars, only the place and its link.
+  const size = stars > 0 ? 112 : 0;
   const gap = 20;
   // Instagram's and Facebook's own buttons cover about 250 px at the bottom: the words end above.
-  const block = size + 40 + nameHeight + (town ? 64 : 0) + 30 + siteHeight;
+  const block = (stars > 0 ? size + 40 : 0) + nameHeight + (town ? 64 : 0) + 30 + siteHeight;
   const top = 1660 - block;
   const fade = context.createLinearGradient(0, top - 280, 0, HEIGHT);
   fade.addColorStop(0, 'rgba(0, 0, 0, 0)');
@@ -209,9 +210,10 @@ function filterPicture(
   context.textAlign = 'center';
 
   const left = middle - (5 * size + 4 * gap) / 2;
-  for (let i = 0; i < 5; i += 1)
-    star(context, left + i * (size + gap), top, size, fillOf(stars, i + 1), '#ffffff');
-  let y = top + size + 40;
+  if (stars > 0)
+    for (let i = 0; i < 5; i += 1)
+      star(context, left + i * (size + gap), top, size, fillOf(stars, i + 1), '#ffffff');
+  let y = stars > 0 ? top + size + 40 : top;
   context.fillStyle = '#ffffff';
   context.font = font(800, name.size);
   for (const line of name.lines) {

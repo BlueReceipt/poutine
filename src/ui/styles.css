@@ -551,6 +551,11 @@ button.action.primary {
 
 /* Each star in two halves (half stars, Alex 2026-10-20): the left half of a star gives a half,
    the right half the whole star. Each half is a 26 × 52 px target. */
+/* No double-tap zoom on the stars: two quick taps take a rating back. */
+.stars {
+  touch-action: manipulation;
+}
+
 .stars .star {
   position: relative;
   width: 52px;
@@ -584,15 +589,34 @@ button.action.primary {
   outline: 2px solid var(--ink);
 }
 
-/* Under the stars: the invitation to share a photo, then its button. */
-.invite-line {
-  margin: 0 0 8px;
-  font-size: 20px;
-  font-weight: 700;
+/* The card's Partager: across the card, under Call and Directions. */
+.card .share-open {
+  width: 100%;
 }
 
-.invite .action svg {
+/* The share step: back, the invitation, the photo button, the link alone, the stars. */
+.share-panel .back {
+  margin: 0 0 4px;
+}
+
+.invite-line {
+  margin: 4px 0 12px;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.card .photo-button {
+  width: 100%;
+  min-height: 56px;
+}
+
+.photo-button svg {
   margin-right: 8px;
+}
+
+.share-panel h3 {
+  margin: 20px 0 4px;
+  font-size: var(--text);
 }
 
 /* Share my rating: one button under the stars, why the link is copied, and the link itself when

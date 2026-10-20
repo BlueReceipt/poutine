@@ -111,7 +111,9 @@ export async function shareStory(
   }
   if (navigator.canShare?.({ files: [ready] })) {
     try {
-      await navigator.share({ files: [ready], text: strings.share.text(place.name, stars), url });
+      const text =
+        stars > 0 ? strings.share.text(place.name, stars) : strings.share.placeText(place.name);
+      await navigator.share({ files: [ready], text, url });
       return { how: 'shared', copied, url };
     } catch (error) {
       if (cancelled(error)) return { how: 'cancelled', copied, url };

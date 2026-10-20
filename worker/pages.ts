@@ -84,15 +84,17 @@ export async function placePage(
     asked && (await friendCodeFits(env.LINK_SECRET, place.osm, asked.stars, asked.code))
       ? asked
       : null;
-  // One kept copy per place, language and friend's stars.
+  // One kept copy per place, language, friend's stars and version of the app's page: a kept copy
+  // names the app's script files, which a deploy replaces, so each deploy starts fresh copies.
+  const page = await env.ASSETS.fetch(new URL('/', url));
+  if (!page.ok) return page;
+  const version = page.headers.get('ETag') ?? '';
   const key = new Request(
-    `${url.origin}/p/${place.osm}?lang=${language}&s=${friend ? `${String(friend.stars)}&c=${friend.code}` : ''}`,
+    `${url.origin}/p/${place.osm}?lang=${language}&s=${friend ? `${String(friend.stars)}&c=${friend.code}` : ''}&v=${encodeURIComponent(version)}`,
   );
   const kept = await caches.default.match(key);
   if (kept) return forBrowser(kept, request.method);
 
-  const page = await env.ASSETS.fetch(new URL('/', url));
-  if (!page.ok) return page;
   const strings = stringsFor(language);
   const total = await totalOf(env, place.osm);
   const { title, description } = previewOf(
