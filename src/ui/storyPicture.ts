@@ -300,16 +300,22 @@ export async function storyPicture(
 }
 
 /**
- * The picture link previews show (public/share.png, 1200 × 630): the name, the address and what
- * the site is in both languages, since a preview can't know its reader's. Made once in a browser.
+ * The picture link previews show (public/share.png, 1200 × 630): the poutine poop of bowl 1 on a
+ * cream disc (Alex, 2026-10-20: "change the picture to the share link to our poutine poop"), the
+ * name, the address and what the site is in both languages, since a preview can't know its
+ * reader's. Made once in a browser.
  */
 export async function linkPreview(english: Strings, french: Strings): Promise<Blob> {
   const names = french.appName;
-  const icon = await ready([names, SITE_NAME, english.tagline, french.tagline]);
+  await ready([names, SITE_NAME, english.tagline, french.tagline]);
   const context = canvasOf(1200, 630);
   context.fillStyle = GRAVY;
   context.fillRect(0, 0, 1200, 630);
-  badge(context, icon, 260, 315, 170);
+  context.fillStyle = CREAM;
+  context.beginPath();
+  context.arc(260, 315, 170, 0, Math.PI * 2);
+  context.fill();
+  drawBowl(context, 1, 1, 260 - 140, 315 - 150, 280);
   context.textAlign = 'left';
   context.fillStyle = CREAM;
   context.font = font(800, 84);
