@@ -223,6 +223,6 @@ describe('links shared from an English phone', () => {
     expect(friendFromSearch('?s=4&c=x7Kq2m-_&en')).toEqual({ stars: 4, code: 'x7Kq2m-_' });
     expect(isEnglishLink('')).toBe(false);
     expect(isEnglishLink('?s=4&c=x7Kq2m-_')).toBe(false);
-    expect(PREVIEW_PICTURE.en).toBe('https://poutines.app/share-en.png?v=4');
+    expect(PREVIEW_PICTURE.en).toBe('https://poutines.app/share-en.png?v=5');
   });
 });

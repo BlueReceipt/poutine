@@ -17,6 +17,8 @@ export interface Strings {
   pronounced: string;
   /** What the site is: in link previews and on the story picture. */
   tagline: string;
+  /** Under "Poutines.app" on the link preview picture; the app's name where empty (French). */
+  previewStrap: string;
   /** Under the poop on the link preview picture (English only: public/share-en.png). */
   previewCaption: string;
   /**
@@ -248,7 +250,8 @@ const english: Strings = {
   language: 'en',
   appName: 'Poutine',
   pronounced: 'pronounced Pootsin',
-  previewCaption: 'Pronounced pootsin',
+  previewStrap: 'Rate it, and share it.',
+  previewCaption: 'Pronounced Poots-in, not poo-teen',
   preview: {
     kinds: {
       'casse-croute': 'Casse-croûte',
@@ -476,6 +479,7 @@ const french: Strings = {
   language: 'fr',
   appName: 'Poutine',
   pronounced: '',
+  previewStrap: '',
   previewCaption: '',
   preview: {
     kinds: {

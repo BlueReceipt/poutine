@@ -303,12 +303,12 @@ export async function storyPicture(
  * The picture link previews show, one per language (Alex, 2026-10-20: "Have one picture for french,
  * one for english"; in English "it reads what i wrote"): public/share.png in French, share-en.png in
  * English, 1200 × 630. The poutine poop of bowl 1 on a cream disc, in English with `previewCaption`
- * under it; beside it the language's welcome: its title, its strapline (the app's name in French),
- * its words. Made once in a browser.
+ * under it ("Pronounced Poots-in, not poo-teen"); beside it the welcome's title, `previewStrap` ("Rate
+ * it, and share it."; the app's name in French) and the welcome's words. Made once in a browser.
  */
 export async function linkPreview(strings: Strings): Promise<Blob> {
   const title = strings.welcome.title || SITE_NAME.charAt(0).toUpperCase() + SITE_NAME.slice(1);
-  const strap = strings.welcome.strap || strings.appName;
+  const strap = strings.previewStrap || strings.appName;
   const caption = strings.previewCaption;
   await ready([title, strap, strings.welcome.text, caption]);
   const context = canvasOf(1200, 630);
