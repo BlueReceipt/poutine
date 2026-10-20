@@ -86,6 +86,18 @@ export interface Strings {
     title: (count: number) => string;
     motto: string;
   };
+  /** The secret menu, behind the app's name in the search bar. */
+  settings: {
+    /** The name's button, for screen readers. */
+    open: string;
+    title: string;
+    found: string;
+    language: string;
+    /** Follow the phone's language. */
+    phone: string;
+    /** Each language in its own words. */
+    names: Readonly<Record<Language, string>>;
+  };
   hours: HoursWords;
 }
 
@@ -342,6 +354,14 @@ const english: Strings = {
     title: (count) => (count === 1 ? '1 place eaten' : `${String(count)} places eaten`),
     motto: 'Gotta eat ’em all!',
   },
+  settings: {
+    open: 'Poutine, secret menu',
+    title: 'Secret menu',
+    found: 'You found it. Tap the name again any time.',
+    language: 'Language',
+    phone: 'Same as my phone',
+    names: { fr: 'Français', en: 'English' },
+  },
   share: {
     place: 'Share',
     placeText: (name) => `${name} on Poutines.app. Poots-in, not poo-teen.`,
@@ -572,6 +592,14 @@ const french: Strings = {
       `${count === 1 ? '1 place mangée' : `${String(count)} places mangées`}. Mange-les toutes${NBSP}!`,
     title: (count) => (count === 1 ? '1 place mangée' : `${String(count)} places mangées`),
     motto: `Mange-les toutes${NBSP}!`,
+  },
+  settings: {
+    open: 'Poutine, menu secret',
+    title: 'Menu secret',
+    found: 'Vous l’avez trouvé. Touchez le nom quand vous voulez.',
+    language: 'Langue',
+    phone: 'Comme mon téléphone',
+    names: { fr: 'Français', en: 'English' },
   },
   share: {
     place: 'Partager',

@@ -82,12 +82,24 @@ body,
 }
 
 .bar h1 {
-  display: flex;
-  flex-direction: column;
   margin: 0;
   font-size: 20px;
   font-weight: 700;
   line-height: 1.2;
+}
+
+/* The app's name: a button with no look of one, opening the secret menu. */
+.bar h1 .name {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 /* English: how to say the name, small under it. */
@@ -341,6 +353,35 @@ body,
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/* The secret menu: the language as three choices side by side, the one in use in gravy. */
+.card.settings h3 {
+  margin: 16px 0 8px;
+  font-size: var(--text);
+}
+
+.choice-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.choice-row .choice {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 2px solid var(--gravy);
+  border-radius: 22px;
+  background: var(--sheet);
+  color: var(--gravy);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.choice-row .choice[aria-checked='true'] {
+  background: var(--gravy);
+  color: var(--sheet);
 }
 
 /* À côté with nothing within 15 km: "La plus proche :" over the one place. */

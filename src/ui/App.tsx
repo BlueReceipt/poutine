@@ -13,9 +13,11 @@ import { closeWelcome, myRatings, nothingSaved } from './rater.ts';
 import { NearbyList, type NearState } from './NearbyList.tsx';
 import { PlaceCard } from './PlaceCard.tsx';
 import { SearchBar } from './SearchBar.tsx';
+import { Settings } from './Settings.tsx';
+import { chosenLanguage } from './settings.ts';
 import { Tally } from './Tally.tsx';
 import { Welcome } from './Welcome.tsx';
-import type { Strings } from './strings.ts';
+import type { Language, Strings } from './strings.ts';
 
 /**
  * A friend's stars the Worker checked and wrote in the page of a place's link (worker/pages.ts);
@@ -36,7 +38,14 @@ interface Selection {
   placeId: string | null;
 }
 
-export function App({ strings }: { strings: Strings }) {
+export function App({
+  strings,
+  onLanguage,
+}: {
+  strings: Strings;
+  /** A language chosen in the secret menu (null: the phone's): the app comes back in it. */
+  onLanguage: (language: Language | null) => void;
+}) {
   const [state, setState] = useState<State>({ kind: 'loading' });
   const [selection, setSelection] = useState<Selection | null>(null);
   const [query, setQuery] = useState('');
@@ -55,6 +64,8 @@ export function App({ strings }: { strings: Strings }) {
   const [welcome, setWelcome] = useState(nothingSaved);
   // The places eaten (the ones this phone rated): the pill by Near me opens their list.
   const [tally, setTally] = useState(false);
+  // The secret menu, behind the app's name.
+  const [settings, setSettings] = useState(false);
   const seq = useRef(0);
   const failed = useCallback(() => {
     setState({ kind: 'failed' });
@@ -144,8 +155,8 @@ export function App({ strings }: { strings: Strings }) {
     setWelcome(false);
   }, []);
   useEffect(() => {
-    if (group || near || adding || tally) setWelcome(false);
-  }, [group, near, adding, tally]);
+    if (group || near || adding || tally || settings) setWelcome(false);
+  }, [group, near, adding, tally, settings]);
 
   /** A place picked in a list: its card opens and the map flies there. */
   const show = useCallback(
@@ -280,6 +291,12 @@ export function App({ strings }: { strings: Strings }) {
         onQuery={setQuery}
         onChoose={show}
         onAdd={startAdding}
+        onSettings={() => {
+          setNear(null);
+          setSelection(null);
+          setTally(false);
+          setSettings(true);
+        }}
       />
       {places && !query.trim() && !adding && (
         <div class="map-actions">
@@ -343,6 +360,15 @@ export function App({ strings }: { strings: Strings }) {
         />
       ) : near ? (
         <NearbyList state={near} strings={strings} onChoose={show} onClose={closeNearby} />
+      ) : settings ? (
+        <Settings
+          strings={strings}
+          chosen={chosenLanguage()}
+          onLanguage={onLanguage}
+          onClose={() => {
+            setSettings(false);
+          }}
+        />
       ) : tally ? (
         <Tally
           eaten={eaten}

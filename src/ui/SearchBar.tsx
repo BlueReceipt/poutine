@@ -10,18 +10,35 @@ interface Props {
   onChoose: (place: Place) => void;
   /** Add a place: the search didn't find it. */
   onAdd: (name: string) => void;
+  /** The app's name opens the secret menu. */
+  onSettings: () => void;
 }
 
 /** The app's name and the search field across the top; what matches drops down below it. */
-export function SearchBar({ strings, query, results, onQuery, onChoose, onAdd }: Props) {
+export function SearchBar({
+  strings,
+  query,
+  results,
+  onQuery,
+  onChoose,
+  onAdd,
+  onSettings,
+}: Props) {
   const words = strings.search;
   const searching = query.trim() !== '';
   return (
     <header class="top">
       <div class="bar">
         <h1>
-          {strings.appName}
-          {strings.pronounced && <small>{strings.pronounced}</small>}
+          <button
+            type="button"
+            class="name"
+            aria-label={strings.settings.open}
+            onClick={onSettings}
+          >
+            {strings.appName}
+            {strings.pronounced && <small>{strings.pronounced}</small>}
+          </button>
         </h1>
         <input
           type="search"
