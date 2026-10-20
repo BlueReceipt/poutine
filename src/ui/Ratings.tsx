@@ -9,7 +9,7 @@ import {
   type Review,
 } from '../domain/ratings.ts';
 import { myStars, raterId, rememberStars } from './rater.ts';
-import { shareRating, type Shared } from './sharing.ts';
+import { photoOf, shareStory, storyFile, type Shared } from './sharing.ts';
 import type { RatingTrouble, ShareWords, Strings } from './strings.ts';
 import { useBotCheck } from './useBotCheck.ts';
 
@@ -199,31 +199,124 @@ export function RatingBox({ place, strings, onRated }: BoxProps) {
 
 /**
  * Share my rating, once this browser rated the place (Alex, 2026-10-19: "as a insta story, or
- * facebook story. and it shares a url to the website"): the story picture and the place's link.
+ * facebook story. and it shares a url to the website"): the story picture and the place's link
+ * with the stars. With my photo (2026-10-20) draws the visitor's photo into the picture first;
+ * the photo never leaves the phone.
  */
 function ShareRating({ place, stars, strings }: { place: Place; stars: number; strings: Strings }) {
   const words = strings.share;
   const [busy, setBusy] = useState(false);
   const [shared, setShared] = useState<Shared | null>(null);
-  const share = async () => {
+  const [withPhoto, setWithPhoto] = useState<{ file: File; preview: string } | null>(null);
+  const [photoFailed, setPhotoFailed] = useState(false);
+  const picker = useRef<HTMLInputElement>(null);
+  useEffect(
+    () => () => {
+      if (withPhoto) URL.revokeObjectURL(withPhoto.preview);
+    },
+    [withPhoto],
+  );
+
+  const share = async (file: File | Promise<File>) => {
     setBusy(true);
     setShared(null);
-    setShared(await shareRating(place, stars, strings));
+    setShared(await shareStory(file, place, stars, strings));
     setBusy(false);
   };
+  const picked = async (chosen: File | undefined) => {
+    if (!chosen) return;
+    setShared(null);
+    setPhotoFailed(false);
+    setBusy(true);
+    const photo = await photoOf(chosen);
+    if (!photo) {
+      setPhotoFailed(true);
+      setBusy(false);
+      return;
+    }
+    try {
+      const file = await storyFile(place, stars, strings, photo);
+      setWithPhoto({ file, preview: URL.createObjectURL(file) });
+    } catch {
+      setPhotoFailed(true);
+    } finally {
+      photo.close();
+      setBusy(false);
+    }
+  };
+
   return (
     <div class="share">
-      <button
-        type="button"
-        class="action"
-        disabled={busy}
-        onClick={() => {
-          void share();
-        }}
-      >
-        {busy ? words.making : words.button}
-      </button>
+      {withPhoto ? (
+        <div class="with-photo">
+          <img src={withPhoto.preview} alt="" width={108} height={192} />
+          <div>
+            <p class="hint">{words.photoNote}</p>
+            <div class="actions">
+              <button
+                type="button"
+                class="action primary"
+                disabled={busy}
+                onClick={() => {
+                  void share(withPhoto.file);
+                }}
+              >
+                {words.place}
+              </button>
+              <button
+                type="button"
+                class="action"
+                onClick={() => {
+                  setWithPhoto(null);
+                  setShared(null);
+                }}
+              >
+                {words.cancel}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div class="actions">
+          <button
+            type="button"
+            class="action"
+            disabled={busy}
+            onClick={() => {
+              void share(storyFile(place, stars, strings));
+            }}
+          >
+            {busy ? words.making : words.button}
+          </button>
+          <button
+            type="button"
+            class="action"
+            disabled={busy}
+            onClick={() => {
+              picker.current?.click();
+            }}
+          >
+            {words.withPhoto}
+          </button>
+          <input
+            ref={picker}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={(event) => {
+              const input = event.currentTarget;
+              void picked(input.files?.[0]);
+              input.value = '';
+            }}
+          />
+        </div>
+      )}
       <p class="hint">{words.hint}</p>
+      {photoFailed && (
+        <p class="problems" role="alert">
+          {words.photoFailed}
+        </p>
+      )}
       {shared && <SharedLine shared={shared} words={words} />}
     </div>
   );

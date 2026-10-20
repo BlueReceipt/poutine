@@ -50,13 +50,44 @@ function canvasOf(width: number, height: number): CanvasRenderingContext2D {
   return context;
 }
 
-function pngOf(context: CanvasRenderingContext2D): Promise<Blob> {
+/** PNG for flat colors; JPEG once a photo is in (a PNG of a photo weighs megabytes). */
+function blobOf(context: CanvasRenderingContext2D, type = 'image/png'): Promise<Blob> {
   return new Promise((resolve, reject) => {
-    context.canvas.toBlob((blob) => {
-      if (blob) resolve(blob);
-      else reject(new Error('The picture could not be made.'));
-    }, 'image/png');
+    context.canvas.toBlob(
+      (blob) => {
+        if (blob) resolve(blob);
+        else reject(new Error('The picture could not be made.'));
+      },
+      type,
+      0.9,
+    );
   });
+}
+
+/** The visitor's photo filling a rounded frame, cropped to it from the middle. */
+function framed(
+  context: CanvasRenderingContext2D,
+  photo: ImageBitmap,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+) {
+  const scale = Math.max(width / photo.width, height / photo.height);
+  const shownWidth = photo.width * scale;
+  const shownHeight = photo.height * scale;
+  context.save();
+  context.beginPath();
+  context.roundRect(x, y, width, height, 48);
+  context.clip();
+  context.drawImage(
+    photo,
+    x + (width - shownWidth) / 2,
+    y + (height - shownHeight) / 2,
+    shownWidth,
+    shownHeight,
+  );
+  context.restore();
 }
 
 function star(
@@ -114,8 +145,17 @@ function nameLines(context: CanvasRenderingContext2D, name: string, width: numbe
   return { size, lines };
 }
 
-/** The story picture of a rating: the app, the stars given, the place and its town, the address. */
-export async function storyPicture(place: Place, stars: number, strings: Strings): Promise<Blob> {
+/**
+ * The story picture of a rating: the app (or the visitor's photo, with the app's badge on it), the
+ * stars given, the place and its town, the address. The photo is only drawn in: canvas keeps none
+ * of its data (place, camera), and it never leaves the phone unless the visitor shares the picture.
+ */
+export async function storyPicture(
+  place: Place,
+  stars: number,
+  strings: Strings,
+  photo?: ImageBitmap,
+): Promise<Blob> {
   const town = townText(place, strings.card.near);
   const icon = await ready([
     strings.appName,
@@ -135,16 +175,23 @@ export async function storyPicture(place: Place, stars: number, strings: Strings
   context.font = font(400, 40);
   const tagline = balancedLines(strings.tagline, 860, (line) => context.measureText(line).width);
   // Instagram's and Facebook's own buttons cover about 250 px at the top and the bottom: the whole
-  // picture sits in the middle of what's left.
-  const height = 390 + cardHeight + 130 + tagline.length * 58 + 15;
-  const top = Math.max(200, 250 + (1420 - height) / 2);
-  badge(context, icon, middle, top + 100, 100);
-  context.fillStyle = CREAM;
-  context.font = font(700, 76);
-  context.fillText(strings.appName, middle, top + 300);
+  // picture sits in the middle of what's left. A photo takes what the card leaves, within limits.
+  const below = cardHeight + 130 + tagline.length * 58 + 15;
+  const photoHeight = Math.min(640, Math.max(380, 1420 - 40 - below));
+  const header = photo ? photoHeight + 40 : 390;
+  const top = Math.max(200, 250 + (1420 - header - below) / 2);
+  if (photo) {
+    framed(context, photo, 90, top, WIDTH - 180, photoHeight);
+    badge(context, icon, 90 + 96, top + 96, 64);
+  } else {
+    badge(context, icon, middle, top + 100, 100);
+    context.fillStyle = CREAM;
+    context.font = font(700, 76);
+    context.fillText(strings.appName, middle, top + 300);
+  }
 
   // The card: what was given, the stars, the place.
-  const cardTop = top + 390;
+  const cardTop = top + header;
   context.fillStyle = CREAM;
   context.beginPath();
   context.roundRect(90, cardTop, WIDTH - 180, cardHeight, 48);
@@ -183,7 +230,7 @@ export async function storyPicture(place: Place, stars: number, strings: Strings
     y += 58;
     context.fillText(line, middle, y);
   }
-  return pngOf(context);
+  return blobOf(context, photo ? 'image/jpeg' : 'image/png');
 }
 
 /**
@@ -211,5 +258,5 @@ export async function linkPreview(english: Strings, french: Strings): Promise<Bl
       context.fillText(line, 490, y);
       y += 42;
     }
-  return pngOf(context);
+  return blobOf(context);
 }

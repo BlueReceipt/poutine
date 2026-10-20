@@ -61,7 +61,20 @@ export interface Strings {
 
 /** Sharing a rating: a story picture with the place's link, through the phone's share sheet. */
 export interface ShareWords {
+  /** On every card: the place's link through the share sheet. */
+  place: string;
+  /** Sent with a place's link when its sharer hasn't rated it. */
+  placeText: (name: string) => string;
+  /** The link was copied instead (no share sheet in this browser). */
+  copied: string;
+  /** On the card a friend's link opened, and in its preview. */
+  friend: (stars: number) => string;
   button: string;
+  /** Share my rating with a photo drawn in: it never leaves the phone. */
+  withPhoto: string;
+  photoNote: string;
+  photoFailed: string;
+  cancel: string;
   making: string;
   /** Under the button: why the link is copied. */
   hint: string;
@@ -223,7 +236,16 @@ const english: Strings = {
     },
   },
   share: {
+    place: 'Share',
+    placeText: (name) => `${name}, on Pootsin`,
+    copied: 'Link copied.',
+    friend: (stars) =>
+      `A friend gave this place ${stars === 1 ? '1 star' : `${String(stars)} stars`}. What would you give it?`,
     button: 'Share my rating',
+    withPhoto: 'With my photo',
+    photoNote: 'Your photo stays on your phone: it’s only drawn into the picture you share.',
+    photoFailed: 'That photo couldn’t be opened. Try another one.',
+    cancel: 'Cancel',
     making: 'Making the picture…',
     hint: 'Sharing also copies the link, for a story’s Link sticker.',
     gave: 'I gave',
@@ -385,7 +407,16 @@ const french: Strings = {
     },
   },
   share: {
+    place: 'Partager',
+    placeText: (name) => `${name}, sur Poutine`,
+    copied: 'Lien copié.',
+    friend: (stars) =>
+      `Quelqu’un t’envoie sa note${NBSP}: ${stars === 1 ? '1 étoile' : `${String(stars)} étoiles`}. Et toi, tu lui donnes combien${NBSP}?`,
     button: 'Partager ma note',
+    withPhoto: 'Avec ma photo',
+    photoNote: `Votre photo reste sur votre téléphone${NBSP}: elle est seulement dessinée dans l’image partagée.`,
+    photoFailed: 'Cette photo n’a pas pu être ouverte. Essayez-en une autre.',
+    cancel: 'Annuler',
     making: 'Création de l’image…',
     hint: 'Partager copie aussi le lien, pour l’autocollant Lien d’une story.',
     gave: 'J’ai donné',

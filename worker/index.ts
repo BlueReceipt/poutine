@@ -18,7 +18,7 @@ export default {
     if (method === 'GET' && pathname === '/api/reviews') return placeReviews(request, env);
     if (pathname.startsWith('/api/')) return problem(404, 'not-found');
     if ((method === 'GET' || method === 'HEAD') && pathname.startsWith('/p/'))
-      return placePage(request, env);
+      return placePage(request, env, ctx);
     return env.ASSETS.fetch(request);
   },
 } satisfies ExportedHandler<Env>;

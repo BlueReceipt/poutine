@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { placeIdFromPath, placePath, placeUrl, previewOf, slugOf } from '../../src/domain/links.ts';
+import {
+  placeIdFromPath,
+  placePath,
+  placeUrl,
+  previewOf,
+  slugOf,
+  starsFromSearch,
+} from '../../src/domain/links.ts';
 import type { Place } from '../../src/domain/osmPlaces.ts';
 import { balancedLines, wrapLines } from '../../src/domain/text.ts';
 import { stringsFor } from '../../src/ui/strings.ts';
@@ -57,6 +64,21 @@ describe('place links', () => {
     for (const each of [place(), place({ osm: 'added/3', name: '???' })])
       expect(placeIdFromPath(placePath(each))).toBe(each.osm);
   });
+
+  it('carries the sharer’s stars, and only whole stars from 1 to 5', () => {
+    expect(placeUrl(place(), 4)).toBe(
+      'https://poutines.app/p/casse-croute-trempette-n265847671?s=4',
+    );
+    for (const stars of [null, undefined, 0, 6, 3.5])
+      expect(placeUrl(place(), stars)).toBe(
+        'https://poutines.app/p/casse-croute-trempette-n265847671',
+      );
+    expect(starsFromSearch('?s=4')).toBe(4);
+    expect(starsFromSearch('?lang=fr&s=1')).toBe(1);
+    expect(starsFromSearch('?s=2&x=1')).toBe(2);
+    for (const search of ['', '?s=0', '?s=6', '?s=45', '?s=4x', '?ss=4', '?s='])
+      expect(starsFromSearch(search)).toBeNull();
+  });
 });
 
 describe('link previews', () => {
@@ -68,6 +90,7 @@ describe('link previews', () => {
       summary: strings.ratings.summary,
       none: strings.ratings.none,
       near: strings.card.near,
+      friend: strings.share.friend,
     };
   };
 
@@ -78,6 +101,18 @@ describe('link previews', () => {
     });
     expect(previewOf(place(), undefined, words('fr')).description).toBe(
       'Pas encore de note. Les casse-croûtes et cantines du Québec sur une carte',
+    );
+  });
+
+  it('leads with a friend’s stars when the link carries them', () => {
+    expect(previewOf(place(), { count: 3, total: 13 }, words('en'), 4)).toEqual({
+      title: '4 ★ · Casse-Croûte Trempette · Saint-Rémi',
+      description:
+        'A friend gave this place 4 stars. What would you give it? Québec’s casse-croûtes and potato shacks on a map',
+    });
+    const nbsp = String.fromCharCode(0xa0);
+    expect(previewOf(place(), undefined, words('fr'), 1).description).toBe(
+      `Quelqu’un t’envoie sa note${nbsp}: 1 étoile. Et toi, tu lui donnes combien${nbsp}? Les casse-croûtes et cantines du Québec sur une carte`,
     );
   });
 

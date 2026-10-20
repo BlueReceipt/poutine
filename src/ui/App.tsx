@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import placesUrl from '../../data/places.json?url';
 import { groupByAddress } from '../domain/groups.ts';
-import { placeIdFromPath, placePath } from '../domain/links.ts';
+import { placeIdFromPath, placePath, starsFromSearch } from '../domain/links.ts';
 import type { Place } from '../domain/osmPlaces.ts';
 import type { RatingTotal } from '../domain/ratings.ts';
 import { nearest, searchPlaces } from '../domain/search.ts';
@@ -123,14 +123,19 @@ export function App({ strings }: { strings: Strings }) {
     [groupOf],
   );
 
-  // A place's link (poutines.app/p/…) opens its card once the places are in.
+  // A place's link (poutines.app/p/…) opens its card once the places are in; a friend's stars in
+  // it ("?s=4") show on that card for the visit.
   const linked = useRef(placeIdFromPath(window.location.pathname));
+  const [friend, setFriend] = useState<{ place: string; stars: number } | null>(null);
   useEffect(() => {
     if (!places || !linked.current) return;
     const id = linked.current;
     linked.current = null;
     const chosen = places.find((candidate) => candidate.osm === id);
-    if (chosen) show(chosen);
+    if (!chosen) return;
+    const stars = starsFromSearch(window.location.search);
+    if (stars !== null) setFriend({ place: chosen.osm, stars });
+    show(chosen);
   }, [places, show]);
 
   // The address bar names the open place, so the browser's own Share and Copy link give its link.
@@ -265,6 +270,7 @@ export function App({ strings }: { strings: Strings }) {
           strings={strings}
           totals={totals}
           ratedAt={ratedAt}
+          friend={friend}
           onRated={rated}
           onChoose={(placeId) => {
             setSelection({ groupId: group.id, placeId });

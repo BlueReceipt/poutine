@@ -556,6 +556,31 @@ button.action.primary {
   font-style: normal;
 }
 
+/* A friend's link: their stars and the question back, under the place's own stars. */
+.card .friend {
+  margin: 8px 0;
+  padding: 10px 12px;
+  border-left: 4px solid #7a4a2a;
+  background: #f1f1ee;
+}
+
+/* With my photo: the picture made, small, beside Share and Cancel. */
+.with-photo {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.with-photo img {
+  flex: none;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
+}
+
+.with-photo .hint {
+  margin: 0;
+}
+
 .share-link {
   font-weight: 700;
   overflow-wrap: anywhere;

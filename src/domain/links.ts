@@ -38,9 +38,22 @@ export function placePath(place: Pick<Place, 'osm' | 'name'>): string {
   return `/p/${slug ? `${slug}-` : ''}${KINDS[kind] ?? ''}${number}`;
 }
 
-/** The place's link on the site's own address, wherever the page that shares it runs. */
-export function placeUrl(place: Pick<Place, 'osm' | 'name'>): string {
-  return `${SITE}${placePath(place)}`;
+/**
+ * The place's link on the site's own address, wherever the page that shares it runs. With the
+ * sharer's stars (Alex, 2026-10-20: "What would you give?"), the link carries them, and only them:
+ * "?s=4". They're a friend's word, never counted as a rating.
+ */
+export function placeUrl(place: Pick<Place, 'osm' | 'name'>, stars?: number | null): string {
+  const given = stars && isStars(stars) ? `?s=${String(stars)}` : '';
+  return `${SITE}${placePath(place)}${given}`;
+}
+
+const isStars = (stars: number): boolean => Number.isInteger(stars) && stars >= 1 && stars <= 5;
+
+/** The sharer's stars a link carries ("?s=4"), 1 to 5; null for none or anything else. */
+export function starsFromSearch(search: string): number | null {
+  const found = /[?&]s=([1-5])(?:&|$)/.exec(search);
+  return found ? Number(found[1]) : null;
 }
 
 const PLACE_PATH = /^\/p\/(?:[a-z0-9-]*-)?([nwra])(\d{1,20})\/?$/i;
@@ -63,22 +76,28 @@ export interface PreviewWords {
   summary: (average: number, count: number) => string;
   none: string;
   near: (town: string) => string;
+  /** A link carrying a friend's stars: what they gave, and the question back. */
+  friend: (stars: number) => string;
 }
 
 /**
  * What a link preview says (WhatsApp, Messenger, a Facebook post): the place and its town, then
- * its stars and what the site is.
+ * its stars and what the site is. A link with a friend's stars leads with them.
  */
 export function previewOf(
   place: Place,
   total: RatingTotal | undefined,
   words: PreviewWords,
+  friend: number | null = null,
 ): { title: string; description: string } {
   const town = townText(place, words.near);
+  const named = town ? `${place.name} · ${town}` : place.name;
+  if (friend !== null)
+    return {
+      title: `${String(friend)} ★ · ${named}`,
+      description: `${words.friend(friend)} ${words.tagline}`,
+    };
   const average = averageOf(total);
   const stars = average === null || !total ? words.none : words.summary(average, total.count);
-  return {
-    title: town ? `${place.name} · ${town}` : place.name,
-    description: `${stars}. ${words.tagline}`,
-  };
+  return { title: named, description: `${stars}. ${words.tagline}` };
 }
