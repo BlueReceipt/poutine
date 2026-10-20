@@ -71,6 +71,7 @@ export function Settings({ strings, chosen, onLanguage, onClose }: Props) {
         ))}
       </ul>
       <p>{words.counts.not}</p>
+      <p>{words.counts.example}</p>
       <p>
         {words.counts.dare}{' '}
         <a href={POUTINE_CRIMES} target="_blank" rel="noopener noreferrer">

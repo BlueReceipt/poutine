@@ -105,6 +105,8 @@ export interface Strings {
       title: string;
       items: readonly string[];
       not: string;
+      /** What loaded fries look like, so nobody calls them poutine. */
+      example: string;
       /** Before the link to r/PoutineCrimes. */
       dare: string;
     };
@@ -389,10 +391,12 @@ const english: Strings = {
       title: 'What counts as poutine',
       items: [
         'Potato fries (red potatoes, for that roadside feel).',
-        'Sauce brune: Québec’s take on sauce espagnole, one of the French mother sauces. NOT GRAVY.',
-        'Cheese curds, typically cheddar.',
+        'Sauce brune: Québec’s take on sauce espagnole, one of the French mother sauces. IT IS NOT A GRAVY. Sauces can vary: shoutout to Italian poutine, chicken BBQ poutine or seafood poutine.',
+        'Cheese curds: typically cheddar, never melted or shredded. They need to squeak as you eat them, for that true fresh quality.',
       ],
       not: 'Missing one of the three? It’s not poutine. Call it disco fries, loaded fries or even POO-teen, but that ain’t it, chef.',
+      example:
+        'Loaded fries, for example: fries under shawarma chicken and garlic-mayo zigzags, currywurst, or pulled pork and slaw, with melted cheese and not one fresh curd. Tasty maybe. Not poutine.',
       dare: 'If you dare, share it to',
     },
   },
@@ -650,12 +654,13 @@ const french: Strings = {
     counts: {
       title: 'Ce qui fait une poutine',
       items: [
-        'Des frites (des patates rouges, pour le goût de casse-croûte au bord de la route).',
-        `De la sauce brune${NBSP}: la version québécoise de la sauce espagnole, une des sauces mères françaises. PAS du gravy.`,
-        'Du fromage en grains, souvent du cheddar.',
+        'Des frites (des patates rouges, pour le goût du casse-croûte sur le bord du chemin).',
+        `De la sauce brune, la version québécoise de la sauce espagnole (une des sauces mères françaises). Ou une autre sauce${NBSP}: shoutout à l’italienne, à la BBQ ou aux fruits de mer.`,
+        `Du fromage en grains frais, ou «${NBSP}squeek squeek${NBSP}».`,
       ],
-      not: `Il en manque un des trois${NBSP}? Ce n’est pas une poutine. Appelez ça des disco fries, des frites garnies ou même une POO-teen, mais c’est pas ça, chef.`,
-      dare: 'Si vous osez, partagez-la sur',
+      not: `Si t’as pas au moins ça, t’as pas une poutine${NBSP}: t’as des frites loadées, ou quelque chose d’autre.`,
+      example: `Des frites loadées, par exemple${NBSP}: des frites sous du poulet shawarma et des zigzags de mayo à l’ail, de la currywurst ou du porc effiloché avec de la salade de chou, du fromage fondu et pas un seul grain de fromage frais. Peut-être bon. Pas une poutine.`,
+      dare: `T’es pas sûr${NBSP}? Va voir sur`,
     },
   },
   share: {
