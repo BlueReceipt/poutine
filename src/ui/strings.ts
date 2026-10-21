@@ -136,13 +136,32 @@ export interface Strings {
      */
     backup: {
       title: string;
+      /** Where the ratings live, and what clearing does. */
       text: string;
+      /** The link, alone or after the passkey ("Or keep this link"). */
+      link: string;
+      orLink: string;
       keep: string;
       copy: string;
       copied: string;
       send: string;
       empty: string;
     };
+  };
+  /**
+   * Visits kept by a passkey (Alex, 2026-10-21: "gardé mes visites meme si je vide lhistorique"):
+   * the offer, its outcome, and finding them again; `name` is the passkey's in the password manager.
+   */
+  keep: {
+    save: string;
+    saving: string;
+    saved: string;
+    kept: string;
+    failed: string;
+    find: string;
+    findMenu: string;
+    none: string;
+    name: string;
   };
   /** A backup link opened: its ratings coming back to this browser. */
   restore: {
@@ -519,14 +538,28 @@ const english: Strings = {
       alt: 'Rating scale. 1 out of 5, Mr. Poo Teen: very bad. 2, poor: barely a poutine. 3, average: does the job. 4, good: solid and tasty. 5, the golden pouts: the ultimate perfection!',
     },
     backup: {
-      title: 'Your backup link',
-      text: 'Your ratings live in this browser: clearing its history erases them here. Keep this link, in your notes or sent to yourself. Opened in any browser, it brings back your bowls, your count, and the ratings you can change.',
+      title: 'Keep your visits',
+      text: 'Your ratings live in this browser: clearing its history erases them here.',
+      link: 'Keep this link, in your notes or sent to yourself. Opened in any browser, it brings back your bowls, your count, and the ratings you can change.',
+      orLink:
+        'Or keep this link, in your notes or sent to yourself. Opened in any browser, it brings back your bowls, your count, and the ratings you can change.',
       keep: 'Keep it to yourself: anyone with it can change your ratings.',
       copy: 'Copy the link',
       copied: 'Copied!',
       send: 'Send it to myself',
       empty: 'Rate a place, and the link that brings your ratings back shows up here.',
     },
+  },
+  keep: {
+    save: 'Keep my visits even if I clear my history',
+    saving: 'One moment…',
+    saved: 'Kept: your visits will come back even if you clear your history.',
+    kept: 'Your visits are kept in your phone.',
+    failed: 'Your visits couldn’t be kept this time.',
+    find: 'Rated places before? Get my visits back',
+    findMenu: 'Get my visits back',
+    none: 'No visits kept on this phone.',
+    name: 'My visits',
   },
   restore: {
     title: 'Your ratings',
@@ -886,14 +919,28 @@ const french: Strings = {
       alt: `Échelle d’évaluation. 1 sur 5, Mr. Poo Teen${NBSP}: le pire du pire. 2, décevant${NBSP}: presque rien dedans. 3, correct${NBSP}: fait la job, sans plus. 4, bon${NBSP}: solide et savoureux. 5, la pouts d’or${NBSP}: la perfection suprême${NBSP}!`,
     },
     backup: {
-      title: 'Votre lien de sauvegarde',
-      text: `Vos notes vivent dans ce navigateur${NBSP}: vider son historique les efface d’ici. Gardez ce lien, dans vos notes ou envoyé à vous-même. Ouvert dans n’importe quel navigateur, il ramène vos bols, votre compteur et les notes que vous pouvez changer.`,
+      title: 'Garder vos visites',
+      text: `Vos notes vivent dans ce navigateur${NBSP}: vider son historique les efface d’ici.`,
+      link: 'Gardez ce lien, dans vos notes ou envoyé à vous-même. Ouvert dans n’importe quel navigateur, il ramène vos bols, votre compteur et les notes que vous pouvez changer.',
+      orLink:
+        'Ou gardez ce lien, dans vos notes ou envoyé à vous-même. Ouvert dans n’importe quel navigateur, il ramène vos bols, votre compteur et les notes que vous pouvez changer.',
       keep: `Gardez-le pour vous${NBSP}: avec lui, n’importe qui peut changer vos notes.`,
       copy: 'Copier le lien',
       copied: `Copié${NBSP}!`,
       send: 'Me l’envoyer',
       empty: 'Notez une place, et le lien qui ramène vos notes apparaîtra ici.',
     },
+  },
+  keep: {
+    save: 'Garder mes visites même si je vide l’historique',
+    saving: 'Un instant…',
+    saved: `C’est gardé${NBSP}: vos visites reviendront même si vous videz l’historique.`,
+    kept: 'Vos visites sont gardées dans votre téléphone.',
+    failed: 'Vos visites n’ont pas pu être gardées cette fois.',
+    find: `Déjà noté des places${NBSP}? Retrouver mes visites`,
+    findMenu: 'Retrouver mes visites',
+    none: 'Aucune visite gardée sur ce téléphone.',
+    name: 'Mes visites',
   },
   restore: {
     title: 'Vos notes',

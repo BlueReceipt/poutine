@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { backupLink } from '../domain/backup.ts';
+import { FindVisits, KeepVisits } from './KeepVisits.tsx';
+import { passkeysWork } from './passkey.ts';
 import { keepStorage, myRatings, savedRater } from './rater.ts';
 import type { Language, Strings } from './strings.ts';
 
@@ -8,6 +10,8 @@ interface Props {
   /** The language chosen here before; null when the app follows the phone. */
   chosen: Language | null;
   onLanguage: (language: Language | null) => void;
+  /** Visits found in a passkey: their key, to bring them back. */
+  onFound: (key: string) => void;
   onClose: () => void;
 }
 
@@ -33,7 +37,7 @@ const RATING_SCALE = '/examples/rating-scale.webp';
  * nothing less), Alex's rating scale with "Pootsin, not poo-teen" back in English, then poutine's
  * history, two articles ("put what counts as poutine, over the history section").
  */
-export function Settings({ strings, chosen, onLanguage, onClose }: Props) {
+export function Settings({ strings, chosen, onLanguage, onFound, onClose }: Props) {
   const heading = useRef<HTMLHeadingElement>(null);
   const words = strings.settings;
 
@@ -77,7 +81,7 @@ export function Settings({ strings, chosen, onLanguage, onClose }: Props) {
         ))}
       </div>
       <h3>{words.backup.title}</h3>
-      <BackupLink words={words.backup} />
+      <BackupLink strings={strings} onFound={onFound} />
       <h3>{words.counts.title}</h3>
       <ul class="counts">
         {words.counts.items.map((item) => (
@@ -132,15 +136,24 @@ export function Settings({ strings, chosen, onLanguage, onClose }: Props) {
 }
 
 /**
- * The backup link (Alex, 2026-10-21: "lets do the link in the secret menu"): this browser's key,
+ * Keeping the visits: in a passkey first (Alex, 2026-10-21, "Garder mes visites même si je vide
+ * l'historique"), or the backup link ("lets do the link in the secret menu"): this browser's key,
  * whole and selectable, to copy or send to oneself; either asks the browser to keep the site's
- * data. Before any rating there's no key yet, and the menu says where the link will show.
+ * data. Before any rating there's no key yet: visits kept in a passkey can be found, and the menu
+ * says where the link will show.
  */
-function BackupLink({ words }: { words: Strings['settings']['backup'] }) {
+function BackupLink({ strings, onFound }: { strings: Strings; onFound: (key: string) => void }) {
+  const words = strings.settings.backup;
   const shown = useRef<HTMLElement>(null);
   const [copied, setCopied] = useState(false);
   const rater = savedRater();
-  if (!rater || Object.keys(myRatings()).length === 0) return <p class="hint">{words.empty}</p>;
+  if (!rater || Object.keys(myRatings()).length === 0)
+    return (
+      <>
+        <FindVisits strings={strings} label={strings.keep.findMenu} onFound={onFound} />
+        <p class="hint">{words.empty}</p>
+      </>
+    );
   const link = backupLink(rater);
   // Where copying isn't allowed, the link is selected for the visitor to copy.
   const select = () => {
@@ -153,6 +166,8 @@ function BackupLink({ words }: { words: Strings['settings']['backup'] }) {
   return (
     <>
       <p>{words.text}</p>
+      <KeepVisits strings={strings} menu />
+      <p>{passkeysWork() ? words.orLink : words.link}</p>
       <p class="key-link">
         <code ref={shown}>{link}</code>
       </p>

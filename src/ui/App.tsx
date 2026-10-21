@@ -16,6 +16,7 @@ import { closeWelcome, myRatings, nothingSaved } from './rater.ts';
 import { NearbyList, type NearState } from './NearbyList.tsx';
 import { PlaceCard } from './PlaceCard.tsx';
 import { SearchBar } from './SearchBar.tsx';
+import { markVisitsKept } from './passkey.ts';
 import { Restore } from './Restore.tsx';
 import { Settings } from './Settings.tsx';
 import { chosenLanguage } from './settings.ts';
@@ -82,6 +83,13 @@ export function App({
   const restored = useCallback(() => {
     setMine(myRatings());
     setWelcome(false);
+  }, []);
+  // Visits found in a passkey (KeepVisits.tsx): their key brought back like a link's.
+  const found = useCallback((key: string) => {
+    markVisitsKept();
+    setWelcome(false);
+    setSettings(false);
+    setBackupKey(key);
   }, []);
   const seq = useRef(0);
   const failed = useCallback(() => {
@@ -410,6 +418,7 @@ export function App({
           strings={strings}
           chosen={chosenLanguage()}
           onLanguage={onLanguage}
+          onFound={found}
           onClose={() => {
             setSettings(false);
           }}
@@ -427,7 +436,7 @@ export function App({
           }}
         />
       ) : (
-        welcome && places && <Welcome strings={strings} onClose={closeWelcomeBox} />
+        welcome && places && <Welcome strings={strings} onClose={closeWelcomeBox} onFound={found} />
       )}
     </main>
   );

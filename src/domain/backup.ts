@@ -23,3 +23,17 @@ export function keyFromHash(hash: string): string | null {
     .toLowerCase();
   return isRaterId(key) ? key : null;
 }
+
+/** A rater's ID as 16 bytes: the user ID of the passkey that keeps it (src/ui/passkey.ts). */
+export function raterBytes(rater: string): Uint8Array<ArrayBuffer> {
+  const hex = rater.replaceAll('-', '');
+  return Uint8Array.from({ length: 16 }, (_, i) => parseInt(hex.slice(i * 2, i * 2 + 2), 16));
+}
+
+/** The rater's ID a passkey's user ID holds, or null when it holds something else. */
+export function raterOfBytes(bytes: Uint8Array): string | null {
+  if (bytes.length !== 16) return null;
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+  const rater = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  return isRaterId(rater) ? rater : null;
+}

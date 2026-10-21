@@ -10,6 +10,7 @@ import {
   type Review,
 } from '../domain/ratings.ts';
 import { Bowl } from './Bowl.tsx';
+import { KeepVisits } from './KeepVisits.tsx';
 import { bowlFor, fillOf } from './bowlArt.ts';
 import { forgetStars, myRatings, myStars, raterId, rememberStars } from './rater.ts';
 import { photoOf, sharePlace, shareStory, storyFile, type Shared } from './sharing.ts';
@@ -274,6 +275,7 @@ function RatingStatus({ rating, strings }: { rating: Rating; strings: Strings })
               : words.thanks(rating.count)}
         </p>
       )}
+      {rating.state === 'sent' && <KeepVisits strings={strings} />}
       {rating.given && rating.state !== 'sending' && <p class="hint">{words.clearHint}</p>}
       {rating.trouble && (
         <p class="problems" role="alert">
