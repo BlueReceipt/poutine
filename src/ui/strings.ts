@@ -108,15 +108,22 @@ export interface Strings {
       /** French: the end of `not`, linked to the menu of loaded fries sold as poutine; English: none. */
       notLinked: string;
       /**
-       * English only (French needn't: Alex, 2026-10-20): what loaded fries look like, before the link
-       * to a menu of them sold as poutine, and the link's words. The picture names its own source.
+       * English only (French needn't: Alex, 2026-10-20): what loaded fries look like, the words before
+       * the link to a menu of them sold as poutine, the link's words and what follows them. The
+       * picture names its own source.
        */
       example: string;
-      seeOne: string;
       oneSold: string;
+      afterSold: string;
       /** Before the link to r/PoutineCrimes. */
       dare: string;
     };
+    /**
+     * Alex's rating scale, a picture (Alex, 2026-10-20: "I like having it in the secret menu. but I
+     * thought we could use this to bring back the original pootsin not poo-teen. message"): its
+     * heading, the line under it (English only), and the picture's words for screen readers.
+     */
+    scale: { title: string; line: string; alt: string };
   };
   hours: HoursWords;
 }
@@ -401,13 +408,18 @@ const english: Strings = {
         'Sauce brune: Québec’s take on sauce espagnole, one of the French mother sauces. IT IS NOT A GRAVY. Sauces can vary: shoutout to Italian poutine, chicken BBQ poutine or seafood poutine.',
         'Cheese curds: typically cheddar, never melted or shredded. They need to squeak as you eat them, for that true fresh quality.',
       ],
-      not: 'Missing one of the three? It’s not poutine. Call it disco fries, loaded fries or even POO-teen, but that ain’t it, chef.',
+      not: 'Missing even one element of the holy trinity? It’s not poutine. Call it disco fries, loaded fries, or “POO-teen” if you must, but that ain’t it, chef.',
       notLinked: '',
       example:
-        'Loaded fries, for example: fries under shawarma chicken and garlic-mayo zigzags, currywurst, or pulled pork and slaw, with melted cheese and not one fresh curd. Tasty maybe. Not poutine.',
-      seeOne: 'Like these, sold in Germany:',
-      oneSold: 'a menu of “poutines”',
-      dare: 'If you dare, share it to',
+        'Burying fries under shawarma chicken and garlic-mayo zigzags, currywurst, or pulled pork and slaw—finished with melted shredded cheese instead of a single fresh curd—just gives you loaded fries. Delicious? Probably. Poutine? Absolutely not. Case in point: this',
+      oneSold: 'German menu boldly advertising “poutines”',
+      afterSold: 'with zero curds in sight.',
+      dare: 'Spot an imposter in the wild? Report the offense to',
+    },
+    scale: {
+      title: 'Rating scale',
+      line: 'Pootsin, not poo-teen.',
+      alt: 'Rating scale. 1 out of 5, Mr. Poo Teen: very bad. 2, poor: barely a poutine. 3, average: does the job. 4, good: solid and tasty. 5, the golden pouts: the ultimate perfection!',
     },
   },
   share: {
@@ -665,15 +677,20 @@ const french: Strings = {
       title: 'Ce qui fait une poutine',
       items: [
         'Des frites (des patates rouges, pour le goût du casse-croûte sur le bord du chemin).',
-        `De la sauce brune, la version québécoise de la sauce espagnole (une des sauces mères françaises). Ou une autre sauce${NBSP}: shoutout à l’italienne, à la BBQ ou aux fruits de mer.`,
+        `De la sauce brune, la version québécoise de la sauce espagnole (une des sauces mères françaises). Shoutout au${NBSP}: sauce italienne, BBQ, fruits-de-mer.`,
         `Du fromage en grains frais, ou «${NBSP}squeek squeek${NBSP}».`,
       ],
       not: `Si t’as pas au moins ça, t’as pas une poutine${NBSP}: t’as des frites loadées, `,
       notLinked: 'ou quelque chose d’autre',
       example: '',
-      seeOne: '',
       oneSold: '',
+      afterSold: '',
       dare: `T’es pas sûr${NBSP}? Va voir sur`,
+    },
+    scale: {
+      title: 'Échelle d’évaluation',
+      line: '',
+      alt: `Échelle d’évaluation. 1 sur 5, Mr. Poo Teen${NBSP}: le pire du pire. 2, décevant${NBSP}: presque rien dedans. 3, correct${NBSP}: fait la job, sans plus. 4, bon${NBSP}: solide et savoureux. 5, la pouts d’or${NBSP}: la perfection suprême${NBSP}!`,
     },
   },
   share: {

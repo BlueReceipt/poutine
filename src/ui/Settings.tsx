@@ -18,6 +18,8 @@ const POUTINE_CRIMES = 'https://www.reddit.com/r/PoutineCrimes/';
  * example ("french doesn't need it. only the english side").
  */
 const SOLD_AS_POUTINE = '/examples/not-poutine.webp';
+/** Alex's rating scale, the five bowls in both languages (2026-10-20). */
+const RATING_SCALE = '/examples/rating-scale.webp';
 
 /**
  * The secret menu (Alex, 2026-10-20: "a cheeky settings tab hidden when someone taps the poutine
@@ -25,8 +27,8 @@ const SOLD_AS_POUTINE = '/examples/not-poutine.webp';
  * other things"): opened by the app's name in the search bar. The language: the phone's, French or
  * English, kept on this phone, every word in the menu's own language ("French secret menu
  * shouldn't have English on its tab"). Then what counts as poutine (fries, sauce brune, curds,
- * nothing less), over poutine's history, two articles ("put what counts as poutine, over the
- * history section").
+ * nothing less), Alex's rating scale with "Pootsin, not poo-teen" back in English, then poutine's
+ * history, two articles ("put what counts as poutine, over the history section").
  */
 export function Settings({ strings, chosen, onLanguage, onClose }: Props) {
   const heading = useRef<HTMLHeadingElement>(null);
@@ -90,11 +92,11 @@ export function Settings({ strings, chosen, onLanguage, onClose }: Props) {
       </p>
       {words.counts.example && (
         <p>
-          {words.counts.example} {words.counts.seeOne}{' '}
+          {words.counts.example}{' '}
           <a href={SOLD_AS_POUTINE} target="_blank" rel="noopener noreferrer">
             {words.counts.oneSold}
-          </a>
-          .
+          </a>{' '}
+          {words.counts.afterSold}
         </p>
       )}
       <p>
@@ -104,6 +106,11 @@ export function Settings({ strings, chosen, onLanguage, onClose }: Props) {
         </a>
         .
       </p>
+      <h3>{words.scale.title}</h3>
+      {words.scale.line && <p>{words.scale.line}</p>}
+      <a class="scale" href={RATING_SCALE} target="_blank" rel="noopener noreferrer">
+        <img src={RATING_SCALE} alt={words.scale.alt} width="1024" height="572" loading="lazy" />
+      </a>
       <h3>{words.history}</h3>
       <ul class="articles">
         {words.articles.map((article) => (

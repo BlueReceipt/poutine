@@ -8,6 +8,7 @@ import { confirmedByRaters, type RatingTotal } from '../domain/ratings.ts';
 import { around, searchPlaces } from '../domain/search.ts';
 import { MapView, type MapRequest } from '../map/MapView.tsx';
 import { AddPlace, type PickStart } from './AddPlace.tsx';
+import { Bowl } from './Bowl.tsx';
 import { noFixOf, whereAmI } from './location.ts';
 import { closeWelcome, myRatings, nothingSaved } from './rater.ts';
 import { NearbyList, type NearState } from './NearbyList.tsx';
@@ -311,7 +312,9 @@ export function App({
                 setTally(true);
               }}
             >
-              <img src="/icon.svg" alt="" width="24" height="24" />
+              <span class="pill-bowl">
+                <Bowl nth={5} fill={1} />
+              </span>
               {eaten.length}
             </button>
           )}

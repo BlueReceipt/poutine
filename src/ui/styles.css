@@ -223,6 +223,13 @@ body,
   font-weight: 800;
 }
 
+/* The places-eaten pill's loaded bowl, in place of the old logo. */
+.pill-bowl {
+  display: inline-block;
+  width: 32px;
+  height: 25px;
+}
+
 .card .tally-motto {
   margin: 0 0 8px;
   color: var(--graphite);
@@ -405,6 +412,14 @@ body,
 /* Links in ink, like the card's own. */
 .card.settings a {
   color: var(--ink);
+}
+
+/* Alex's rating scale, the width of the menu; a tap opens it whole. */
+.card.settings .scale img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
 }
 
 /* À côté with nothing within 15 km: "La plus proche :" over the one place. */
