@@ -99,6 +99,10 @@ export interface Place {
   picked: boolean;
   /** Its short link, poutines.app/<link> (data/links.json), set when the list is written. */
   link?: string;
+  /** The links of other entries for it, merged into it since: they open it still. */
+  oldLinks?: string[];
+  /** While the list is built: the IDs of other entries for it merged into it (for `oldLinks`). */
+  absorbed?: string[];
 }
 
 const PROVINCES: Record<string, string> = {
@@ -511,8 +515,10 @@ const DETAILS = [
 
 /**
  * One place out of two entries for it: the first kept, what it lacks taken from the other (its
- * street address, phone, links, hours, cuisine), and the other's pin when only the other's stands
- * on their shared address (a visitor's pin put on the street alone). Of two nested names, the
+ * street address, phone, links, hours, cuisine), and the other's pin and spelling of the street
+ * when only the other's stands on their shared address (a visitor's pin put on the street alone).
+ * The entry not kept leaves its ID and link to it, so a link shared before still opens it. Of two
+ * nested names, the
  * shorter ("Le Verger à
  * Ti-Paul"), and that entry's ID and link unless the first's ID is the one already known (it has
  * a link, maybe ratings: `known`). `own` keeps the first's name and ID whatever: a pick's, or a
@@ -538,6 +544,7 @@ export function merged(
     other.addressCheck === 'confirmed' &&
     sameAddress(kept, other)
   ) {
+    place.street = other.street;
     place.lat = other.lat;
     place.lon = other.lon;
     place.addressCheck = 'confirmed';
@@ -553,6 +560,19 @@ export function merged(
       place.link = other.link;
     }
   }
+  // Nothing goes when the other is the same entry as the list last held it (withAdded).
+  const dropped = other.osm === kept.osm ? null : place.osm === kept.osm ? other : kept;
+  const absorbed = [...(kept.absorbed ?? []), ...(other.absorbed ?? []), dropped?.osm ?? ''].filter(
+    (id, at, all) => id && id !== place.osm && all.indexOf(id) === at,
+  );
+  const oldLinks = [
+    ...(kept.oldLinks ?? []),
+    ...(other.oldLinks ?? []),
+    dropped?.link ?? '',
+  ].filter((link, at, all) => link && link !== place.link && all.indexOf(link) === at);
+  if (absorbed.length > 0) place.absorbed = absorbed;
+  if (oldLinks.length > 0) place.oldLinks = oldLinks;
+  else delete place.oldLinks;
   return place;
 }
 
@@ -564,16 +584,22 @@ export function merged(
 export function withAdded(places: readonly Place[], added: readonly Place[]): Place[] {
   const ids = new Set(added.map((place) => place.osm));
   const listed = places.filter((place) => !ids.has(place.osm));
+  // As the list last held it (npm run places -- --offline): what it took from twins gone since.
+  const before = new Map(places.filter((place) => ids.has(place.osm)).map((p) => [p.osm, p]));
   const gone = new Set<string>();
-  const joined = added.map((place) =>
-    listed
+  const joined = added.map((place) => {
+    const earlier = before.get(place.osm);
+    return listed
       .filter((other) => twins(place, other))
-      .reduce((kept, other) => {
-        gone.add(other.osm);
-        // The approved place keeps its own ID, name and link: they are already shared.
-        return merged(kept, other, { own: true });
-      }, place),
-  );
+      .reduce(
+        (kept, other) => {
+          gone.add(other.osm);
+          // The approved place keeps its own ID, name and link: they are already shared.
+          return merged(kept, other, { own: true });
+        },
+        earlier ? merged(place, earlier, { own: true }) : place,
+      );
+  });
   return [...listed.filter((place) => !gone.has(place.osm)), ...joined];
 }
 

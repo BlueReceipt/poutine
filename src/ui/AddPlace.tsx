@@ -116,7 +116,14 @@ export function AddPlace(props: Props) {
     if (!needsNameAndTown()) return;
     setBusy('finding');
     setNotice(null);
-    const query = { street: street.trim(), town: city.trim(), postalCode: '', province };
+    // The civic number and street alone: a whole address pasted there is cut at its first comma.
+    const line = splitStreet(street);
+    const query = {
+      street: [line.housenumber, line.street].filter(Boolean).join(' '),
+      town: city.trim(),
+      postalCode: '',
+      province,
+    };
     try {
       const response = await fetch('/api/geocode', {
         method: 'POST',
@@ -125,7 +132,7 @@ export function AddPlace(props: Props) {
       });
       if (!response.ok) throw new Error(String(response.status));
       const { candidates } = (await response.json()) as { candidates: AddressCandidate[] };
-      const placement = street.trim() ? placementFor(query, candidates) : null;
+      const placement = query.street ? placementFor(query, candidates) : null;
       if (placement) {
         setPostcode(placement.postalCode);
         pinAt(placement, placement.precision, placement.precision === 'address' ? 18 : 16);

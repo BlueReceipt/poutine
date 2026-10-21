@@ -1,7 +1,8 @@
 // A place's short link (/labanquise): the app's own page, its title and link preview naming the
 // place and its stars (or a friend's, from "?s=4"), for WhatsApp, Messenger, Facebook and the
 // rest. The page then opens the place's card itself. Cloudflare keeps each page five minutes. The
-// links shared before short links (/p/la-banquise-n5228808422) are sent to the short one.
+// links shared before short links (/p/la-banquise-n5228808422) are sent to the short one, and so
+// are the links of entries merged into a place since (/alfahotdog to /alfa).
 import {
   isEnglishLink,
   placeIdFromPath,
@@ -15,18 +16,21 @@ import { linkFromPath } from '../src/domain/shortLinks.ts';
 import { friendCodeFits } from './codes.ts';
 import { approvedPlaces } from './added.ts';
 import { countLater } from './counts.ts';
-import { listed } from './list.ts';
+import { givenLinks, listed } from './list.ts';
 import type { RatingTotal } from '../src/domain/ratings.ts';
 import { phoneLanguage, stringsFor, type Language } from '../src/ui/strings.ts';
 
 const byId = new Map(listed.map((p) => [p.osm, p]));
 const byLink = new Map(listed.flatMap((p) => (p.link ? [[p.link, p] as const] : [])));
+const byOldLink = new Map(
+  listed.flatMap((p) => (p.oldLinks ?? []).map((old) => [old, p] as const)),
+);
 
 /** A link from before short links: to the place's short link, a friend's stars kept. */
 export function oldPlaceLink(request: Request, env: Env): Promise<Response> | Response {
   const url = new URL(request.url);
   const id = placeIdFromPath(url.pathname);
-  const place = id ? byId.get(id) : undefined;
+  const place = id ? (byId.get(id) ?? byOldLink.get(givenLinks[id] ?? '')) : undefined;
   if (!place) return env.ASSETS.fetch(new URL('/', url));
   return Response.redirect(`${url.origin}${placePath(place)}${url.search}`, 301);
 }
@@ -72,6 +76,8 @@ export async function placePage(
 ): Promise<Response> {
   const url = new URL(request.url);
   const word = linkFromPath(url.pathname);
+  const merged = word ? byOldLink.get(word) : undefined;
+  if (merged) return Response.redirect(`${url.origin}${placePath(merged)}${url.search}`, 301);
   // A place approved since the list was built has its link in D1 (worker/added.ts).
   const place = word
     ? (byLink.get(word) ?? (await approvedPlaces(env, word).catch(() => []))[0])

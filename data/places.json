@@ -4421,7 +4421,10 @@
    ],
    "poutine": "unconfirmed",
    "picked": false,
-   "link": "pouletbronzemtl"
+   "link": "pouletbronzemtl",
+   "oldLinks": [
+    "pouletbronze"
+   ]
   },
   {
    "osm": "node/4092733399",
@@ -5703,7 +5706,10 @@
    ],
    "poutine": "name",
    "picked": true,
-   "link": "chezmatantepatatesfrites"
+   "link": "chezmatantepatatesfrites",
+   "oldLinks": [
+    "chezmatante"
+   ]
   },
   {
    "osm": "node/4571604461",
@@ -12621,7 +12627,7 @@
    "citySource": "adresses-quebec",
    "province": "QC",
    "postcode": "J0K 1T0",
-   "addressCheck": "unchecked",
+   "addressCheck": "confirmed",
    "lat": 45.9318989,
    "lon": -73.6120771,
    "phone": "",
@@ -12635,7 +12641,10 @@
    ],
    "poutine": "unconfirmed",
    "picked": false,
-   "link": "lafortunetraiteur"
+   "link": "lafortunetraiteur",
+   "oldLinks": [
+    "traiteurlafortuneetcremerie"
+   ]
   },
   {
    "osm": "node/9756384773",
@@ -19730,7 +19739,10 @@
    ],
    "poutine": "unconfirmed",
    "picked": false,
-   "link": "broger"
+   "link": "broger",
+   "oldLinks": [
+    "brogersmashburger"
+   ]
   },
   {
    "osm": "node/14214730206",
@@ -22229,29 +22241,6 @@
    "link": "cantinechezjoann"
   },
   {
-   "osm": "way/717175488",
-   "name": "Alfa Hot-dog",
-   "housenumber": "2497",
-   "street": "Chemin de Chambly",
-   "city": "Longueuil",
-   "citySource": "adresses-quebec",
-   "province": "QC",
-   "postcode": "J4L 1M2",
-   "addressCheck": "confirmed",
-   "lat": 45.5240166,
-   "lon": -73.4681769,
-   "phone": "+14506475701",
-   "website": "https://alfahotdog.com/",
-   "facebook": "",
-   "instagram": "",
-   "menu": "",
-   "openingHours": "",
-   "cuisine": [],
-   "poutine": "unconfirmed",
-   "picked": false,
-   "link": "alfahotdog"
-  },
-  {
    "osm": "way/717426038",
    "name": "Casse croûte le connaisseur",
    "housenumber": "452",
@@ -23221,7 +23210,10 @@
    ],
    "poutine": "unconfirmed",
    "picked": false,
-   "link": "levergeratipaul"
+   "link": "levergeratipaul",
+   "oldLinks": [
+    "levergeratipaulfermebrassicolecidreriedistillerietarterieboutique"
+   ]
   },
   {
    "osm": "way/1434507801",
@@ -23470,22 +23462,76 @@
    "cuisine": [],
    "poutine": "confirmed",
    "picked": false,
-   "link": "restaurantlexpress"
+   "link": "restaurantlexpress",
+   "oldLinks": [
+    "restaurantlexpresswaterloo"
+   ]
   },
   {
    "osm": "added/3",
    "name": "Au coin du hamburger",
    "housenumber": "3040",
-   "street": "Ch Sainte-Marie",
+   "street": "Chemin Sainte-Marie",
    "city": "Mascouche",
+   "citySource": "visitor",
+   "province": "QC",
+   "postcode": "J7K 1P3",
+   "addressCheck": "confirmed",
+   "lat": 45.7448524,
+   "lon": -73.6013961,
+   "phone": "+14504744049",
+   "website": "https://www.aucoinduhamburger.com/",
+   "facebook": "",
+   "instagram": "",
+   "menu": "",
+   "openingHours": "",
+   "cuisine": [
+    "burger"
+   ],
+   "poutine": "confirmed",
+   "picked": false,
+   "link": "aucoinduhamburger",
+   "oldLinks": [
+    "aucoinduhamburgermascouche"
+   ]
+  },
+  {
+   "osm": "added/4",
+   "name": "Green spot",
+   "housenumber": "3041",
+   "street": "rue Notre-Dame o",
+   "city": "Montréal",
    "citySource": "visitor",
    "province": "QC",
    "postcode": "",
    "addressCheck": "unchecked",
-   "lat": 45.75023919606099,
-   "lon": -73.60689574982501,
-   "phone": "+14504744049",
-   "website": "https://www.aucoinduhamburger.com/",
+   "lat": 45.434780271403014,
+   "lon": -73.68578833477102,
+   "phone": "+15149316473",
+   "website": "",
+   "facebook": "https://facebook.com/GreenSpot1947",
+   "instagram": "",
+   "menu": "",
+   "openingHours": "",
+   "cuisine": [],
+   "poutine": "confirmed",
+   "picked": false,
+   "link": "greenspot"
+  },
+  {
+   "osm": "added/5",
+   "name": "Casse croûte de Neuville",
+   "housenumber": "429",
+   "street": "Rte 138",
+   "city": "Neuville",
+   "citySource": "visitor",
+   "province": "QC",
+   "postcode": "",
+   "addressCheck": "unchecked",
+   "lat": 46.70333789287358,
+   "lon": -71.56584267271876,
+   "phone": "+14188762706",
+   "website": "https://cassecroutedeneuville.ca/",
    "facebook": "",
    "instagram": "",
    "menu": "",
@@ -23493,7 +23539,56 @@
    "cuisine": [],
    "poutine": "confirmed",
    "picked": false,
-   "link": "aucoinduhamburger"
+   "link": "cassecroutedeneuville"
+  },
+  {
+   "osm": "added/6",
+   "name": "Alfa",
+   "housenumber": "2497",
+   "street": "Chemin de Chambly",
+   "city": "Longueuil",
+   "citySource": "visitor",
+   "province": "QC",
+   "postcode": "J4L 1M2",
+   "addressCheck": "confirmed",
+   "lat": 45.5240166,
+   "lon": -73.4681769,
+   "phone": "+14506475701",
+   "website": "https://alfahotdog.com/",
+   "facebook": "",
+   "instagram": "",
+   "menu": "",
+   "openingHours": "",
+   "cuisine": [],
+   "poutine": "confirmed",
+   "picked": false,
+   "link": "alfa",
+   "oldLinks": [
+    "alfahotdog"
+   ]
+  },
+  {
+   "osm": "added/7",
+   "name": "Birdhouse",
+   "housenumber": "525",
+   "street": "Promenade du Centropolis",
+   "city": "Laval",
+   "citySource": "visitor",
+   "province": "QC",
+   "postcode": "H7T 0A3",
+   "addressCheck": "confirmed",
+   "lat": 45.561434,
+   "lon": -73.746713,
+   "phone": "+14506832473",
+   "website": "",
+   "facebook": "",
+   "instagram": "",
+   "menu": "",
+   "openingHours": "",
+   "cuisine": [],
+   "poutine": "confirmed",
+   "picked": false,
+   "link": "birdhouselaval"
   }
  ]
 }

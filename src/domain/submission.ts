@@ -1,4 +1,4 @@
-import { splitStreet } from './addresses.ts';
+import { splitStreet, streetAlone } from './addresses.ts';
 import {
   normalizePhone,
   normalizePostcode,
@@ -69,7 +69,8 @@ export function approvedPlace(id: number, place: NewPlace): Place {
     osm: `added/${String(id)}`,
     name: place.name,
     housenumber: place.housenumber,
-    street: place.street,
+    // Sent before the street's line was cut at a comma: the town and postal code after it go.
+    street: streetAlone(place.street),
     city: place.city,
     citySource: 'visitor',
     province: place.province,

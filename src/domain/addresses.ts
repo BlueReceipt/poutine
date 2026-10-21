@@ -120,8 +120,16 @@ export function civicNumber(street: string): string {
 export function splitStreet(street: string): { housenumber: string; street: string } {
   const match = /^\s*(\d+[a-z]?)\b[\s,-]*(.*)$/i.exec(street);
   return match
-    ? { housenumber: match[1] ?? '', street: (match[2] ?? '').trim() }
-    : { housenumber: '', street: street.trim() };
+    ? { housenumber: match[1] ?? '', street: streetAlone(match[2] ?? '') }
+    : { housenumber: '', street: streetAlone(street) };
+}
+
+/**
+ * A street without what follows a comma: the town, province and postal code of a whole address
+ * pasted on the street's line ("Ch. de Chambly, Longueuil, Quebec J4L 1M2", Alfa, 2026-10-20).
+ */
+export function streetAlone(street: string): string {
+  return (street.split(',')[0] ?? '').trim();
 }
 
 // Street types, French and English, each spelling to one: "ch." is "chemin", "Dr" is "drive".

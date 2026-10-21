@@ -150,6 +150,11 @@ describe('placementFor (Terrain’s rules)', () => {
     });
     expect(splitStreet('12A, rang Double')).toEqual({ housenumber: '12A', street: 'rang Double' });
     expect(splitStreet('Route 132')).toEqual({ housenumber: '', street: 'Route 132' });
+    // A whole address pasted on the line: its town, province and postal code go.
+    expect(splitStreet('2497 Ch. de Chambly, Longueuil, Quebec J4L 1M2')).toEqual({
+      housenumber: '2497',
+      street: 'Ch. de Chambly',
+    });
   });
 });
 
@@ -220,15 +225,22 @@ describe('approved places', () => {
     });
   });
 
+  it('keep only the street of a whole address sent on its line before it was cut', () => {
+    const checked = checkNewPlace(sent());
+    if (!('place' in checked)) throw new Error('expected a place');
+    const before = { ...checked.place, street: 'boulevard Perron, Carleton-sur-Mer, QC G0C 1J0' };
+    expect(approvedPlace(7, before).street).toBe('boulevard Perron');
+  });
+
   it('replace a place of the same ID and go at the end of the list', () => {
-    const listed = [
-      { osm: 'node/1', name: 'Cantine Grains' },
-      { osm: 'added/7', name: 'old' },
-    ] as Place[];
-    const added = [
-      { osm: 'added/7', name: 'new' },
-      { osm: 'added/8', name: 'Cantine Poutini' },
-    ] as Place[];
+    const checked = checkNewPlace(sent());
+    if (!('place' in checked)) throw new Error('expected a place');
+    const at = (osm: string, name: string, lat: number): Place => ({
+      ...approvedPlace(1, { ...checked.place, name, lat }),
+      osm,
+    });
+    const listed = [at('node/1', 'Cantine Grains', 46), at('added/7', 'old', 47)];
+    const added = [at('added/7', 'new', 47), at('added/8', 'Cantine Poutini', 48)];
     expect(withAdded(listed, added).map((p) => [p.osm, p.name])).toEqual([
       ['node/1', 'Cantine Grains'],
       ['added/7', 'new'],

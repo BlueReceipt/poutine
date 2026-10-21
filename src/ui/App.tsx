@@ -199,7 +199,9 @@ export function App({
     const id = placeIdFromPath(path);
     const word = id ? null : linkFromPath(path);
     const chosen = places.find((candidate) =>
-      id ? candidate.osm === id : word !== null && candidate.link === word,
+      id
+        ? candidate.osm === id
+        : word !== null && (candidate.link === word || candidate.oldLinks?.includes(word) === true),
     );
     if (chosen) {
       const stars = friendOnPage();

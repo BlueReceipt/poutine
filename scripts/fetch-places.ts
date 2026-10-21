@@ -390,7 +390,15 @@ function withLinks(places: Place[]): Place[] {
     )}
 `,
   );
-  return places.map((place) => ({ ...place, link: links[place.osm] }));
+  // A merged place keeps the links of the entries merged into it: a link shared before opens it.
+  return places.map(({ absorbed, ...place }) => {
+    const link = links[place.osm];
+    const oldLinks = [
+      ...(place.oldLinks ?? []),
+      ...(absorbed ?? []).map((id) => links[id] ?? ''),
+    ].filter((old, at, all) => old && old !== link && all.indexOf(old) === at);
+    return { ...place, link, oldLinks: oldLinks.length > 0 ? oldLinks : undefined };
+  });
 }
 
 async function main(): Promise<void> {

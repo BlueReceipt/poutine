@@ -281,6 +281,33 @@ describe('two entries for one place', () => {
       lat: 46.4143,
       addressCheck: 'confirmed',
     });
+    // And the street as Adresses Québec spells it.
+    const shortened = { ...onStreet, street: 'Rg du Bas-St-Jacques' };
+    expect(merged(shortened, onAddress, { own: true }).street).toBe('Rang du Bas-Saint-Jacques');
+  });
+
+  it('keeps the link of the entry merged away, which opens the place still', () => {
+    const kept = at({ osm: 'added/6', name: 'Alfa', link: 'alfa' });
+    const other = at({
+      osm: 'way/7',
+      name: 'Alfa Hot-dog',
+      addressCheck: 'confirmed',
+      link: 'alfahotdog',
+      oldLinks: ['alfa2'],
+    });
+    expect(merged(kept, other, { own: true })).toMatchObject({
+      osm: 'added/6',
+      link: 'alfa',
+      absorbed: ['way/7'],
+      oldLinks: ['alfa2', 'alfahotdog'],
+    });
+    // Run again with the list as it was last written (--offline): the twin is gone, not its link.
+    const written = { ...merged(kept, other, { own: true }), absorbed: undefined };
+    const fresh = at({ osm: 'added/6', name: 'Alfa', addressCheck: 'unchecked', lat: 46.42 });
+    expect(withAdded([written], [fresh])[0]).toMatchObject({
+      oldLinks: ['alfa2', 'alfahotdog'],
+      lat: 46.4143,
+    });
   });
 
   it('lets a place Alex approved stand for its OpenStreetMap twin, filled in from it', () => {
