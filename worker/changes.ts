@@ -79,8 +79,8 @@ export async function sendChange(
     env.DB.prepare(
       `INSERT INTO changes
         (created_at, place, name, housenumber, street, city, postcode, phone, website, facebook,
-         instagram, hours, closed, claim, contact, sender)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         instagram, hours, vegan, closed, claim, contact, sender)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).bind(
       now.toISOString(),
       place.osm,
@@ -94,6 +94,7 @@ export async function sendChange(
       change.facebook,
       change.instagram,
       change.hours,
+      change.vegan === null ? null : change.vegan ? 1 : 0,
       change.closed ? 1 : 0,
       change.claim ? 1 : 0,
       change.contact,

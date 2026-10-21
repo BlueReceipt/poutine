@@ -12,9 +12,11 @@ export const GRAVY = '#7a4a2a';
 /**
  * A pin is a poutine bowl (Alex, 2026-10-20: "change the green icon to a small poutine based on our
  * personal review. if its not reviewed, we just show the empty aluminium tray"): `bowl-0` the empty
- * tray, `bowl-1` to `bowl-5` the bowl this visitor gave, drawn by `pinImages` in MapView.
+ * tray, `bowl-1` to `bowl-5` the bowl this visitor gave, drawn by `pinImages` in MapView; a `v` after
+ * for a place with a vegan poutine, its tray green (Mr. Poo-teen with a leaf).
  */
-export const pinImage = (bowl: number): string => `bowl-${String(bowl)}`;
+export const pinImage = (bowl: number, vegan: boolean): string =>
+  `bowl-${String(bowl)}${vegan ? 'v' : ''}`;
 /** The pictures' width in pixels, and how many pixels make one on screen: 40 px wide at full size. */
 export const PIN_PIXELS = 120;
 export const PIN_RATIO = 3;
@@ -31,6 +33,8 @@ export interface PinProperties {
    * best when they rated several; 0 for none: the empty tray.
    */
   bowl: number;
+  /** One of the pin's places has a vegan poutine: its tray is green. */
+  vegan: boolean;
 }
 
 const STRENGTH: readonly PoutineEvidence[] = ['unconfirmed', 'name', 'cuisine', 'confirmed'];
@@ -61,6 +65,7 @@ export function pinFeatures(
             return stars === undefined ? 0 : Math.max(1, Math.min(5, Math.round(stars)));
           }),
         ),
+        vegan: group.places.some((place) => place.vegan === true),
       },
     })),
   };
@@ -120,7 +125,7 @@ export function selectedFilter(id: string | null): FilterSpecification {
 
 /**
  * Each pin a small foil tray: empty where this visitor hasn't rated, their own bowl where they have
- * (Mr. Poo-teen for 1, loaded for 5), drawn above the empty ones. An empty tray nothing confirms
+ * (Mr. Poo-teen for 1, loaded for 5), drawn above the empty ones; green for a vegan poutine. An empty tray nothing confirms
  * yet is faint. A shared pin carries its count on a gravy badge. The selected pin sits on a white
  * disc ringed in black.
  */
@@ -142,7 +147,12 @@ export const pinLayers: LayerSpecification[] = [
     type: 'symbol',
     source: PLACES,
     layout: {
-      'icon-image': ['concat', 'bowl-', ['to-string', ['get', 'bowl']]],
+      'icon-image': [
+        'concat',
+        'bowl-',
+        ['to-string', ['get', 'bowl']],
+        ['case', ['get', 'vegan'], 'v', ''],
+      ],
       'icon-size': ['interpolate', ['linear'], ['zoom'], 4, 0.4, 9, 0.6, 13, 0.85, 16, 1],
       'icon-allow-overlap': true,
       'icon-ignore-placement': true,

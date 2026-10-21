@@ -1,5 +1,5 @@
 import { useId } from 'preact/hooks';
-import { BOX, bowlShapes, COLOUR, GHOST, type Op, type Shape } from './bowlArt.ts';
+import { BOX, bowlShapes, COLOUR, GHOST, LEAF, type Op, type Shape } from './bowlArt.ts';
 
 const transformOf = (ops: Op[]): string =>
   ops
@@ -91,6 +91,23 @@ export function Bowl({ nth, fill }: { nth: number; fill: number }) {
           <g clip-path={`url(#${id}-clip)`}>{layer(COLOUR, `${id}-c`)}</g>
         </>
       )}
+    </svg>
+  );
+}
+
+/** The vegan leaf alone, by the card's "Vegan poutine on the menu". */
+export function Leaf() {
+  return (
+    <svg
+      class="leaf"
+      viewBox="39.4 5.4 10.2 11.2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      {LEAF.map((shape, i) => (
+        <Drawn key={i} shape={shape} fry="" />
+      ))}
     </svg>
   );
 }

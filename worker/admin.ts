@@ -103,7 +103,7 @@ async function reviewChange(
   const fix = fixOfChange(change, place, id, now.slice(0, 10));
   await env.DB.prepare(
     `UPDATE changes SET name = ?, housenumber = ?, street = ?, city = ?, postcode = ?, phone = ?,
-      website = ?, facebook = ?, instagram = ?, hours = ?, closed = ?, status = 'approved',
+      website = ?, facebook = ?, instagram = ?, hours = ?, vegan = ?, closed = ?, status = 'approved',
       reviewed_at = ?, contact = '', fix = ?
       WHERE id = ? AND status = 'pending'`,
   )
@@ -118,6 +118,7 @@ async function reviewChange(
       change.facebook,
       change.instagram,
       change.hours,
+      change.vegan === null ? null : change.vegan ? 1 : 0,
       change.closed ? 1 : 0,
       now,
       JSON.stringify(fix),

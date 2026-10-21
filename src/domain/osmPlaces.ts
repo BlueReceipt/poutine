@@ -101,6 +101,12 @@ export interface Place {
   link?: string;
   /** The links of other entries for it, merged into it since: they open it still. */
   oldLinks?: string[];
+  /**
+   * A vegan poutine on the menu (Alex, 2026-10-21: "a vegan offering present tag. that would make
+   * the aluminum plate green"): OpenStreetMap's diet:vegan=only, or a fix (Alex's own, or a
+   * visitor's change he approved). Its pin's tray is green.
+   */
+  vegan?: true;
   /** While the list is built: the IDs of other entries for it merged into it (for `oldLinks`). */
   absorbed?: string[];
 }
@@ -414,6 +420,9 @@ function placeFrom(
     cuisine: cuisines(tags),
     poutine: evidence,
     picked,
+    // Vegan only: its poutine is too. "yes" (vegan options) promises no vegan poutine: those are
+    // leads for Alex (data/review/vegan-leads.csv).
+    ...(tags['diet:vegan'] === 'only' ? { vegan: true as const } : {}),
   };
 }
 
@@ -539,6 +548,7 @@ export function merged(
   }
   for (const field of DETAILS) if (!place[field]) place[field] = other[field];
   if (place.cuisine.length === 0) place.cuisine = other.cuisine;
+  if (other.vegan) place.vegan = true;
   if (
     kept.addressCheck !== 'confirmed' &&
     other.addressCheck === 'confirmed' &&

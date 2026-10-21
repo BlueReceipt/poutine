@@ -27,6 +27,8 @@ export interface ChangeForm {
   instagram: string;
   /** Opening hours in the visitor's own words, or OpenStreetMap's syntax as the list has it. */
   hours: string;
+  /** A vegan poutine on the menu (Alex, 2026-10-21). */
+  vegan: boolean;
   /** Closed for good. */
   closed: boolean;
   /** "It's my business": the owner claims the spot. */
@@ -48,6 +50,8 @@ export interface PlaceChange {
   facebook: string;
   instagram: string;
   hours: string;
+  /** A vegan poutine on the menu; null when the change says nothing of it (sent before the box). */
+  vegan: boolean | null;
   closed: boolean;
   claim: boolean;
   contact: string;
@@ -80,7 +84,7 @@ const TEXTS = [
   'hours',
   'contact',
 ] as const;
-const FIELDS: readonly string[] = [...TEXTS, 'closed', 'claim'];
+const FIELDS: readonly string[] = [...TEXTS, 'vegan', 'closed', 'claim'];
 
 /** The form as it opens: the place as the map has it. */
 export function changeFormOf(place: Place): ChangeForm {
@@ -94,6 +98,7 @@ export function changeFormOf(place: Place): ChangeForm {
     facebook: place.facebook,
     instagram: place.instagram,
     hours: place.openingHours,
+    vegan: place.vegan === true,
     closed: false,
     claim: false,
     contact: '',
@@ -117,7 +122,9 @@ export interface ChangedField {
     | 'website'
     | 'facebook'
     | 'instagram'
-    | 'hours';
+    | 'hours'
+    | 'vegan';
+  /** As the list writes it; "yes" or "no" for vegan. */
   before: string;
   after: string;
 }
@@ -138,6 +145,15 @@ export function changedFields(change: PlaceChange, place: Place): ChangedField[]
     { field: 'facebook', before: place.facebook, after: change.facebook },
     { field: 'instagram', before: place.instagram, after: change.instagram },
     { field: 'hours', before: place.openingHours, after: change.hours },
+    ...(change.vegan === null
+      ? []
+      : [
+          {
+            field: 'vegan' as const,
+            before: place.vegan ? 'yes' : 'no',
+            after: change.vegan ? 'yes' : 'no',
+          },
+        ]),
   ];
   return pairs.filter((pair) => pair.before !== pair.after);
 }
@@ -168,7 +184,13 @@ export function checkChange(
   const text = texts as Record<(typeof TEXTS)[number], string>;
   const closed = fields.closed ?? false;
   const claim = fields.claim ?? false;
-  if (typeof closed !== 'boolean' || typeof claim !== 'boolean')
+  // A form from before the box says nothing of it (null): the place stays as it is.
+  const vegan = fields.vegan ?? null;
+  if (
+    typeof closed !== 'boolean' ||
+    typeof claim !== 'boolean' ||
+    (vegan !== null && typeof vegan !== 'boolean')
+  )
     return { problems: ['not-a-change'] };
 
   const problems: ChangeProblem[] = [];
@@ -202,6 +224,7 @@ export function checkChange(
     facebook,
     instagram,
     hours: text.hours,
+    vegan,
     closed,
     claim,
     contact,
@@ -231,6 +254,7 @@ export function fixOfChange(change: PlaceChange, place: Place, id: number, day: 
       fix.housenumber = change.housenumber;
       fix.street = change.street;
     } else if (field === 'hours') fix.openingHours = after;
+    else if (field === 'vegan') fix.vegan = after === 'yes';
     else fix[field] = after;
   }
   return fix;
@@ -251,6 +275,8 @@ export interface ChangeRow {
   facebook: string;
   instagram: string;
   hours: string;
+  /** 1 or 0; null for a change sent before the box (migrations/0008). */
+  vegan: number | null;
   closed: number;
   claim: number;
   contact: string;
@@ -258,7 +284,7 @@ export interface ChangeRow {
 }
 
 export const CHANGE_COLUMNS =
-  'id, created_at, place, name, housenumber, street, city, postcode, phone, website, facebook, instagram, hours, closed, claim, contact, fix';
+  'id, created_at, place, name, housenumber, street, city, postcode, phone, website, facebook, instagram, hours, vegan, closed, claim, contact, fix';
 
 export function changeOfRow(row: ChangeRow): PlaceChange {
   return {
@@ -272,6 +298,7 @@ export function changeOfRow(row: ChangeRow): PlaceChange {
     facebook: row.facebook,
     instagram: row.instagram,
     hours: row.hours,
+    vegan: row.vegan === null ? null : row.vegan === 1,
     closed: row.closed === 1,
     claim: row.claim === 1,
     contact: row.contact,

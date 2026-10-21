@@ -29,6 +29,14 @@ describe('searchPlaces', () => {
     expect(names('drummond')).toEqual(['Cantine Grains']);
   });
 
+  it('finds the places with a vegan poutine, typed in English or French', () => {
+    const vegan = [...places, { ...place('Aux Vivres', 'Montréal'), vegan: true as const }];
+    const found = (query: string) => searchPlaces(vegan, query).map((p) => p.name);
+    expect(found('vegan')).toEqual(['Aux Vivres']);
+    expect(found('végane montréal')).toEqual(['Aux Vivres']);
+    expect(found('végétalienne')).toEqual(['Aux Vivres']);
+  });
+
   it('needs every word typed, and nothing for an empty search', () => {
     expect(names('cantine levis')).toEqual([]);
     expect(names('patates levis')).toEqual(['Patates Banquet']);

@@ -42,6 +42,10 @@ export interface Strings {
   card: {
     close: string;
     unconfirmed: string;
+    /** A vegan poutine on the menu: a line on the card, by a leaf. */
+    vegan: string;
+    /** A vegan place whose poutine nothing confirms yet. */
+    veganPlace: string;
     near: (town: string) => string;
     hours: string;
     call: string;
@@ -220,6 +224,7 @@ export interface EditWords {
   instagram: string;
   hours: string;
   hoursHint: string;
+  vegan: string;
   closed: string;
   claim: string;
   claimHint: string;
@@ -274,6 +279,8 @@ export interface AdminWords {
   before: string;
   after: string;
   fields: Record<ChangedField['field'], string>;
+  yes: string;
+  no: string;
   ownerContact: string;
   placePhone: string;
   confirmHint: string;
@@ -375,6 +382,8 @@ const english: Strings = {
   card: {
     close: 'Close',
     unconfirmed: 'Poutine not confirmed yet',
+    vegan: 'Vegan poutine on the menu',
+    veganPlace: 'Everything here is vegan',
     near: (town) => `near ${town}`,
     hours: 'Hours',
     call: 'Call',
@@ -543,7 +552,10 @@ const english: Strings = {
       facebook: 'Facebook',
       instagram: 'Instagram',
       hours: 'Hours',
+      vegan: 'Vegan poutine',
     },
+    yes: 'Yes',
+    no: 'No',
     ownerContact: 'How to reach the owner',
     placePhone: 'The place’s own phone',
     confirmHint:
@@ -566,6 +578,7 @@ const english: Strings = {
     instagram: 'Instagram',
     hours: 'Hours',
     hoursHint: 'In your own words: “Mon–Fri 11 am–8 pm, closed Sunday”.',
+    vegan: 'Vegan poutine on the menu',
     closed: 'Closed for good',
     claim: 'It’s my business',
     claimHint:
@@ -714,6 +727,8 @@ const french: Strings = {
   card: {
     close: 'Fermer',
     unconfirmed: 'Poutine pas encore confirmée',
+    vegan: 'Poutine végane au menu',
+    veganPlace: 'Tout est végane ici',
     near: (town) => `près de ${town}`,
     hours: 'Heures d’ouverture',
     call: 'Appeler',
@@ -886,7 +901,10 @@ const french: Strings = {
       facebook: 'Facebook',
       instagram: 'Instagram',
       hours: 'Heures',
+      vegan: 'Poutine végane',
     },
+    yes: 'Oui',
+    no: 'Non',
     ownerContact: 'Pour joindre le propriétaire',
     placePhone: 'Le téléphone du commerce',
     confirmHint:
@@ -910,6 +928,7 @@ const french: Strings = {
     instagram: 'Instagram',
     hours: 'Heures',
     hoursHint: `Dans vos mots${NBSP}: «${NBSP}lun-ven 11 h-20 h, fermé le dimanche${NBSP}».`,
+    vegan: 'Poutine végane au menu',
     closed: 'Fermé pour de bon',
     claim: 'C’est mon commerce',
     claimHint: `Laissez un numéro ou un courriel${NBSP}: on vous contactera pour confirmer que c’est le vôtre. Il n’est jamais affiché, et il est effacé une fois que c’est réglé.`,

@@ -156,6 +156,21 @@ describe('selectPlaces', () => {
     expect(dropped['repeated-name']).toBe(5);
   });
 
+  it('takes a vegan-only place for a vegan poutine, vegan options for no promise', () => {
+    const { places } = selectPlaces(
+      [
+        node(31, { name: 'Casse-croûte Végé', 'diet:vegan': 'only' }),
+        node(32, { name: 'Casse-croûte Mixte', 'diet:vegan': 'yes' }, 46.9),
+      ],
+      towns,
+      [],
+    );
+    expect(places.map((p) => [p.name, p.vegan])).toEqual([
+      ['Casse-croûte Végé', true],
+      ['Casse-croûte Mixte', undefined],
+    ]);
+  });
+
   it('keeps a pick anywhere, confirmed, with no Québec town outside Québec', () => {
     const barouche: OsmElement = node(9, { name: 'La Barouche' }, 45.3758, -74.9019);
     const { places } = selectPlaces(

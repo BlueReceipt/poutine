@@ -322,6 +322,22 @@ body,
   font-style: italic;
 }
 
+/* A vegan poutine on the menu: the line in green, by its leaf. */
+.card .vegan {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 0 0 8px;
+  color: #2e6b39;
+  font-weight: 700;
+}
+
+.card .vegan .leaf {
+  width: 18px;
+  height: 20px;
+  flex: none;
+}
+
 .card .address {
   margin: 8px 0 12px;
 }

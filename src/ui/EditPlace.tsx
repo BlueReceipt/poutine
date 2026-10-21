@@ -13,12 +13,12 @@ interface Props {
   onBack: () => void;
 }
 
-type TextField = Exclude<keyof ChangeForm, 'closed' | 'claim'>;
+type TextField = Exclude<keyof ChangeForm, 'vegan' | 'closed' | 'claim'>;
 
 /**
  * Add more info and Claim this spot (Alex, 2026-10-20: "if we long press a poutine area, can it
  * open the function, add more info, and maybe claim a spot"), in place of the card: the place's
- * details as the map has them, to fix; closed for good; "It's my business" with a phone or email
+ * details as the map has them, to fix; a vegan poutine; closed for good; "It's my business" with a phone or email
  * to be reached at. Sent behind the bot check, to wait for approval like a new place.
  */
 export function EditPlace({ place, strings, onBack }: Props) {
@@ -142,6 +142,17 @@ export function EditPlace({ place, strings, onBack }: Props) {
           }}
         />
         <small class="where">{words.hoursHint}</small>
+      </label>
+      <label class="check">
+        <input
+          type="checkbox"
+          checked={form.vegan}
+          onChange={(event) => {
+            const vegan = event.currentTarget.checked;
+            setForm((before) => ({ ...before, vegan }));
+          }}
+        />
+        <span>{words.vegan}</span>
       </label>
       <label class="check">
         <input

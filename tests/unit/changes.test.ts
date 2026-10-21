@@ -101,6 +101,34 @@ describe('Add more info', () => {
     ).toEqual([]);
   });
 
+  it('says a vegan poutine is on the menu, or no longer is, once approved', () => {
+    expect(changeFormOf({ ...place, vegan: true }).vegan).toBe(true);
+    const checked = checkChange(form({ vegan: true }), place);
+    if (!('change' in checked)) throw new Error('refused');
+    expect(changedFields(checked.change, place)).toEqual([
+      { field: 'vegan', before: 'no', after: 'yes' },
+    ]);
+    const fix = fixOfChange(checked.change, place, 6, '2026-10-21');
+    expect(fix.vegan).toBe(true);
+    expect(applyFixes([place], { 'node/7': fix })[0]).toMatchObject({
+      vegan: true,
+      poutine: 'confirmed',
+    });
+    const vegan = { ...place, vegan: true as const };
+    const gone = checkChange(form({ vegan: false }), vegan);
+    if (!('change' in gone)) throw new Error('refused');
+    expect(
+      applyFixes([vegan], { 'node/7': fixOfChange(gone.change, vegan, 7, '2026-10-21') })[0],
+    ).not.toHaveProperty('vegan');
+    // A form from before the box leaves it as it is.
+    const { vegan: _, ...before } = form({ phone: '' });
+    const old = checkChange(before, vegan);
+    if (!('change' in old)) throw new Error('refused');
+    expect(old.change.vegan).toBeNull();
+    expect(changedFields(old.change, vegan).map((each) => each.field)).toEqual(['phone']);
+    expect(fixOfChange(old.change, vegan, 8, '2026-10-21')).not.toHaveProperty('vegan');
+  });
+
   it('takes a phone away when the visitor empties it', () => {
     const checked = checkChange(form({ phone: '' }), place);
     if (!('change' in checked)) throw new Error('refused');

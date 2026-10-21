@@ -11,6 +11,7 @@ import {
   telUrl,
 } from '../domain/placeText.ts';
 import { confirmedByRaters, type RatingTotal } from '../domain/ratings.ts';
+import { Leaf } from './Bowl.tsx';
 import { EditPlace } from './EditPlace.tsx';
 import { RatingBox, RatingSummary, ReviewList, SharePanel, useRating } from './Ratings.tsx';
 import type { Strings } from './strings.ts';
@@ -123,6 +124,9 @@ function PlaceDetails(props: DetailsProps) {
   // Partager opens the share step (the invitation, the photo, the stars) in place of the card.
   const [sharing, setSharing] = useState(false);
   const address = addressLines(place, words.near);
+  // Nothing confirms its poutine yet: the card says so, and of a vegan place (OpenStreetMap's
+  // diet:vegan=only) only that everything there is vegan.
+  const unconfirmed = place.poutine === 'unconfirmed' && !confirmedByRaters(total);
   const hours = place.openingHours
     ? (readableHours(place.openingHours, strings.hours) ?? [place.openingHours])
     : [];
@@ -170,8 +174,12 @@ function PlaceDetails(props: DetailsProps) {
           </h2>
           <RatingSummary total={total} strings={strings} />
           {friend !== null && <p class="friend">{strings.share.friend(friend)}</p>}
-          {place.poutine === 'unconfirmed' && !confirmedByRaters(total) && (
-            <p class="hint">{words.unconfirmed}</p>
+          {unconfirmed && <p class="hint">{words.unconfirmed}</p>}
+          {place.vegan && (
+            <p class="vegan">
+              <Leaf />
+              {unconfirmed ? words.veganPlace : words.vegan}
+            </p>
           )}
           {address.length > 0 && (
             <p class="address">

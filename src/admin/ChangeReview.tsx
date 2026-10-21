@@ -23,10 +23,10 @@ interface Props {
   onBack: () => void;
 }
 
-type TextField = Exclude<keyof ChangeForm, 'closed' | 'claim' | 'contact'>;
+type TextField = Exclude<keyof ChangeForm, 'vegan' | 'closed' | 'claim' | 'contact'>;
 
 /** The change as the form's fields, to fix before approving. */
-function formOfRow(row: ChangeRow): ChangeForm {
+function formOfRow(row: WaitingChange): ChangeForm {
   return {
     name: row.name,
     street: [row.housenumber, row.street].filter(Boolean).join(' '),
@@ -37,6 +37,7 @@ function formOfRow(row: ChangeRow): ChangeForm {
     facebook: row.facebook,
     instagram: row.instagram,
     hours: row.hours,
+    vegan: row.vegan === null ? row.current.vegan === true : row.vegan === 1,
     closed: row.closed === 1,
     claim: row.claim === 1,
     contact: row.contact,
@@ -112,8 +113,10 @@ export function ChangeReview({ row, strings, onDecided, onBack }: Props) {
       />
     </label>
   );
-  const shown = (field: string, value: string) =>
-    field === 'phone' && value ? displayPhone(value) : value || '—';
+  const shown = (field: string, value: string) => {
+    if (field === 'vegan') return value === 'yes' ? words.yes : words.no;
+    return field === 'phone' && value ? displayPhone(value) : value || '—';
+  };
 
   return (
     <section class="waiting">
@@ -137,6 +140,16 @@ export function ChangeReview({ row, strings, onDecided, onBack }: Props) {
           {field('facebook', edit.facebook)}
           {field('instagram', edit.instagram)}
           {field('hours', edit.hours)}
+          <label class="check">
+            <input
+              type="checkbox"
+              checked={form.vegan}
+              onChange={(event) => {
+                setForm({ ...form, vegan: event.currentTarget.checked });
+              }}
+            />
+            <span>{edit.vegan}</span>
+          </label>
           <label class="check">
             <input
               type="checkbox"

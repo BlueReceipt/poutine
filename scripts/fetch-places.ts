@@ -368,6 +368,44 @@ function reviewCsv(places: readonly Place[], why = new Map<string, ListedFor | n
 }
 
 /**
+ * The places OpenStreetMap says have vegan options (diet:vegan yes or limited), which promise no
+ * vegan poutine: leads for Alex to confirm (2026-10-21: "LOV and Aux Vivres from OpenStreetMap, the
+ * 10 others as a list for me"); each he confirms becomes a fix with "vegan": true.
+ */
+function veganLeadsCsv(
+  places: readonly Place[],
+  tagsOf: ReadonlyMap<string, Readonly<Record<string, string>>>,
+): string {
+  const header = [
+    'Name',
+    'Address',
+    'Town',
+    'OpenStreetMap says',
+    'Website',
+    'Facebook',
+    'OpenStreetMap',
+    'Vegan poutine? (yes / no)',
+  ];
+  const lines = places
+    .filter((p) => !p.vegan && ['yes', 'limited'].includes(tagsOf.get(p.osm)?.['diet:vegan'] ?? ''))
+    .map((p) =>
+      [
+        p.name,
+        [p.housenumber, p.street].filter(Boolean).join(' '),
+        townText(p),
+        `vegan options: ${tagsOf.get(p.osm)?.['diet:vegan'] ?? ''}${tagsOf.get(p.osm)?.['diet:vegetarian'] === 'only' ? ', vegetarian only' : ''}`,
+        p.website,
+        p.facebook,
+        `https://www.openstreetmap.org/${p.osm}`,
+        '',
+      ]
+        .map(csvCell)
+        .join(','),
+    );
+  return `\uFEFF${[header.join(','), ...lines].join('\r\n')}\r\n`;
+}
+
+/**
  * Every place's short link (data/links.json, never changed once given), set on each place. The
  * file keeps the links of places since dropped, so no link ever moves to another place.
  */
@@ -505,6 +543,8 @@ async function main(): Promise<void> {
   mkdirSync(join(DATA, 'review'), { recursive: true });
   const why = new Map(eateries.map((e) => [idOf(e), whyListed(e.tags ?? {})]));
   writeFileSync(join(DATA, 'review', 'places.csv'), reviewCsv(places, why));
+  const tagsOf = new Map(eateries.map((e) => [idOf(e), e.tags ?? {}]));
+  writeFileSync(join(DATA, 'review', 'vegan-leads.csv'), veganLeadsCsv(places, tagsOf));
 
   const count = (test: (p: Place) => boolean): string => String(places.filter(test).length);
   console.log(
@@ -525,6 +565,9 @@ async function main(): Promise<void> {
   );
   console.log(
     `addresses: ${count((p) => p.addressCheck === 'confirmed')} confirmed at the pin, ${count((p) => p.addressCheck === 'far')} far from the pin, ${count((p) => p.addressCheck === 'not-found')} not found; postal code ${count((p) => Boolean(p.postcode))}`,
+  );
+  console.log(
+    `vegan poutine: ${count((p) => p.vegan === true)}; leads for Alex in data/review/vegan-leads.csv`,
   );
   console.log('left out:', dropped);
   if (missingPicks.length > 0)

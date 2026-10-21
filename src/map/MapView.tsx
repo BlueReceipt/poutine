@@ -74,29 +74,31 @@ const SHADOW = 14;
 
 /**
  * The pins' pictures: the empty tray and the five bowls, each over a soft shadow so the silver stands
- * out on the grey map (Alex, 2026-10-20, choosing "B: the trays with a shadow"), drawn once on canvas.
+ * out on the grey map (Alex, 2026-10-20, choosing "B: the trays with a shadow"), drawn once on canvas;
+ * each again with its tray green, for a vegan poutine.
  */
 function pinImages(map: MapLibreMap): void {
   const height = Math.round((PIN_PIXELS * BOX.height) / BOX.width);
-  for (let bowl = 0; bowl <= 5; bowl += 1) {
-    const art = document.createElement('canvas');
-    art.width = PIN_PIXELS;
-    art.height = height;
-    const drawn = art.getContext('2d');
-    const pin = document.createElement('canvas');
-    pin.width = PIN_PIXELS + SHADOW * 2;
-    pin.height = height + SHADOW * 2;
-    const context = pin.getContext('2d');
-    if (!drawn || !context) return;
-    drawBowl(drawn, bowl, 1, 0, (height - PIN_PIXELS) / 2, PIN_PIXELS);
-    context.shadowColor = 'rgba(0, 0, 0, 0.55)';
-    context.shadowBlur = 10;
-    context.shadowOffsetY = 3;
-    context.drawImage(art, SHADOW, SHADOW);
-    map.addImage(pinImage(bowl), context.getImageData(0, 0, pin.width, pin.height), {
-      pixelRatio: PIN_RATIO,
-    });
-  }
+  for (const vegan of [false, true])
+    for (let bowl = 0; bowl <= 5; bowl += 1) {
+      const art = document.createElement('canvas');
+      art.width = PIN_PIXELS;
+      art.height = height;
+      const drawn = art.getContext('2d');
+      const pin = document.createElement('canvas');
+      pin.width = PIN_PIXELS + SHADOW * 2;
+      pin.height = height + SHADOW * 2;
+      const context = pin.getContext('2d');
+      if (!drawn || !context) return;
+      drawBowl(drawn, bowl, 1, 0, (height - PIN_PIXELS) / 2, PIN_PIXELS, vegan);
+      context.shadowColor = 'rgba(0, 0, 0, 0.55)';
+      context.shadowBlur = 10;
+      context.shadowOffsetY = 3;
+      context.drawImage(art, SHADOW, SHADOW);
+      map.addImage(pinImage(bowl, vegan), context.getImageData(0, 0, pin.width, pin.height), {
+        pixelRatio: PIN_RATIO,
+      });
+    }
 }
 
 /** The pin nearest the tap among those within reach, or null. */

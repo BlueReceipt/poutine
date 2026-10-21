@@ -37,6 +37,11 @@ export interface Fix {
   facebook?: string;
   instagram?: string;
   openingHours?: string;
+  /**
+   * A vegan poutine on the menu (true: the place serves poutine, so it's confirmed), or none any
+   * more (false).
+   */
+  vegan?: boolean;
   /** Where the corrected details come from. */
   source: string;
   /** The address the list had before, as addressOf writes it. */
@@ -64,9 +69,12 @@ export function applyFixes(
     const housenumber = fix.housenumber ?? place.housenumber;
     const street = fix.street ?? place.street;
     const moved = housenumber !== place.housenumber || street !== place.street;
+    const { vegan, ...rest } = place;
     return [
       {
-        ...place,
+        ...rest,
+        ...((fix.vegan ?? vegan) ? { vegan: true as const } : {}),
+        ...(fix.vegan ? { poutine: 'confirmed' as const } : {}),
         name: fix.renamed ?? place.name,
         lat: fix.lat ?? place.lat,
         lon: fix.lon ?? place.lon,

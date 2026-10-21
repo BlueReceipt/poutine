@@ -9,8 +9,8 @@ function searchable(text: string): string {
 }
 
 /**
- * Places whose name, town (or village in it) or street has a word starting with each word typed,
- * accents and punctuation ignored. Names starting with what was typed come first, then names
+ * Places whose name, town (or village in it) or street has a word starting with each word typed
+ * ("vegan" for a vegan poutine), accents and punctuation ignored. Names starting with what was typed come first, then names
  * holding every word, then the rest (a town, a street); alphabetical within each.
  */
 export function searchPlaces(places: readonly Place[], query: string): Place[] {
@@ -24,6 +24,8 @@ export function searchPlaces(places: readonly Place[], query: string): Place[] {
     const allWords = [
       ...nameWords,
       ...searchable(`${place.locality ?? ''} ${place.city} ${place.street}`).split(' '),
+      // "vegan", "végane", "végétalienne" find the places with a vegan poutine.
+      ...(place.vegan ? ['vegane', 'vegetalienne'] : []),
     ];
     if (!words.every((word) => allWords.some((candidate) => candidate.startsWith(word)))) continue;
     let rank = 2;

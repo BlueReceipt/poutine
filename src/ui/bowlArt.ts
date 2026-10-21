@@ -88,6 +88,33 @@ export const COLOUR: Palette = {
   shine: '#fbfcfd',
 };
 
+/**
+ * A place with a vegan poutine (Alex, 2026-10-21: "that would make the aluminum plate green"): the
+ * same bowls, the foil green.
+ */
+export const VEGAN: Palette = {
+  ...COLOUR,
+  inner: '#8cc596',
+  rim: '#cbeccf',
+  crimp: '#68a874',
+  body: '#a6d8ae',
+  pleatDark: '#7fba8a',
+  pleatLight: '#ddf3e1',
+  bodyLine: '#3b764a',
+};
+
+/** A small leaf in the bowl's top right: Mr. Poo-teen has no tray to turn green. */
+export const LEAF: Shape[] = [
+  {
+    kind: 'path',
+    d: 'M40 16 C40 9 45 6 49 6 C49 12 46 16 40 16 Z',
+    fill: '#4caf5c',
+    stroke: '#2e6b39',
+    line: 0.8,
+  },
+  { kind: 'path', d: 'M40.6 15.4 L46.6 8.6', stroke: '#2e6b39', line: 0.7 },
+];
+
 /** A bowl not given yet: the same drawing in greys. */
 export const GHOST: Palette = {
   fry: { top: '#efefec', middle: '#e8e8e4', bottom: '#dededa' },
@@ -416,12 +443,13 @@ function tray(p: Palette, nth: number): Shape[] {
 
 const drawings = new Map<string, Shape[]>();
 
-/** The nth bowl (1 to 5; 0 the empty tray) in colour or in grey. */
+/** The nth bowl (1 to 5; 0 the empty tray) in colour, in grey, or green for a vegan poutine. */
 export function bowlShapes(nth: number, palette: Palette): Shape[] {
-  const key = `${String(nth)}${palette === COLOUR ? 'c' : 'g'}`;
+  const key = `${String(nth)}${palette === COLOUR ? 'c' : palette === VEGAN ? 'v' : 'g'}`;
   let shapes = drawings.get(key);
   if (!shapes) {
     shapes = nth === 1 ? mrPooTeen(palette) : tray(palette, nth);
+    if (nth === 1 && palette === VEGAN) shapes = [...shapes, ...LEAF];
     drawings.set(key, shapes);
   }
   return shapes;
@@ -478,7 +506,7 @@ function paintOn(context: CanvasRenderingContext2D, shape: Shape): void {
 
 /**
  * The nth bowl on a canvas, in a square of `size` at (x, y), filled to `fill` from the left: the grey
- * bowl, then the coloured one clipped over it (a half bowl for a half star).
+ * bowl, then the coloured one clipped over it (a half bowl for a half star); green for a vegan one.
  */
 export function drawBowl(
   context: CanvasRenderingContext2D,
@@ -487,6 +515,7 @@ export function drawBowl(
   x: number,
   y: number,
   size: number,
+  vegan = false,
 ): void {
   const scale = size / BOX.width;
   context.save();
@@ -501,7 +530,7 @@ export function drawBowl(
     context.beginPath();
     context.rect(BOX.x, BOX.y, BOX.width * fill, BOX.height);
     context.clip();
-    for (const shape of bowlShapes(nth, COLOUR)) paintOn(context, shape);
+    for (const shape of bowlShapes(nth, vegan ? VEGAN : COLOUR)) paintOn(context, shape);
   }
   context.restore();
 }

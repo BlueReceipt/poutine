@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { groupByAddress } from '../../src/domain/groups.ts';
 import type { Place } from '../../src/domain/osmPlaces.ts';
-import { boundsOf, pinFeatures } from '../../src/map/pins.ts';
+import { boundsOf, pinFeatures, pinImage } from '../../src/map/pins.ts';
 
 const at = (lon: number, lat: number, extra: Partial<Place> = {}): Place =>
   ({
@@ -41,9 +41,9 @@ describe('pins', () => {
       ]),
     );
     expect(features.map((feature) => feature.properties)).toEqual([
-      { id: 'node/-73.6', count: 1, poutine: 'name', bowl: 0 },
-      { id: 'node/-73.61', count: 2, poutine: 'cuisine', bowl: 0 },
-      { id: 'node/-73.7', count: 1, poutine: 'unconfirmed', bowl: 0 },
+      { id: 'node/-73.6', count: 1, poutine: 'name', bowl: 0, vegan: false },
+      { id: 'node/-73.61', count: 2, poutine: 'cuisine', bowl: 0, vegan: false },
+      { id: 'node/-73.7', count: 1, poutine: 'unconfirmed', bowl: 0, vegan: false },
     ]);
     expect(features[0]?.geometry.coordinates).toEqual([-73.6, 45.5]);
   });
@@ -61,6 +61,22 @@ describe('pins', () => {
     expect(bowls({ 'node/-73.6': 1 })).toEqual([1, 0]);
     expect(bowls({ 'node/-73.62': 4, 'node/-73.61': 2 })).toEqual([0, 4]);
     expect(bowls({ 'node/-73.6': 4.5 })).toEqual([5, 0]);
+  });
+
+  it('greens the tray of a pin where one place has a vegan poutine', () => {
+    const shared = { housenumber: '1', street: 'Rue Principale', city: 'Saint-Rémi' };
+    const groups = groupByAddress([
+      at(-73.6, 45.5, { vegan: true }),
+      at(-73.61, 45.26, shared),
+      at(-73.62, 45.26, { ...shared, vegan: true }),
+      at(-73.7, 45.3),
+    ]);
+    expect(pinFeatures(groups).features.map((feature) => feature.properties.vegan)).toEqual([
+      true,
+      true,
+      false,
+    ]);
+    expect([pinImage(3, true), pinImage(0, false)]).toEqual(['bowl-3v', 'bowl-0']);
   });
 
   it('makes solid the pin of a place raters confirmed', () => {
