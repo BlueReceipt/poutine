@@ -785,6 +785,14 @@
    "street": "Route 315",
    "postcode": "J8L 0J9"
   },
+  "node/9752814493": {
+   "name": "Lafortune traiteur",
+   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20; moved from Traiteur Lafortune et Crèmerie (way/1061513562), its twin, when the two merged",
+   "was": "Saint-Alexis",
+   "housenumber": "178",
+   "street": "Rue Principale",
+   "postcode": "J0K 1T0"
+  },
   "node/9969017581": {
    "name": "Casse-Croûte des Chutes",
    "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
@@ -1277,14 +1285,6 @@
    "housenumber": "1400",
    "street": "Boulevard Laurier",
    "postcode": "J0H 1S0"
-  },
-  "way/1061513562": {
-   "name": "Traiteur Lafortune et Crèmerie",
-   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
-   "was": "Saint-Alexis",
-   "housenumber": "178",
-   "street": "Rue Principale",
-   "postcode": "J0K 1T0"
   },
   "way/1084315895": {
    "name": "Kingburger",

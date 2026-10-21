@@ -1049,33 +1049,6 @@
    "link": "mami"
   },
   {
-   "osm": "node/1205203024",
-   "name": "Poulet Bronzé",
-   "housenumber": "",
-   "street": "",
-   "city": "Montréal",
-   "citySource": "adresses-quebec",
-   "province": "QC",
-   "postcode": "",
-   "addressCheck": "unchecked",
-   "lat": 45.4951763,
-   "lon": -73.5796504,
-   "phone": "",
-   "website": "https://poulet-bronze.com/",
-   "facebook": "",
-   "instagram": "",
-   "menu": "",
-   "openingHours": "",
-   "cuisine": [
-    "chicken",
-    "friture",
-    "sandwich"
-   ],
-   "poutine": "unconfirmed",
-   "picked": false,
-   "link": "pouletbronze"
-  },
-  {
    "osm": "node/1237960449",
    "name": "Mister Steer",
    "housenumber": "1198",
@@ -4436,12 +4409,16 @@
    "lat": 45.4958189,
    "lon": -73.5803631,
    "phone": "",
-   "website": "",
+   "website": "https://poulet-bronze.com/",
    "facebook": "",
    "instagram": "",
    "menu": "",
    "openingHours": "",
-   "cuisine": [],
+   "cuisine": [
+    "chicken",
+    "friture",
+    "sandwich"
+   ],
    "poutine": "unconfirmed",
    "picked": false,
    "link": "pouletbronzemtl"
@@ -12638,12 +12615,12 @@
   {
    "osm": "node/9752814493",
    "name": "Lafortune traiteur",
-   "housenumber": "",
-   "street": "",
+   "housenumber": "178",
+   "street": "Rue Principale",
    "city": "Saint-Alexis",
    "citySource": "adresses-quebec",
    "province": "QC",
-   "postcode": "",
+   "postcode": "J0K 1T0",
    "addressCheck": "unchecked",
    "lat": 45.9318989,
    "lon": -73.6120771,
@@ -16896,31 +16873,6 @@
    "poutine": "unconfirmed",
    "picked": false,
    "link": "restaurantaupouletnouveau"
-  },
-  {
-   "osm": "node/12216892626",
-   "name": "Au Coin du Hamburger",
-   "housenumber": "3040",
-   "street": "Chemin Sainte-Marie",
-   "city": "Mascouche",
-   "citySource": "adresses-quebec",
-   "province": "QC",
-   "postcode": "J7K 1P3",
-   "addressCheck": "confirmed",
-   "lat": 45.7448524,
-   "lon": -73.6013961,
-   "phone": "",
-   "website": "",
-   "facebook": "",
-   "instagram": "",
-   "menu": "",
-   "openingHours": "",
-   "cuisine": [
-    "burger"
-   ],
-   "poutine": "unconfirmed",
-   "picked": false,
-   "link": "aucoinduhamburgermascouche"
   },
   {
    "osm": "node/12229998949",
@@ -22922,32 +22874,6 @@
    "poutine": "name",
    "picked": false,
    "link": "cassecrouteduvieuxmoulin"
-  },
-  {
-   "osm": "way/1061513562",
-   "name": "Traiteur Lafortune et Crèmerie",
-   "housenumber": "178",
-   "street": "Rue Principale",
-   "city": "Saint-Alexis",
-   "citySource": "adresses-quebec",
-   "province": "QC",
-   "postcode": "J0K 1T0",
-   "addressCheck": "confirmed",
-   "lat": 45.9315227,
-   "lon": -73.6122929,
-   "phone": "",
-   "website": "",
-   "facebook": "",
-   "instagram": "",
-   "menu": "",
-   "openingHours": "",
-   "cuisine": [
-    "regional",
-    "american"
-   ],
-   "poutine": "unconfirmed",
-   "picked": false,
-   "link": "traiteurlafortuneetcremerie"
   },
   {
    "osm": "way/1084315895",

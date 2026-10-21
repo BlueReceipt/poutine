@@ -1,3 +1,4 @@
+import { sameName, sameStreetName } from './addresses.ts';
 import { fold } from './text.ts';
 
 /** One element of an Overpass answer (`out center tags`). */
@@ -455,14 +456,47 @@ export function twins(a: Place, b: Place): boolean {
   const left = fold(a.name);
   const right = fold(b.name);
   const meters = metersBetween(a, b);
-  if (left === right) return meters < 75;
-  const [short, long] = left.length < right.length ? [a.name, right] : [b.name, left];
-  if (isGenericName(short) || !long.startsWith(`${fold(short)} `)) return false;
-  const address = (place: Place) =>
-    place.housenumber && place.street
-      ? fold(`${place.housenumber} ${place.street} ${place.city}`)
-      : '';
-  return meters < 25 || (address(a) !== '' && address(a) === address(b));
+  const together = sameAddress(a, b);
+  // Before a push (Alex: "make sure there are no duplicates"): Poulet Bronzé twice 91 m apart, Au
+  // coin du hamburger twice at 3040 chemin Sainte-Marie, its two pins 736 m apart.
+  if (left === right) return together || meters < (isGenericName(a.name) ? 75 : 150);
+  const [short, long] = left.length < right.length ? [a.name, b.name] : [b.name, a.name];
+  if (isGenericName(short)) return false;
+  // Every word of one name in the other: "Lafortune traiteur", "Traiteur Lafortune et Crèmerie".
+  const words = (name: string) =>
+    fold(name)
+      .split(' ')
+      .filter((word) => !SMALL_WORDS.has(word));
+  const longWords = words(long);
+  const contained = words(short).every((word) => longWords.includes(word));
+  return contained && (together || meters < 75);
+}
+
+const SMALL_WORDS = new Set([
+  'de',
+  'du',
+  'des',
+  'la',
+  'le',
+  'les',
+  'l',
+  'd',
+  'et',
+  'a',
+  'au',
+  'aux',
+]);
+
+/** Two places at one street address: the same civic number, street and town, however written. */
+function sameAddress(a: Place, b: Place): boolean {
+  return Boolean(
+    a.housenumber &&
+    a.housenumber === b.housenumber &&
+    a.street &&
+    b.street &&
+    sameStreetName(a.street, b.street) &&
+    sameName(a.city, b.city),
+  );
 }
 
 const DETAILS = [
@@ -477,7 +511,9 @@ const DETAILS = [
 
 /**
  * One place out of two entries for it: the first kept, what it lacks taken from the other (its
- * street address, phone, links, hours, cuisine). Of two nested names, the shorter ("Le Verger à
+ * street address, phone, links, hours, cuisine), and the other's pin when only the other's stands
+ * on their shared address (a visitor's pin put on the street alone). Of two nested names, the
+ * shorter ("Le Verger à
  * Ti-Paul"), and that entry's ID and link unless the first's ID is the one already known (it has
  * a link, maybe ratings: `known`). `own` keeps the first's name and ID whatever: a pick's, or a
  * place Alex approved, whose link is already shared.
@@ -497,6 +533,15 @@ export function merged(
   }
   for (const field of DETAILS) if (!place[field]) place[field] = other[field];
   if (place.cuisine.length === 0) place.cuisine = other.cuisine;
+  if (
+    kept.addressCheck !== 'confirmed' &&
+    other.addressCheck === 'confirmed' &&
+    sameAddress(kept, other)
+  ) {
+    place.lat = other.lat;
+    place.lon = other.lon;
+    place.addressCheck = 'confirmed';
+  }
   const shorter =
     fold(other.name) !== fold(kept.name) &&
     other.name.length < kept.name.length &&

@@ -242,7 +242,18 @@ describe('two entries for one place', () => {
     const long = at({ name: 'Le Verger à Grains - Ferme brassicole - Boutique', lat: 46.41431 });
     expect(twins(short, long)).toBe(true);
     expect(twins(at({ name: 'Casse-croûte' }), at({ name: 'Casse-croûte Trempette' }))).toBe(false);
-    expect(twins(short, at({ name: 'Le Verger à Grains', lat: 46.42 }))).toBe(false);
+    expect(twins(short, at({ name: 'Le Verger à Grains', housenumber: '9', lat: 46.42 }))).toBe(
+      false,
+    );
+    // The same name a little farther, or at one address however far; words of one in the other.
+    expect(twins(short, at({ lat: 46.4153 }))).toBe(true);
+    expect(twins(short, at({ street: 'Rg du Bas-St-Jacques', lat: 46.42 }))).toBe(true);
+    expect(
+      twins(
+        at({ name: 'Grains traiteur' }),
+        at({ name: 'Traiteur Grains et Crèmerie', lat: 46.4146 }),
+      ),
+    ).toBe(true);
   });
 
   it('merges them: what one lacks from the other, the short name, the known ID kept', () => {
@@ -260,6 +271,16 @@ describe('two entries for one place', () => {
       cuisine: ['regional'],
     });
     expect(merged(long, short, { known: new Set(['node/1']) }).osm).toBe('node/1');
+  });
+
+  it('takes the pin that stands on their address when only one does', () => {
+    const onStreet = at({ osm: 'added/3', addressCheck: 'unchecked', lat: 46.42 });
+    const onAddress = at({ osm: 'node/4', addressCheck: 'confirmed' });
+    expect(merged(onStreet, onAddress, { own: true })).toMatchObject({
+      osm: 'added/3',
+      lat: 46.4143,
+      addressCheck: 'confirmed',
+    });
   });
 
   it('lets a place Alex approved stand for its OpenStreetMap twin, filled in from it', () => {
