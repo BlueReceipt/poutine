@@ -54,13 +54,13 @@ export interface RatingTotal {
   no?: number;
 }
 
-/** Yeses it takes from different raters to confirm a place serves poutine (Alex, 2026-10-20). */
-export const CONFIRM_AT = 3;
-
-/** Three yeses or more, and more yeses than noes. */
+/**
+ * A rating confirms the place serves poutine (Alex, 2026-10-20: "if someone gives a review, it
+ * should erase the poutine not confirmed"): whoever rates it ate a poutine there. It took three
+ * yeses to "Did you have poutine here?" before, a question the card no longer asks.
+ */
 export function confirmedByRaters(total: RatingTotal | undefined): boolean {
-  const yes = total?.yes ?? 0;
-  return yes >= CONFIRM_AT && yes > (total?.no ?? 0);
+  return (total?.count ?? 0) > 0;
 }
 
 /** Stars a rating may give: 1 to 5, whole (Alex, 2026-10-20: "whole numbers. no halfs"). */

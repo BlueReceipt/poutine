@@ -49,6 +49,9 @@ body,
 .map {
   position: absolute;
   inset: 0;
+  /* A long press on a pin is the app's (Add more info), not the phone's text selection. */
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
 .visually-hidden {
@@ -542,6 +545,45 @@ body,
   margin-top: 8px;
   font-weight: 700;
   cursor: pointer;
+}
+
+/* Add more info: hours in a box of a few lines, the town and postal code side by side. */
+.field textarea {
+  min-height: 88px;
+  padding: 10px 12px;
+  border: 2px solid #8a8d86;
+  border-radius: 10px;
+  background: var(--sheet);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 400;
+  resize: vertical;
+}
+
+.field textarea:focus {
+  border-color: var(--ink);
+  outline: 2px solid var(--ink);
+}
+
+.field-row {
+  display: flex;
+  gap: 12px;
+}
+
+/* Side by side, each field shares the width: an input's own width would push past the screen. */
+.field-row .field {
+  min-width: 0;
+}
+
+.field-row .field input {
+  width: 100%;
+  min-width: 0;
+}
+
+/* The card's way to Add more info, quiet under its links. */
+.card .edit-open {
+  display: block;
+  margin-top: 4px;
 }
 
 .check input {

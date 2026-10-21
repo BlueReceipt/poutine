@@ -8,6 +8,12 @@
       "port": 4180
     },
     {
+      "name": "poutine-4181",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["wrangler", "dev", "--port", "4181"],
+      "port": 4181
+    },
+    {
       "name": "poutine-page",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],

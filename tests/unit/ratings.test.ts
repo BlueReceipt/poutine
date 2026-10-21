@@ -67,12 +67,10 @@ describe('Did you have poutine here?', () => {
       expect(checkRating(sent({ poutine }))).toEqual({ problems: ['not-a-rating'] });
   });
 
-  it('confirms a place with three yeses from raters, and more yeses than noes', () => {
-    expect(confirmedByRaters({ count: 3, total: 12, yes: 3 })).toBe(true);
-    expect(confirmedByRaters({ count: 5, total: 20, yes: 3, no: 2 })).toBe(true);
-    expect(confirmedByRaters({ count: 6, total: 20, yes: 3, no: 3 })).toBe(false);
-    expect(confirmedByRaters({ count: 2, total: 8, yes: 2 })).toBe(false);
-    expect(confirmedByRaters({ count: 9, total: 30 })).toBe(false);
+  it('confirms a place as soon as anyone rates it', () => {
+    expect(confirmedByRaters({ count: 1, total: 4 })).toBe(true);
+    expect(confirmedByRaters({ count: 9, total: 30, yes: 0, no: 3 })).toBe(true);
+    expect(confirmedByRaters({ count: 0, total: 0 })).toBe(false);
     expect(confirmedByRaters(undefined)).toBe(false);
   });
 });

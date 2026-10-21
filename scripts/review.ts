@@ -6,7 +6,8 @@
  *   npm run waiting                 the places waiting, with links to check them
  *   npm run approve -- 3 5          approves them as the approval page does (on the map within a minute),
  *                                   then folds
- *   npm run fold                    copies the approved places to data/added.json and the list
+ *   npm run fold                    copies the approved places to data/added.json and the list, and
+ *                                   the approved changes (Add more info) to data/fixes.json
  *   npm run reject -- 4             turns them down (kept in the database as rejected)
  *   npm run ratings                 the latest ratings (and written reviews, once switched on)
  *   npm run hide -- 12              hides ratings: they stop counting at once, no push needed
@@ -18,9 +19,9 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import type { Fix } from '../src/domain/addressFixes.ts';
 import { COUNT_KINDS, type CountKind } from '../src/domain/counts.ts';
 import { possibleDuplicates } from '../src/domain/duplicates.ts';
-import { CONFIRM_AT } from '../src/domain/ratings.ts';
 import type { Place } from '../src/domain/osmPlaces.ts';
 import { linkForNewPlace } from '../src/domain/shortLinks.ts';
 import {
@@ -32,6 +33,7 @@ import {
 
 const ROOT = join(import.meta.dirname, '..');
 const ADDED = join(ROOT, 'data', 'added.json');
+const FIXES = join(ROOT, 'data', 'fixes.json');
 const PLACES = join(ROOT, 'data', 'places.json');
 // Wrangler's own entry (its package exports don't name it): the project's installed copy.
 const WRANGLER = join(ROOT, 'node_modules', 'wrangler', 'bin', 'wrangler.js');
@@ -149,11 +151,34 @@ function placeOfRow(row: Row): Place {
 }
 
 /**
+ * The changes Alex approved (Add more info) into data/fixes.json, each over the fix already there
+ * for its place, the latest last; they already show from D1 until the list has them.
+ */
+function foldChanges(): number {
+  const rows = sql<{ place: string; fix: string }>(
+    "SELECT place, fix FROM changes WHERE status = 'approved' AND fix IS NOT NULL ORDER BY reviewed_at, id",
+  );
+  if (rows.length === 0) return 0;
+  const file = JSON.parse(readFileSync(FIXES, 'utf8')) as {
+    about: string;
+    fixes: Record<string, Fix>;
+  };
+  for (const row of rows)
+    file.fixes[row.place] = { ...file.fixes[row.place], ...(JSON.parse(row.fix) as Fix) };
+  file.fixes = Object.fromEntries(
+    Object.entries(file.fixes).sort(([a], [b]) => a.localeCompare(b, 'en', { numeric: true })),
+  );
+  writeFileSync(FIXES, `${JSON.stringify(file, null, 1)}\n`);
+  return rows.length;
+}
+
+/**
  * The approved places into the list the app ships: data/added.json, their links in
- * data/links.json, then data/places.json again (no server asked). Commit and push to ship them;
- * they already show from D1 until then.
+ * data/links.json, the approved changes in data/fixes.json, then data/places.json again (no server
+ * asked). Commit and push to ship them; they already show from D1 until then.
  */
 function fold(): void {
+  const changes = foldChanges();
   const rows = approvedRows();
   const file = JSON.parse(readFileSync(LINKS, 'utf8')) as {
     about: string;
@@ -192,7 +217,7 @@ function fold(): void {
     stdio: 'inherit',
   });
   console.log(
-    `${String(rows.length)} approved places in data/added.json: commit and push to ship them.`,
+    `${String(rows.length)} approved places in data/added.json, ${String(changes)} approved changes in data/fixes.json: commit and push to ship them.`,
   );
 }
 
@@ -270,13 +295,12 @@ function counts(): void {
 }
 
 /**
- * The places raters confirmed serve poutine, and which of them the list still calls unconfirmed:
- * those can be made permanent with "confirmed": true in data/picked.json.
+ * The places raters confirmed serve poutine (any rating does), and which of them the list still
+ * calls unconfirmed: those can be made permanent with "confirmed": true in data/picked.json.
  */
 function confirmed(): void {
-  const rows = sql<{ place: string; poutine_yes: number; poutine_no: number }>(
-    `SELECT place, poutine_yes, poutine_no FROM rating_totals
-      WHERE poutine_yes >= ${String(CONFIRM_AT)} AND poutine_yes > poutine_no ORDER BY place`,
+  const rows = sql<{ place: string; count: number }>(
+    `SELECT place, count FROM rating_totals WHERE count > 0 ORDER BY place`,
   );
   if (rows.length === 0) {
     console.log('No place confirmed by raters yet.');
@@ -287,7 +311,7 @@ function confirmed(): void {
     const place = places.find((candidate) => candidate.osm === row.place);
     const still = place?.poutine === 'unconfirmed' ? '  (still unconfirmed in the list)' : '';
     console.log(
-      `${row.place}  ${place?.name ?? '?'}, ${place?.city ?? ''}: ${String(row.poutine_yes)} yes, ${String(row.poutine_no)} no${still}`,
+      `${row.place}  ${place?.name ?? '?'}, ${place?.city ?? ''}: ${String(row.count)} rating${row.count === 1 ? '' : 's'}${still}`,
     );
   }
 }

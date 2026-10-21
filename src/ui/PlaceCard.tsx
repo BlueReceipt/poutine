@@ -11,6 +11,7 @@ import {
   telUrl,
 } from '../domain/placeText.ts';
 import { confirmedByRaters, type RatingTotal } from '../domain/ratings.ts';
+import { EditPlace } from './EditPlace.tsx';
 import { RatingBox, RatingSummary, ReviewList, SharePanel, useRating } from './Ratings.tsx';
 import type { Strings } from './strings.ts';
 
@@ -25,6 +26,9 @@ interface Props {
   ratedAt: Readonly<Record<string, number>>;
   /** The stars a friend's link carried for one place ("?s=4"), shown on its card. */
   friend: { place: string; stars: number } | null;
+  /** Add more info shows in place of the card (a long press on the pin, or the card's link). */
+  editing: boolean;
+  onEditing: (editing: boolean) => void;
   onRated: (place: string, total: RatingTotal) => void;
   onChoose: (id: string) => void;
   onClose: () => void;
@@ -32,7 +36,8 @@ interface Props {
 
 /** A sheet over the bottom of the map: one place's card, or the places sharing a pin. */
 export function PlaceCard(props: Props) {
-  const { group, place, strings, totals, ratedAt, friend, onRated, onChoose, onClose } = props;
+  const { group, place, strings, totals, ratedAt, friend, editing, onEditing, onRated } = props;
+  const { onChoose, onClose } = props;
   const heading = useRef<HTMLHeadingElement>(null);
 
   // The card takes the focus when it opens or changes; Escape closes it.
@@ -64,6 +69,8 @@ export function PlaceCard(props: Props) {
           total={totals[place.osm]}
           ratedAt={ratedAt[place.osm] ?? 0}
           friend={friend?.place === place.osm ? friend.stars : null}
+          editing={editing}
+          onEditing={onEditing}
           onRated={(total) => {
             onRated(place.osm, total);
           }}
@@ -100,11 +107,13 @@ interface DetailsProps {
   total: RatingTotal | undefined;
   ratedAt: number;
   friend: number | null;
+  editing: boolean;
+  onEditing: (editing: boolean) => void;
   onRated: (total: RatingTotal) => void;
 }
 
 function PlaceDetails(props: DetailsProps) {
-  const { place, strings, heading, total, ratedAt, friend, onRated } = props;
+  const { place, strings, heading, total, ratedAt, friend, editing, onEditing, onRated } = props;
   const words = strings.card;
   const rating = useRating(place, onRated);
   // Partager opens the share step (the invitation, the photo, the stars) in place of the card.
@@ -123,7 +132,20 @@ function PlaceDetails(props: DetailsProps) {
   // One bot check for both views: it stays put while the card and its share step swap.
   return (
     <>
-      {sharing ? (
+      {editing ? (
+        <>
+          <h2 id="card-title" ref={heading} tabIndex={-1}>
+            {place.name}
+          </h2>
+          <EditPlace
+            place={place}
+            strings={strings}
+            onBack={() => {
+              onEditing(false);
+            }}
+          />
+        </>
+      ) : sharing ? (
         <>
           <h2 id="card-title" ref={heading} tabIndex={-1}>
             {place.name}
@@ -201,6 +223,15 @@ function PlaceDetails(props: DetailsProps) {
               </a>
             </li>
           </ul>
+          <button
+            type="button"
+            class="link edit-open"
+            onClick={() => {
+              onEditing(true);
+            }}
+          >
+            {strings.edit.open}
+          </button>
           <ReviewList place={place} strings={strings} version={ratedAt} />
         </>
       )}

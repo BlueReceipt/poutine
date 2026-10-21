@@ -28,10 +28,15 @@ export interface Fix {
   /** Where the pin goes when it stands elsewhere: the address's own point (Adresses Québec). */
   lat?: number;
   lon?: number;
-  /** Details Alex gives (2026-10-20, Chez Lulu's): its phone and pages. */
+  /**
+   * Details Alex gives (2026-10-20, Chez Lulu's), or a visitor's approved change: its phone, pages
+   * and hours; an empty one takes the list's away.
+   */
   phone?: string;
   website?: string;
   facebook?: string;
+  instagram?: string;
+  openingHours?: string;
   /** Where the corrected details come from. */
   source: string;
   /** The address the list had before, as addressOf writes it. */
@@ -69,10 +74,18 @@ export function applyFixes(
         street,
         city: fix.city ?? place.city,
         citySource: fix.city ? 'fix' : place.citySource,
-        postcode: fix.postcode ? normalizePostcode(fix.postcode) : place.postcode,
-        phone: fix.phone ? normalizePhone(fix.phone) : place.phone,
-        website: fix.website ? normalizeUrl(fix.website) : place.website,
-        facebook: fix.facebook ? profileUrl(fix.facebook, 'www.facebook.com') : place.facebook,
+        postcode: fix.postcode !== undefined ? normalizePostcode(fix.postcode) : place.postcode,
+        phone: fix.phone !== undefined ? normalizePhone(fix.phone) : place.phone,
+        website: fix.website !== undefined ? normalizeUrl(fix.website) : place.website,
+        facebook:
+          fix.facebook !== undefined
+            ? profileUrl(fix.facebook, 'www.facebook.com')
+            : place.facebook,
+        instagram:
+          fix.instagram !== undefined
+            ? profileUrl(fix.instagram, 'www.instagram.com')
+            : place.instagram,
+        openingHours: fix.openingHours ?? place.openingHours,
         addressCheck: moved ? 'unchecked' : place.addressCheck,
       },
     ];

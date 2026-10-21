@@ -1,6 +1,14 @@
 // The approval page (Alex, 2026-10-20): /admin and /api/admin/*, behind Cloudflare Access and the
-// Worker's own check of its token (access.ts). The places waiting, then Approve (with Alex's
-// fixes, checked like a visitor's form), Reject. An approved place shows on the map at once.
+// Worker's own check of its token (access.ts). The places waiting and the changes and claims
+// waiting (Add more info), then Approve (with Alex's fixes, checked like a visitor's form), Reject.
+// An approved place or change shows on the map at once.
+import {
+  CHANGE_COLUMNS,
+  changeOfRow,
+  checkChange,
+  fixOfChange,
+  type ChangeRow,
+} from '../src/domain/changes.ts';
 import { linkForNewPlace } from '../src/domain/shortLinks.ts';
 import {
   approvedPlace,
@@ -11,6 +19,7 @@ import {
 } from '../src/domain/submission.ts';
 import { signedInAlex } from './access.ts';
 import { ADDED_PATH, approvedPlaces } from './added.ts';
+import { CHANGES_PATH, currentPlace } from './changes.ts';
 import { fromThisSite, json, jsonBody, problem } from './http.ts';
 import { givenLinks, listed } from './list.ts';
 
@@ -28,17 +37,101 @@ export async function adminPage(request: Request, env: Env): Promise<Response> {
   return new Response(page.body, { status: page.status, headers });
 }
 
-/** GET /api/admin/waiting: the places waiting, oldest first. */
+/**
+ * GET /api/admin/waiting: the places waiting, and the changes and claims waiting with the place as
+ * the map shows it now, oldest first.
+ */
 export async function waitingPlaces(request: Request, env: Env): Promise<Response> {
   if (!(await signedInAlex(request, env))) return problem(403, 'not-signed-in');
-  const { results } = await env.DB.prepare(
-    `SELECT ${SUBMISSION_COLUMNS} FROM submissions WHERE status = 'pending' ORDER BY created_at`,
-  ).all<SubmissionRow>();
-  return json({ waiting: results });
+  const [places, changes] = await env.DB.batch([
+    env.DB.prepare(
+      `SELECT ${SUBMISSION_COLUMNS} FROM submissions WHERE status = 'pending' ORDER BY created_at`,
+    ),
+    env.DB.prepare(
+      `SELECT ${CHANGE_COLUMNS} FROM changes WHERE status = 'pending' ORDER BY created_at`,
+    ),
+  ]);
+  const withPlaces = await Promise.all(
+    ((changes?.results ?? []) as ChangeRow[]).map(async (row) => ({
+      ...row,
+      current: await currentPlace(env, row.place),
+    })),
+  );
+  return json({
+    waiting: (places?.results ?? []) as SubmissionRow[],
+    changes: withPlaces.filter((row) => row.current !== null),
+  });
 }
 
 /**
- * POST /api/admin/review {id, decision: "approve" | "reject", place?}: one place decided. On
+ * One change or claim decided (POST /api/admin/review with kind "change"). On Approve, `change`
+ * holds Alex's fixes as the form's fields, checked like a visitor's; what it makes different shows
+ * on the map within the minute the approved changes are kept. Either way an owner's contact goes.
+ */
+async function reviewChange(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext,
+  id: number,
+  decision: unknown,
+  fixes: unknown,
+): Promise<Response> {
+  const row = await env.DB.prepare(
+    `SELECT ${CHANGE_COLUMNS} FROM changes WHERE id = ? AND status = 'pending'`,
+  )
+    .bind(id)
+    .first<ChangeRow>();
+  if (!row) return problem(409, 'not-waiting');
+  const now = new Date().toISOString();
+  if (decision === 'reject') {
+    await env.DB.prepare(
+      "UPDATE changes SET status = 'rejected', reviewed_at = ?, contact = '' WHERE id = ? AND status = 'pending'",
+    )
+      .bind(now, id)
+      .run();
+    return json({ rejected: id });
+  }
+  if (decision !== 'approve') return problem(400, 'not-a-review');
+  const place = await currentPlace(env, row.place);
+  if (!place) return problem(409, 'not-waiting');
+  let change = changeOfRow(row);
+  if (fixes !== undefined) {
+    const checked = checkChange(fixes, place);
+    if ('problems' in checked) return json({ error: 'problems', problems: checked.problems }, 400);
+    change = checked.change;
+  }
+  const fix = fixOfChange(change, place, id, now.slice(0, 10));
+  await env.DB.prepare(
+    `UPDATE changes SET name = ?, housenumber = ?, street = ?, city = ?, postcode = ?, phone = ?,
+      website = ?, facebook = ?, instagram = ?, hours = ?, closed = ?, status = 'approved',
+      reviewed_at = ?, contact = '', fix = ?
+      WHERE id = ? AND status = 'pending'`,
+  )
+    .bind(
+      change.name,
+      change.housenumber,
+      change.street,
+      change.city,
+      change.postcode,
+      change.phone,
+      change.website,
+      change.facebook,
+      change.instagram,
+      change.hours,
+      change.closed ? 1 : 0,
+      now,
+      JSON.stringify(fix),
+      id,
+    )
+    .run();
+  // The map asks for the approved changes again rather than wait out the minute they're kept.
+  ctx.waitUntil(caches.default.delete(new Request(new URL(CHANGES_PATH, request.url))));
+  return json({ fix });
+}
+
+/**
+ * POST /api/admin/review {id, decision: "approve" | "reject", place?}: one place decided (with
+ * kind "change" and `change`, one change or claim: reviewChange). On
  * Approve, `place` holds Alex's fixes as the form's fields, checked like a visitor's; the place
  * gets its short link and shows on the map within the minute the approved places are kept.
  */
@@ -51,9 +144,10 @@ export async function reviewPlace(
   if (!(await signedInAlex(request, env))) return problem(403, 'not-signed-in');
   const body = await jsonBody(request, 8 * 1024);
   if (!body || typeof body !== 'object' || Array.isArray(body)) return problem(400, 'not-a-review');
-  const { id, decision, place: fixes } = body as Record<string, unknown>;
+  const { id, decision, place: fixes, kind, change } = body as Record<string, unknown>;
   if (typeof id !== 'number' || !Number.isInteger(id) || id <= 0)
     return problem(400, 'not-a-review');
+  if (kind === 'change') return reviewChange(request, env, ctx, id, decision, change);
   const row = await env.DB.prepare(
     `SELECT ${SUBMISSION_COLUMNS} FROM submissions WHERE id = ? AND status = 'pending'`,
   )

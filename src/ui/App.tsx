@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import placesUrl from '../../data/places.json?url';
+import { applyFixes, type Fix } from '../domain/addressFixes.ts';
 import { groupByAddress } from '../domain/groups.ts';
 import { placeIdFromPath, placePath } from '../domain/links.ts';
 import { linkFromPath, searchFor } from '../domain/shortLinks.ts';
@@ -49,6 +50,8 @@ export function App({
 }) {
   const [state, setState] = useState<State>({ kind: 'loading' });
   const [selection, setSelection] = useState<Selection | null>(null);
+  // Add more info in place of the card (a long press on a pin, or the card's link).
+  const [editing, setEditing] = useState(false);
   const [query, setQuery] = useState('');
   const [near, setNear] = useState<NearState | null>(null);
   const [me, setMe] = useState<{ lat: number; lon: number } | null>(null);
@@ -72,8 +75,8 @@ export function App({
     setState({ kind: 'failed' });
   }, []);
 
-  // The list the app ships, and the places Alex approved since (from the Worker; without it, the
-  // list alone), so a link to a new place opens it too.
+  // The list the app ships, the places Alex approved since and the changes he approved since (from
+  // the Worker; without it, the list alone), so a link to a new place opens it too.
   useEffect(() => {
     const listed = fetch(placesUrl).then((response) => {
       if (!response.ok) throw new Error(`places.json answered ${String(response.status)}`);
@@ -82,13 +85,14 @@ export function App({
     const added = fetch('/api/added', { cache: 'no-cache' })
       .then((response) => (response.ok ? response.json() : { places: [] }))
       .catch(() => ({ places: [] })) as Promise<{ places: Place[] }>;
-    Promise.all([listed, added])
-      .then(([list, since]) => {
+    const changes = fetch('/api/changes', { cache: 'no-cache' })
+      .then((response) => (response.ok ? response.json() : { fixes: {} }))
+      .catch(() => ({ fixes: {} })) as Promise<{ fixes: Record<string, Fix> }>;
+    Promise.all([listed, added, changes])
+      .then(([list, since, changed]) => {
         const known = new Set(list.places.map((place) => place.osm));
-        setState({
-          kind: 'ready',
-          places: [...list.places, ...since.places.filter((place) => !known.has(place.osm))],
-        });
+        const all = [...list.places, ...since.places.filter((place) => !known.has(place.osm))];
+        setState({ kind: 'ready', places: applyFixes(all, changed.fixes) });
       })
       .catch(failed);
   }, [failed]);
@@ -143,9 +147,19 @@ export function App({
       : (group?.places.find((candidate) => candidate.osm === selection?.placeId) ?? null);
 
   const select = useCallback((groupId: string | null) => {
+    setEditing(false);
     setSelection(groupId ? { groupId, placeId: null } : null);
   }, []);
+  // A card closed any way closes its Add more info too.
+  useEffect(() => {
+    if (!selection) setEditing(false);
+  }, [selection]);
+  const longPress = useCallback((groupId: string) => {
+    setSelection({ groupId, placeId: null });
+    setEditing(true);
+  }, []);
   const closeCard = useCallback(() => {
+    setEditing(false);
     setSelection(null);
   }, []);
   const closeNearby = useCallback(() => {
@@ -165,6 +179,7 @@ export function App({
       const groupId = groupOf.get(chosen.osm);
       if (!groupId) return;
       setQuery('');
+      setEditing(false);
       setSelection({ groupId, placeId: chosen.osm });
       seq.current += 1;
       setRequest({ kind: 'place', id: groupId, seq: seq.current });
@@ -269,6 +284,7 @@ export function App({
           picking={picking}
           onPicked={setPicked}
           onSelect={select}
+          onLongPress={longPress}
           onFailed={failed}
         />
       )}
@@ -355,6 +371,8 @@ export function App({
           totals={totals}
           ratedAt={ratedAt}
           friend={friend}
+          editing={editing}
+          onEditing={setEditing}
           onRated={rated}
           onChoose={(placeId) => {
             setSelection({ groupId: group.id, placeId });

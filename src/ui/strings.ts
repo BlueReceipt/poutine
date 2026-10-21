@@ -1,3 +1,4 @@
+import type { ChangedField, ChangeProblem } from '../domain/changes.ts';
 import type { HoursWords } from '../domain/hours.ts';
 import type { PlaceKind } from '../domain/links.ts';
 import type { PlacedBy, Problem } from '../domain/submission.ts';
@@ -77,6 +78,7 @@ export interface Strings {
     distance: (meters: number) => string;
   };
   add: AddWords;
+  edit: EditWords;
   admin: AdminWords;
   ratings: RatingWords;
   share: ShareWords;
@@ -199,6 +201,49 @@ export interface RatingWords {
 }
 
 /** The approval page (/admin), Alex's alone. */
+/**
+ * Add more info and Claim this spot (Alex, 2026-10-20): the form over a place's card, opened by a
+ * long press on its pin or the card's link.
+ */
+export interface EditWords {
+  /** The card's link to the form. */
+  open: string;
+  title: string;
+  intro: string;
+  name: string;
+  street: string;
+  town: string;
+  postcode: string;
+  phone: string;
+  website: string;
+  facebook: string;
+  instagram: string;
+  hours: string;
+  hoursHint: string;
+  closed: string;
+  claim: string;
+  claimHint: string;
+  contact: string;
+  send: string;
+  sending: string;
+  back: string;
+  sentTitle: string;
+  sent: string;
+  close: string;
+  problems: Record<
+    | ChangeProblem
+    | 'bot-check'
+    | 'too-many'
+    | 'queue-full'
+    | 'no-such-place'
+    | 'offline'
+    | 'unexpected',
+    string
+  >;
+  privacy: string;
+  license: string;
+}
+
 export interface AdminWords {
   title: string;
   loading: string;
@@ -221,6 +266,19 @@ export interface AdminWords {
   rejected: (name: string) => string;
   notWaiting: string;
   unexpected: string;
+  /** The changes and claims waiting (Add more info). */
+  changesTitle: string;
+  change: string;
+  claim: string;
+  closedSaid: string;
+  before: string;
+  after: string;
+  fields: Record<ChangedField['field'], string>;
+  ownerContact: string;
+  placePhone: string;
+  confirmHint: string;
+  changeApproved: (name: string) => string;
+  changeRejected: (name: string) => string;
 }
 
 export interface AddWords {
@@ -469,6 +527,76 @@ const english: Strings = {
     rejected: (name) => `${name} is rejected.`,
     notWaiting: 'Already decided, maybe in another tab. The list is loaded again.',
     unexpected: 'Something went wrong. Try again in a moment.',
+    changesTitle: 'Changes and claims waiting',
+    change: 'Change',
+    claim: 'Claim',
+    closedSaid: 'Closed for good, the sender says.',
+    before: 'Now',
+    after: 'Proposed',
+    fields: {
+      name: 'Name',
+      address: 'Address',
+      city: 'Town',
+      postcode: 'Postal code',
+      phone: 'Phone',
+      website: 'Website',
+      facebook: 'Facebook',
+      instagram: 'Instagram',
+      hours: 'Hours',
+    },
+    ownerContact: 'How to reach the owner',
+    placePhone: 'The place’s own phone',
+    confirmHint:
+      'Call the place’s own number, or ask something only the owner would know, before you approve a claim.',
+    changeApproved: (name) =>
+      `The change to ${name} is approved: it shows on the map within a minute.`,
+    changeRejected: (name) => `The change to ${name} is rejected.`,
+  },
+  edit: {
+    open: 'Add info or claim this spot',
+    title: 'Add more info',
+    intro: 'Fix what’s wrong, add what’s missing. Every change is checked before it shows.',
+    name: 'Name',
+    street: 'Address',
+    town: 'Town',
+    postcode: 'Postal code',
+    phone: 'Phone',
+    website: 'Website',
+    facebook: 'Facebook',
+    instagram: 'Instagram',
+    hours: 'Hours',
+    hoursHint: 'In your own words: “Mon–Fri 11 am–8 pm, closed Sunday”.',
+    closed: 'Closed for good',
+    claim: 'It’s my business',
+    claimHint:
+      'Leave a phone number or an email: we’ll contact you to confirm it’s yours. It’s never shown, and it’s erased once that’s done.',
+    contact: 'Your phone or email',
+    send: 'Send',
+    sending: 'Sending…',
+    back: 'Back',
+    sentTitle: 'Thanks!',
+    sent: 'It shows on the map once it’s been checked.',
+    close: 'Close',
+    problems: {
+      name: 'The place needs a name.',
+      phone: 'That phone number doesn’t look right.',
+      website: 'That website address doesn’t look right.',
+      facebook: 'That Facebook page doesn’t look right.',
+      instagram: 'That Instagram account doesn’t look right.',
+      contact: 'To claim the spot, leave a phone number or an email.',
+      nothing: 'Nothing changed yet: fix a detail, or tick a box.',
+      'too-long': 'One of the fields is too long.',
+      'not-a-change': 'The change couldn’t be read. Reload the page and try again.',
+      'bot-check': 'The anti-spam check didn’t pass. Try again in a moment.',
+      'too-many': 'Too many sent from here in the last hour. Try again later.',
+      'queue-full': 'Lots waiting already. Try again in a few days.',
+      'no-such-place': 'This place isn’t on the map anymore.',
+      offline: 'Not sent: no connection. Try again in a moment.',
+      unexpected: 'Something went wrong. Try again in a moment.',
+    },
+    privacy:
+      'No account. To stop spam, a scrambled form of your connection’s address is kept for 30 days.',
+    license: 'What you send joins the open list of places (ODbL), like the rest.',
   },
   add: {
     title: 'Add a place',
@@ -742,6 +870,76 @@ const french: Strings = {
     rejected: (name) => `${name} est refusée.`,
     notWaiting: 'Déjà décidée, peut-être dans un autre onglet. La liste est rechargée.',
     unexpected: 'Un problème est survenu. Réessayez dans un moment.',
+    changesTitle: 'Changements et réclamations en attente',
+    change: 'Changement',
+    claim: 'Réclamation',
+    closedSaid: `Fermé pour de bon, dit la personne.`,
+    before: 'Maintenant',
+    after: 'Proposé',
+    fields: {
+      name: 'Nom',
+      address: 'Adresse',
+      city: 'Ville',
+      postcode: 'Code postal',
+      phone: 'Téléphone',
+      website: 'Site Web',
+      facebook: 'Facebook',
+      instagram: 'Instagram',
+      hours: 'Heures',
+    },
+    ownerContact: 'Pour joindre le propriétaire',
+    placePhone: 'Le téléphone du commerce',
+    confirmHint:
+      'Appelez le numéro du commerce, ou demandez ce que seul le propriétaire saurait, avant d’approuver une réclamation.',
+    changeApproved: (name) =>
+      `Le changement à ${name} est approuvé${NBSP}: il apparaît sur la carte d’ici une minute.`,
+    changeRejected: (name) => `Le changement à ${name} est refusé.`,
+  },
+  edit: {
+    open: 'Ajouter de l’info ou réclamer ce commerce',
+    title: 'Ajouter de l’info',
+    intro:
+      'Corrigez ce qui cloche, ajoutez ce qui manque. Chaque changement est vérifié avant d’apparaître.',
+    name: 'Nom',
+    street: 'Adresse',
+    town: 'Ville',
+    postcode: 'Code postal',
+    phone: 'Téléphone',
+    website: 'Site Web',
+    facebook: 'Facebook',
+    instagram: 'Instagram',
+    hours: 'Heures',
+    hoursHint: `Dans vos mots${NBSP}: «${NBSP}lun-ven 11 h-20 h, fermé le dimanche${NBSP}».`,
+    closed: 'Fermé pour de bon',
+    claim: 'C’est mon commerce',
+    claimHint: `Laissez un numéro ou un courriel${NBSP}: on vous contactera pour confirmer que c’est le vôtre. Il n’est jamais affiché, et il est effacé une fois que c’est réglé.`,
+    contact: 'Votre téléphone ou courriel',
+    send: 'Envoyer',
+    sending: 'Envoi…',
+    back: 'Retour',
+    sentTitle: `Merci${NBSP}!`,
+    sent: 'Ça apparaîtra sur la carte une fois vérifié.',
+    close: 'Fermer',
+    problems: {
+      name: 'La place a besoin d’un nom.',
+      phone: 'Ce numéro de téléphone ne semble pas bon.',
+      website: 'Cette adresse Web ne semble pas bonne.',
+      facebook: 'Cette page Facebook ne semble pas bonne.',
+      instagram: 'Ce compte Instagram ne semble pas bon.',
+      contact: 'Pour réclamer le commerce, laissez un numéro ou un courriel.',
+      nothing: `Rien n’a changé${NBSP}: corrigez un détail ou cochez une case.`,
+      'too-long': 'Un des champs est trop long.',
+      'not-a-change': 'Le changement n’a pas pu être lu. Rechargez la page et réessayez.',
+      'bot-check': 'La vérification anti-pourriel n’a pas passé. Réessayez dans un moment.',
+      'too-many': 'Trop d’envois d’ici dans la dernière heure. Réessayez plus tard.',
+      'queue-full': 'Beaucoup en attente déjà. Réessayez dans quelques jours.',
+      'no-such-place': 'Cette place n’est plus sur la carte.',
+      offline: `Pas envoyé${NBSP}: pas de connexion. Réessayez dans un moment.`,
+      unexpected: 'Un problème est survenu. Réessayez dans un moment.',
+    },
+    privacy:
+      'Pas de compte. Pour bloquer le pourriel, une forme brouillée de l’adresse de votre connexion est gardée 30 jours.',
+    license: 'Ce que vous envoyez rejoint la liste ouverte des places (ODbL), comme le reste.',
   },
   add: {
     title: 'Ajouter une place',

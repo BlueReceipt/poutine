@@ -60,8 +60,14 @@ interface Props {
   picking: { start: PickStart; seq: number } | null;
   onPicked: (center: { lat: number; lon: number }) => void;
   onSelect: (id: string | null) => void;
+  /** A long press on a pin (its group's ID): Add more info (Alex, 2026-10-20). */
+  onLongPress: (id: string) => void;
   onFailed: () => void;
 }
+
+/** How long a finger or a button stays on a pin for a long press, in ms, and how far it may slide. */
+const LONG_PRESS = 500;
+const LONG_PRESS_SLIDE = 10;
 
 /** How far each pin's soft shadow reaches, in the pictures' pixels. */
 const SHADOW = 14;
@@ -151,6 +157,8 @@ export function MapView(props: Props) {
   const mapRef = useRef<MapLibreMap | null>(null);
   const select = useRef(onSelect);
   select.current = onSelect;
+  const longPress = useRef(props.onLongPress);
+  longPress.current = props.onLongPress;
   const picked = useRef(props.onPicked);
   picked.current = props.onPicked;
   const isPicking = useRef(false);
@@ -212,9 +220,55 @@ export function MapView(props: Props) {
           mapRef.current = loaded;
           pending();
         });
-        loaded.on('click', (event) => {
-          // While a new place's pin is placed, a tap only moves the map.
+        // A long press on a pin opens its Add more info (Alex, 2026-10-20: "if we long press a
+        // poutine area, can it open the function, add more info"); sliding, a second finger or
+        // letting go before LONG_PRESS is an ordinary touch.
+        let press: { x: number; y: number; timer: number } | null = null;
+        let pressedAt = 0;
+        const letGo = () => {
+          if (press) window.clearTimeout(press.timer);
+          press = null;
+        };
+        const hold = (x: number, y: number) => {
+          letGo();
           if (isPicking.current) return;
+          const pin = nearestPin(loaded, x, y);
+          if (!pin) return;
+          const id = String(pin.properties.id);
+          press = {
+            x,
+            y,
+            timer: window.setTimeout(() => {
+              press = null;
+              pressedAt = Date.now();
+              longPress.current(id);
+            }, LONG_PRESS),
+          };
+        };
+        const slide = (x: number, y: number) => {
+          if (press && Math.hypot(x - press.x, y - press.y) > LONG_PRESS_SLIDE) letGo();
+        };
+        loaded.on('touchstart', (event) => {
+          if (event.points.length === 1) hold(event.point.x, event.point.y);
+          else letGo();
+        });
+        loaded.on('touchmove', (event) => {
+          slide(event.point.x, event.point.y);
+        });
+        loaded.on('touchend', letGo);
+        loaded.on('touchcancel', letGo);
+        loaded.on('mousedown', (event) => {
+          if (event.originalEvent.button === 0) hold(event.point.x, event.point.y);
+        });
+        loaded.on('mousemove', (event) => {
+          slide(event.point.x, event.point.y);
+        });
+        loaded.on('mouseup', letGo);
+        loaded.on('dragstart', letGo);
+        loaded.on('click', (event) => {
+          // While a new place's pin is placed, a tap only moves the map; the tap that ends a long
+          // press is no tap.
+          if (isPicking.current || Date.now() - pressedAt < 800) return;
           const pin = nearestPin(loaded, event.point.x, event.point.y);
           select.current(pin ? String(pin.properties.id) : null);
         });

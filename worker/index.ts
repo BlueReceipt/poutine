@@ -3,6 +3,7 @@
 // (assets, fonts, map glyphs, pictures) never reach this code: run_worker_first in wrangler.jsonc.
 import { adminPage, reviewPlace, waitingPlaces } from './admin.ts';
 import { ADDED_PATH, addedPlaces } from './added.ts';
+import { approvedChanges, CHANGES_PATH, sendChange } from './changes.ts';
 import { countTap } from './counts.ts';
 import { geocode } from './geocode.ts';
 import { problem } from './http.ts';
@@ -19,6 +20,8 @@ export default {
     if (method === 'POST' && pathname === '/api/count') return countTap(request, env, ctx);
     if (method === 'POST' && pathname === '/api/places') return addPlace(request, env, ctx);
     if (method === 'GET' && pathname === ADDED_PATH) return addedPlaces(request, env, ctx);
+    if (method === 'POST' && pathname === CHANGES_PATH) return sendChange(request, env, ctx);
+    if (method === 'GET' && pathname === CHANGES_PATH) return approvedChanges(request, env, ctx);
     if (method === 'GET' && pathname === '/api/admin/waiting') return waitingPlaces(request, env);
     if (method === 'POST' && pathname === '/api/admin/review')
       return reviewPlace(request, env, ctx);
