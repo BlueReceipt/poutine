@@ -221,12 +221,18 @@ describe('approved places', () => {
   });
 
   it('replace a place of the same ID and go at the end of the list', () => {
-    const listed = [{ osm: 'node/1' }, { osm: 'added/7', name: 'old' }] as Place[];
-    const added = [{ osm: 'added/7', name: 'new' }, { osm: 'added/8' }] as Place[];
+    const listed = [
+      { osm: 'node/1', name: 'Cantine Grains' },
+      { osm: 'added/7', name: 'old' },
+    ] as Place[];
+    const added = [
+      { osm: 'added/7', name: 'new' },
+      { osm: 'added/8', name: 'Cantine Poutini' },
+    ] as Place[];
     expect(withAdded(listed, added).map((p) => [p.osm, p.name])).toEqual([
-      ['node/1', undefined],
+      ['node/1', 'Cantine Grains'],
       ['added/7', 'new'],
-      ['added/8', undefined],
+      ['added/8', 'Cantine Poutini'],
     ]);
   });
 });

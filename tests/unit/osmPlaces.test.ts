@@ -8,9 +8,13 @@ import {
   poutineEvidence,
   profileUrl,
   provinceCode,
+  merged,
   selectPlaces,
+  twins,
   whyListed,
+  withAdded,
   type OsmElement,
+  type Place,
   type Town,
 } from '../../src/domain/osmPlaces.ts';
 
@@ -204,5 +208,67 @@ describe('applyPicks', () => {
       poutine: 'confirmed',
       picked: true,
     });
+  });
+});
+
+describe('two entries for one place', () => {
+  const at = (details: Partial<Place>): Place => ({
+    osm: 'node/1',
+    name: 'Le Verger à Grains',
+    housenumber: '260',
+    street: 'Rang du Bas-Saint-Jacques',
+    city: 'Saint-Elzéar',
+    citySource: 'osm',
+    province: 'QC',
+    postcode: '',
+    addressCheck: 'unchecked',
+    lat: 46.4143,
+    lon: -71.0746,
+    phone: '',
+    website: '',
+    facebook: '',
+    instagram: '',
+    menu: '',
+    openingHours: '',
+    cuisine: [],
+    poutine: 'unconfirmed',
+    picked: false,
+    ...details,
+  });
+
+  it('takes a name and its long form at one address for one place, a generic name never', () => {
+    const short = at({ osm: 'way/2' });
+    const long = at({ name: 'Le Verger à Grains - Ferme brassicole - Boutique', lat: 46.41431 });
+    expect(twins(short, long)).toBe(true);
+    expect(twins(at({ name: 'Casse-croûte' }), at({ name: 'Casse-croûte Trempette' }))).toBe(false);
+    expect(twins(short, at({ name: 'Le Verger à Grains', lat: 46.42 }))).toBe(false);
+  });
+
+  it('merges them: what one lacks from the other, the short name, the known ID kept', () => {
+    const long = at({
+      name: 'Le Verger à Grains - Ferme brassicole - Boutique',
+      facebook: 'https://www.facebook.com/grains/',
+      cuisine: ['regional'],
+    });
+    const short = at({ osm: 'way/2', phone: '+14185550123' });
+    expect(merged(long, short)).toMatchObject({
+      osm: 'way/2',
+      name: 'Le Verger à Grains',
+      facebook: 'https://www.facebook.com/grains/',
+      phone: '+14185550123',
+      cuisine: ['regional'],
+    });
+    expect(merged(long, short, { known: new Set(['node/1']) }).osm).toBe('node/1');
+  });
+
+  it('lets a place Alex approved stand for its OpenStreetMap twin, filled in from it', () => {
+    const approved = at({ osm: 'added/2', name: 'Restaurant Trempette', poutine: 'confirmed' });
+    const listed = at({ osm: 'node/9', name: 'Restaurant Trempette', phone: '+14185550123' });
+    const places = withAdded(
+      [listed, at({ osm: 'node/5', name: 'Cantine Poutini', lat: 47 })],
+      [approved],
+    );
+    expect(places.map((place) => place.osm)).toEqual(['node/5', 'added/2']);
+    expect(places[1]).toMatchObject({ phone: '+14185550123', poutine: 'confirmed' });
   });
 });

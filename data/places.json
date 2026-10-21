@@ -5226,29 +5226,6 @@
    "link": "casawippi"
   },
   {
-   "osm": "node/4365557799",
-   "name": "Restaurant L'Express",
-   "housenumber": "6250",
-   "street": "Rue Foster",
-   "city": "Waterloo",
-   "citySource": "osm",
-   "province": "QC",
-   "postcode": "J0E 2N0",
-   "addressCheck": "confirmed",
-   "lat": 45.3515919,
-   "lon": -72.5146712,
-   "phone": "",
-   "website": "",
-   "facebook": "",
-   "instagram": "",
-   "menu": "",
-   "openingHours": "",
-   "cuisine": [],
-   "poutine": "unconfirmed",
-   "picked": false,
-   "link": "restaurantlexpresswaterloo"
-  },
-  {
    "osm": "node/4370422520",
    "name": "Le Relais Restaurant Bistro",
    "housenumber": "286",
@@ -5744,7 +5721,9 @@
    "instagram": "",
    "menu": "",
    "openingHours": "",
-   "cuisine": [],
+   "cuisine": [
+    "hot_dog"
+   ],
    "poutine": "name",
    "picked": true,
    "link": "chezmatantepatatesfrites"
@@ -10129,19 +10108,19 @@
   },
   {
    "osm": "node/7900776900",
-   "name": "Cantine",
-   "housenumber": "",
-   "street": "",
+   "name": "Casse-Croûte et Dépanneur à la Claire Fontaine",
+   "housenumber": "295",
+   "street": "Rue Hébert",
    "city": "Saint-Stanislas-de-Kostka",
    "citySource": "adresses-quebec",
    "province": "QC",
-   "postcode": "",
+   "postcode": "J0S 1W0",
    "addressCheck": "unchecked",
-   "lat": 45.2037232,
-   "lon": -74.1615845,
-   "phone": "",
+   "lat": 45.197448,
+   "lon": -74.16914,
+   "phone": "+14503737199",
    "website": "",
-   "facebook": "",
+   "facebook": "https://www.facebook.com/p/Casse-Cro%C3%BBte-et-D%C3%A9panneur-%C3%A0-la-Claire-Fontaine-100057155841479/",
    "instagram": "",
    "menu": "",
    "openingHours": "",
@@ -11193,31 +11172,6 @@
    "poutine": "name",
    "picked": false,
    "link": "reinedelapatate"
-  },
-  {
-   "osm": "node/9140501465",
-   "name": "Captain B",
-   "housenumber": "3527",
-   "street": "Avenue Lacombe",
-   "city": "Montréal",
-   "citySource": "osm",
-   "province": "QC",
-   "postcode": "H3T 1M2",
-   "addressCheck": "confirmed",
-   "lat": 45.4973742,
-   "lon": -73.6231615,
-   "phone": "",
-   "website": "https://captain-b.com/",
-   "facebook": "",
-   "instagram": "",
-   "menu": "",
-   "openingHours": "",
-   "cuisine": [
-    "burger"
-   ],
-   "poutine": "unconfirmed",
-   "picked": false,
-   "link": "captainb"
   },
   {
    "osm": "node/9153134871",
@@ -18268,32 +18222,6 @@
    "link": "cassecroutequeuedecochon"
   },
   {
-   "osm": "node/13070728974",
-   "name": "Le Verger à Ti-Paul - Ferme brassicole - Cidrerie - Distillerie - Tarterie - Boutique",
-   "housenumber": "260",
-   "street": "Rang du Bas-Saint-Jacques",
-   "city": "Saint-Elzéar",
-   "citySource": "osm",
-   "province": "QC",
-   "postcode": "G0S 2J1",
-   "addressCheck": "far",
-   "lat": 46.4143565,
-   "lon": -71.0746675,
-   "phone": "+14183871333",
-   "website": "https://levergeratipaul.com/",
-   "facebook": "https://www.facebook.com/vergeratipaul/?fref=ts",
-   "instagram": "",
-   "menu": "",
-   "openingHours": "",
-   "cuisine": [
-    "regional",
-    "ferme_brassicole"
-   ],
-   "poutine": "unconfirmed",
-   "picked": false,
-   "link": "levergeratipaulfermebrassicolecidreriedistillerietarterieboutique"
-  },
-  {
    "osm": "node/13070810041",
    "name": "Bleuetière Goulet",
    "housenumber": "2041",
@@ -19880,31 +19808,6 @@
   {
    "osm": "node/14184960833",
    "name": "Broger",
-   "housenumber": "",
-   "street": "",
-   "city": "Mont-Royal",
-   "citySource": "adresses-quebec",
-   "province": "QC",
-   "postcode": "",
-   "addressCheck": "unchecked",
-   "lat": 45.5148872,
-   "lon": -73.6455001,
-   "phone": "",
-   "website": "",
-   "facebook": "",
-   "instagram": "",
-   "menu": "",
-   "openingHours": "11:30-21:00",
-   "cuisine": [
-    "burger"
-   ],
-   "poutine": "unconfirmed",
-   "picked": false,
-   "link": "broger"
-  },
-  {
-   "osm": "node/14184970421",
-   "name": "Broger Smash Burger",
    "housenumber": "1789",
    "street": "Boulevard Graham",
    "city": "Mont-Royal",
@@ -19919,13 +19822,13 @@
    "facebook": "",
    "instagram": "",
    "menu": "",
-   "openingHours": "",
+   "openingHours": "11:30-21:00",
    "cuisine": [
     "burger"
    ],
    "poutine": "unconfirmed",
    "picked": false,
-   "link": "brogersmashburger"
+   "link": "broger"
   },
   {
    "osm": "node/14214730206",
@@ -21576,7 +21479,7 @@
   },
   {
    "osm": "way/485194679",
-   "name": "Casse-Croûte Saint-Stanislas",
+   "name": "Chez Lulu",
    "housenumber": "1625",
    "street": "Rue Principale",
    "city": "Saint-Stanislas",
@@ -21586,9 +21489,9 @@
    "addressCheck": "confirmed",
    "lat": 46.6161909,
    "lon": -72.3852753,
-   "phone": "",
+   "phone": "+14183283269",
    "website": "",
-   "facebook": "",
+   "facebook": "https://www.facebook.com/CasseCroutechezLulu/",
    "instagram": "",
    "menu": "",
    "openingHours": "",
@@ -22596,31 +22499,6 @@
    "link": "rotisserieshighwaypizza"
   },
   {
-   "osm": "way/784343218",
-   "name": "Chez Ma Tante",
-   "housenumber": "",
-   "street": "",
-   "city": "Montréal",
-   "citySource": "adresses-quebec",
-   "province": "QC",
-   "postcode": "",
-   "addressCheck": "unchecked",
-   "lat": 45.5792215,
-   "lon": -73.6438888,
-   "phone": "",
-   "website": "",
-   "facebook": "",
-   "instagram": "",
-   "menu": "",
-   "openingHours": "",
-   "cuisine": [
-    "hot_dog"
-   ],
-   "poutine": "unconfirmed",
-   "picked": false,
-   "link": "chezmatante"
-  },
-  {
    "osm": "way/799479427",
    "name": "Casse-croûte l'express du fleuve",
    "housenumber": "598",
@@ -23453,16 +23331,17 @@
    "province": "QC",
    "postcode": "G0S 2J1",
    "addressCheck": "far",
-   "lat": 46.4143672,
-   "lon": -71.0746668,
+   "lat": 46.4143565,
+   "lon": -71.0746675,
    "phone": "+14183871333",
    "website": "https://levergeratipaul.com/",
-   "facebook": "",
+   "facebook": "https://www.facebook.com/vergeratipaul/?fref=ts",
    "instagram": "",
    "menu": "",
    "openingHours": "",
    "cuisine": [
-    "regional"
+    "regional",
+    "ferme_brassicole"
    ],
    "poutine": "unconfirmed",
    "picked": false,

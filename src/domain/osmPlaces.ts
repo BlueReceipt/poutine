@@ -445,12 +445,91 @@ export function applyPicks(places: readonly Place[], picks: readonly Pick[]): Pl
 }
 
 /**
+ * Two entries for one place (Alex, 2026-10-20: "le verger a ti-paul has two pins"; "l'express is
+ * entered twice. it shouldn't. if one is missing info, it should be merged"): the same name within
+ * 75 m (OpenStreetMap's point and building), or one name the other's start ("Le Verger à Ti-Paul"
+ * and "Le Verger à Ti-Paul - Ferme brassicole - …") at one street address or within 25 m. A name
+ * that only says what a place is ("Casse-croûte") makes no twin of a longer one.
+ */
+export function twins(a: Place, b: Place): boolean {
+  const left = fold(a.name);
+  const right = fold(b.name);
+  const meters = metersBetween(a, b);
+  if (left === right) return meters < 75;
+  const [short, long] = left.length < right.length ? [a.name, right] : [b.name, left];
+  if (isGenericName(short) || !long.startsWith(`${fold(short)} `)) return false;
+  const address = (place: Place) =>
+    place.housenumber && place.street
+      ? fold(`${place.housenumber} ${place.street} ${place.city}`)
+      : '';
+  return meters < 25 || (address(a) !== '' && address(a) === address(b));
+}
+
+const DETAILS = [
+  'postcode',
+  'phone',
+  'website',
+  'facebook',
+  'instagram',
+  'menu',
+  'openingHours',
+] as const;
+
+/**
+ * One place out of two entries for it: the first kept, what it lacks taken from the other (its
+ * street address, phone, links, hours, cuisine). Of two nested names, the shorter ("Le Verger à
+ * Ti-Paul"), and that entry's ID and link unless the first's ID is the one already known (it has
+ * a link, maybe ratings: `known`). `own` keeps the first's name and ID whatever: a pick's, or a
+ * place Alex approved, whose link is already shared.
+ */
+export function merged(
+  kept: Place,
+  other: Place,
+  {
+    known = new Set<string>(),
+    own = kept.picked,
+  }: { known?: ReadonlySet<string>; own?: boolean } = {},
+): Place {
+  const place: Place = { ...kept };
+  if (!place.housenumber && !place.street && other.street) {
+    place.housenumber = other.housenumber;
+    place.street = other.street;
+  }
+  for (const field of DETAILS) if (!place[field]) place[field] = other[field];
+  if (place.cuisine.length === 0) place.cuisine = other.cuisine;
+  const shorter =
+    fold(other.name) !== fold(kept.name) &&
+    other.name.length < kept.name.length &&
+    twins(kept, other);
+  if (shorter && !own) {
+    place.name = other.name;
+    if (known.has(other.osm) || !known.has(kept.osm)) {
+      place.osm = other.osm;
+      place.link = other.link;
+    }
+  }
+  return place;
+}
+
+/**
  * The places visitors added and Alex approved (data/added.json), joined to the list: each replaces
- * any place of the list with its ID (an approved place approved again), the rest go at the end.
+ * any place of the list with its ID (an approved place approved again), the rest go at the end. An
+ * OpenStreetMap entry for the same place goes, what it knows that the approved one lacks kept.
  */
 export function withAdded(places: readonly Place[], added: readonly Place[]): Place[] {
   const ids = new Set(added.map((place) => place.osm));
-  return [...places.filter((place) => !ids.has(place.osm)), ...added];
+  const listed = places.filter((place) => !ids.has(place.osm));
+  const gone = new Set<string>();
+  const joined = added.map((place) =>
+    listed
+      .filter((other) => twins(place, other))
+      .reduce((kept, other) => {
+        gone.add(other.osm);
+        // The approved place keeps its own ID, name and link: they are already shared.
+        return merged(kept, other, { own: true });
+      }, place),
+  );
+  return [...listed.filter((place) => !gone.has(place.osm)), ...joined];
 }
 
 function richness(place: Place): number {
@@ -474,15 +553,17 @@ const EVIDENCE_RANK: Record<PoutineEvidence, number> = {
 
 /**
  * The poutine map's places from an Overpass answer: independent places whose cuisine or name says
- * poutine, and every one of Alex's picks. One place per name within 75 m (OpenStreetMap often has
- * the same shack as a point and as a building), keeping the richer one. Elements listed in
- * outsideQuebec (picks elsewhere) get no Québec town or province.
+ * poutine, and every one of Alex's picks. Twins (`twins`: OpenStreetMap often has the same shack as
+ * a point and as a building) make one place, the richer one with what the other adds (`merged`).
+ * Elements listed in outsideQuebec (picks elsewhere) get no Québec town or province; `known` holds
+ * the IDs already given a link (data/links.json), kept when twins merge.
  */
 export function selectPlaces(
   elements: readonly OsmElement[],
   towns: readonly Town[],
   picks: readonly Pick[],
   outsideQuebec: ReadonlySet<string> = new Set(),
+  known: ReadonlySet<string> = new Set(),
 ): { places: Place[]; dropped: Record<DropReason, number> } {
   const pickById = new Map(picks.map((pick) => [pick.osm, pick]));
   const dropped: Record<DropReason, number> = {
@@ -532,11 +613,9 @@ export function selectPlaces(
   );
   const places: Place[] = [];
   for (const place of candidates) {
-    const name = fold(place.name);
-    const twin = places.find(
-      (other) => fold(other.name) === name && metersBetween(place, other) < 75,
-    );
-    if (twin) {
+    const twin = places.findIndex((other) => twins(place, other));
+    if (twin >= 0) {
+      places[twin] = merged(places[twin] ?? place, place, { known });
       dropped.duplicate += 1;
       continue;
     }

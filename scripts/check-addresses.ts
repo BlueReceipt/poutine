@@ -298,7 +298,7 @@ function accept(args: readonly string[]): void {
     `${JSON.stringify(
       {
         about:
-          'Corrections Alex accepted, laid over OpenStreetMap’s details by npm run places (picks’ own details still win), each with its source and what the list said before. Proposed by npm run addresses.',
+          'Corrections Alex accepted, laid over OpenStreetMap’s details by npm run places (picks’ own details still win), each with its source and what the list said before: addresses proposed by npm run addresses, places he says closed for good ("closed": true, left out of the list), and names, details and pins he gives ("renamed", phone, pages, lat and lon).',
         fixes: Object.fromEntries(
           Object.entries(file.fixes).sort(([a], [b]) =>
             a.localeCompare(b, 'en', { numeric: true }),

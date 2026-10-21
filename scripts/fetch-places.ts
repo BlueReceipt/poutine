@@ -451,7 +451,14 @@ async function main(): Promise<void> {
     .filter((e) => e.lat !== undefined && e.lon !== undefined)
     .map((e) => ({ name: e.tags?.name ?? '', lat: e.lat ?? 0, lon: e.lon ?? 0 }));
   const eateries = [...inQuebec, ...picked.filter((e) => outsideQuebec.has(idOf(e)))];
-  const { places: found, dropped } = selectPlaces(eateries, towns, picks, outsideQuebec);
+  // IDs already given a link keep it when two entries for one place merge.
+  const linksFile = join(DATA, 'links.json');
+  const known = new Set(
+    existsSync(linksFile)
+      ? Object.keys((JSON.parse(readFileSync(linksFile, 'utf8')) as { links: object }).links)
+      : [],
+  );
+  const { places: found, dropped } = selectPlaces(eateries, towns, picks, outsideQuebec, known);
   const townsFound = await lookUpTowns(found);
   for (const stale of staleFixes(found, fixes))
     console.warn(

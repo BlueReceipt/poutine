@@ -1,5 +1,11 @@
 import { nameKey, sameName, sameStreetName } from './addresses.ts';
-import { normalizePostcode, type Place } from './osmPlaces.ts';
+import {
+  normalizePhone,
+  normalizePostcode,
+  normalizeUrl,
+  profileUrl,
+  type Place,
+} from './osmPlaces.ts';
 import { fold } from './text.ts';
 
 /**
@@ -13,6 +19,17 @@ export interface Fix {
   street?: string;
   city?: string;
   postcode?: string;
+  /** Closed for good: the place leaves the list (its link stays given, to no other place). */
+  closed?: true;
+  /** The place's own name, when the list has another (its link stays as given). */
+  renamed?: string;
+  /** Where the pin goes when it stands elsewhere: the address's own point (Adresses Québec). */
+  lat?: number;
+  lon?: number;
+  /** Details Alex gives (2026-10-20, Chez Lulu's): its phone and pages. */
+  phone?: string;
+  website?: string;
+  facebook?: string;
   /** Where the corrected details come from. */
   source: string;
   /** The address the list had before, as addressOf writes it. */
@@ -25,26 +42,38 @@ export function addressOf(place: { housenumber: string; street: string; city: st
   return [street, place.city].filter(Boolean).join(', ');
 }
 
-/** The fixes laid over the places they name; a place's address check waits for the next full run. */
+/**
+ * The fixes laid over the places they name, a closed place left out; a place's address check waits
+ * for the next full run.
+ */
 export function applyFixes(
   places: readonly Place[],
   fixes: Readonly<Record<string, Fix>>,
 ): Place[] {
-  return places.map((place) => {
+  return places.flatMap((place) => {
     const fix = fixes[place.osm];
-    if (!fix) return place;
+    if (!fix) return [place];
+    if (fix.closed) return [];
     const housenumber = fix.housenumber ?? place.housenumber;
     const street = fix.street ?? place.street;
     const moved = housenumber !== place.housenumber || street !== place.street;
-    return {
-      ...place,
-      housenumber,
-      street,
-      city: fix.city ?? place.city,
-      citySource: fix.city ? 'fix' : place.citySource,
-      postcode: fix.postcode ? normalizePostcode(fix.postcode) : place.postcode,
-      addressCheck: moved ? 'unchecked' : place.addressCheck,
-    };
+    return [
+      {
+        ...place,
+        name: fix.renamed ?? place.name,
+        lat: fix.lat ?? place.lat,
+        lon: fix.lon ?? place.lon,
+        housenumber,
+        street,
+        city: fix.city ?? place.city,
+        citySource: fix.city ? 'fix' : place.citySource,
+        postcode: fix.postcode ? normalizePostcode(fix.postcode) : place.postcode,
+        phone: fix.phone ? normalizePhone(fix.phone) : place.phone,
+        website: fix.website ? normalizeUrl(fix.website) : place.website,
+        facebook: fix.facebook ? profileUrl(fix.facebook, 'www.facebook.com') : place.facebook,
+        addressCheck: moved ? 'unchecked' : place.addressCheck,
+      },
+    ];
   });
 }
 

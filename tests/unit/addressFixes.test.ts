@@ -229,6 +229,33 @@ describe('applyFixes', () => {
     expect(again?.addressCheck).toBe('confirmed');
   });
 
+  it('gives a place the name Alex says it goes by', () => {
+    const renamed: Fix = {
+      name: 'Cantine',
+      renamed: 'Chez Grains',
+      phone: '(418) 555-0123',
+      facebook: 'https://www.facebook.com/ChezGrains/',
+      lat: 45.1974,
+      lon: -74.1691,
+      source: 'Alex',
+      was: '',
+    };
+    expect(applyFixes([listed], { 'node/1': renamed })[0]).toMatchObject({
+      name: 'Chez Grains',
+      lat: 45.1974,
+      lon: -74.1691,
+      phone: '+14185550123',
+      facebook: 'https://www.facebook.com/ChezGrains/',
+    });
+  });
+
+  it('leaves out a place Alex says is closed for good', () => {
+    const closed: Fix = { name: 'Cantine Trempette', closed: true, source: 'Alex', was: '' };
+    expect(applyFixes([listed, { ...listed, osm: 'node/2' }], { 'node/1': closed })).toHaveLength(
+      1,
+    );
+  });
+
   it('lets a pick’s own details win', () => {
     const [fixed] = applyPicks(applyFixes([listed], { 'node/1': fix }), [
       { osm: 'node/1', name: 'Cantine Trempette', details: { street: 'Rue de la Pick' } },

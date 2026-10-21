@@ -1,5 +1,5 @@
 {
- "about": "Corrections Alex accepted, laid over OpenStreetMap’s details by npm run places (picks’ own details still win), each with its source and what the list said before. Proposed by npm run addresses.",
+ "about": "Corrections Alex accepted, laid over OpenStreetMap’s details by npm run places (picks’ own details still win), each with its source and what the list said before: addresses proposed by npm run addresses, places he says closed for good (\"closed\": true, left out of the list), and names, details and pins he gives (\"renamed\", phone, pages, lat and lon).",
  "fixes": {
   "node/444774762": {
    "name": "Petite boufffe",
@@ -607,6 +607,19 @@
    "street": "Rue Dufferin",
    "postcode": "J0B 3E0"
   },
+  "node/7900776900": {
+   "name": "Cantine",
+   "renamed": "Casse-Croûte et Dépanneur à la Claire Fontaine",
+   "housenumber": "295",
+   "street": "Rue Hébert",
+   "postcode": "J0S 1W0",
+   "lat": 45.197448,
+   "lon": -74.16914,
+   "phone": "(450) 373-7199",
+   "facebook": "https://www.facebook.com/p/Casse-Croûte-et-Dépanneur-à-la-Claire-Fontaine-100057155841479/",
+   "source": "Alex, 2026-10-20: \"the one in st stan de kostka is a : Casse-Croûte et Dépanneur à la Claire Fontaine (450) 373-7199 https://www.facebook.com/p/Casse-Croûte-et-Dépanneur-à-la-Claire-Fontaine-100057155841479/ 295 rue hébert, Saint-Stanislas-de-Kostka, QC, Canada, j0s1w0\"; the pin moved 916 m to 295 rue Hébert (Adresses Québec)",
+   "was": "Saint-Stanislas-de-Kostka"
+  },
   "node/8058927608": {
    "name": "Casse-croûte du coin",
    "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
@@ -694,6 +707,12 @@
    "housenumber": "246",
    "street": "Rue Water",
    "postcode": "J0A 1A0"
+  },
+  "node/9140501465": {
+   "name": "Captain B",
+   "closed": true,
+   "source": "Alex, 2026-10-20: \"Captain b seems to be closed permanently. its just lafrench now.\" (LaFrench, node/13909816210, at the same address)",
+   "was": "3527 Avenue Lacombe, Montréal"
   },
   "node/9176360296": {
    "name": "Chef Fred Poutinerie",
@@ -1097,6 +1116,15 @@
    "housenumber": "922",
    "street": "Chemin Riverside",
    "postcode": "J0X 3G0"
+  },
+  "way/485194679": {
+   "name": "Casse-Croûte Saint-Stanislas",
+   "renamed": "Chez Lulu",
+   "phone": "(418) 328-3269",
+   "facebook": "https://www.facebook.com/CasseCroutechezLulu/",
+   "postcode": "G0X 3E0",
+   "source": "Alex, 2026-10-20: \"also, cantine in st-stanislas is called Chez Lulu.\" then \"(418) 328-3269 https://www.facebook.com/CasseCroutechezLulu/ 1625, rue Principale, Saint-Stanislas, QC, Canada, G0X 3E0\"",
+   "was": "1625 Rue Principale, Saint-Stanislas"
   },
   "way/512977787": {
    "name": "Cantine Renard 2",
