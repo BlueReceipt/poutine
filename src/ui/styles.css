@@ -363,6 +363,23 @@ body,
 }
 
 /* The secret menu: the language as three choices side by side, the one in use in gravy. */
+/* The secret menu is for reading: the whole screen, over the search bar (Alex, 2026-10-20: "the
+   secret menu doesn't appear fully, so its a bit annoying to read"); its lines no wider than a
+   phone's on a computer. */
+.card.settings {
+  z-index: 5;
+  inset: 0;
+  max-height: none;
+  border-radius: 0;
+  padding-top: max(20px, env(safe-area-inset-top));
+  padding-inline: max(var(--space), calc((100% - 640px) / 2));
+}
+
+.card.settings .close {
+  top: max(8px, env(safe-area-inset-top));
+  right: max(8px, calc((100% - 640px) / 2 - 8px));
+}
+
 .card.settings h3 {
   margin: 16px 0 8px;
   font-size: var(--text);
