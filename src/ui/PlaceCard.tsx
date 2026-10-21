@@ -56,7 +56,11 @@ export function PlaceCard(props: Props) {
 
   const words = strings.card;
   return (
-    <section class="card" role="dialog" aria-labelledby="card-title">
+    <section
+      class={place && editing ? 'card editing' : 'card'}
+      role="dialog"
+      aria-labelledby="card-title"
+    >
       <button type="button" class="close" aria-label={words.close} onClick={onClose}>
         ×
       </button>

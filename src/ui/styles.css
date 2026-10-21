@@ -368,8 +368,10 @@ body,
 /* The secret menu: the language as three choices side by side, the one in use in gravy. */
 /* The secret menu is for reading: the whole screen, over the search bar (Alex, 2026-10-20: "the
    secret menu doesn't appear fully, so its a bit annoying to read"); its lines no wider than a
-   phone's on a computer. */
-.card.settings {
+   phone's on a computer. Add more info too (Alex, 2026-10-21: "when we long press … open the card
+   in full. and not just 3/4"). */
+.card.settings,
+.card.editing {
   z-index: 5;
   inset: 0;
   max-height: none;
@@ -378,7 +380,8 @@ body,
   padding-inline: max(var(--space), calc((100% - 640px) / 2));
 }
 
-.card.settings .close {
+.card.settings .close,
+.card.editing .close {
   top: max(8px, env(safe-area-inset-top));
   right: max(8px, calc((100% - 640px) / 2 - 8px));
 }
