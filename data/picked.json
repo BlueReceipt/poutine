@@ -479,6 +479,18 @@
    "name": "Votre Maison",
    "confirmed": true,
    "note": "1225 boulevard Curé-Poirier Ouest, Longueuil: a Greek restaurant OpenStreetMap tags greek, so the rules left it out (Alex, 2026-10-20: \"it is greek. but they make amazing poutine.\")."
+  },
+  {
+   "osm": "node/8367783901",
+   "name": "Fromagerie Lemaire",
+   "confirmed": true,
+   "note": "182 boulevard Industriel, near Drummondville: a cheese factory and its counter, which OpenStreetMap tags shop=cheese, so the rules left it out (Alex, 2026-10-20). Phone and links from Alex.",
+   "details": {
+    "postcode": "J1Z 1B9",
+    "phone": "(819) 395-5327",
+    "website": "https://www.fromagerie-lemaire.ca",
+    "facebook": "https://www.facebook.com/fromagerielemaire/"
+   }
   }
  ]
 }

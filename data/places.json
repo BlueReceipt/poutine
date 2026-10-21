@@ -1,7 +1,7 @@
 {
  "source": "OpenStreetMap: independent casse-croûtes, cantines and potato shacks in Québec, by cuisine=poutine or by name, plus Alex’s picks anywhere",
  "attribution": "© OpenStreetMap contributors, ODbL 1.0; towns where OpenStreetMap has none, and address corrections (data/fixes.json): Adresses Québec, CC BY 4.0",
- "osmBase": "2026-10-20T22:06:26Z",
+ "osmBase": "2026-10-21T02:55:16Z",
  "places": [
   {
    "osm": "node/265847671",
@@ -10505,6 +10505,32 @@
    "poutine": "unconfirmed",
    "picked": false,
    "link": "restaurantdelapromenade"
+  },
+  {
+   "osm": "node/8367783901",
+   "name": "Fromagerie Lemaire",
+   "housenumber": "182",
+   "street": "Boulevard Industriel",
+   "city": "Saint-Germain-de-Grantham",
+   "citySource": "osm",
+   "province": "QC",
+   "postcode": "J1Z 1B9",
+   "addressCheck": "confirmed",
+   "lat": 45.8596097,
+   "lon": -72.5778584,
+   "phone": "+18193955327",
+   "website": "https://www.fromagerie-lemaire.ca/",
+   "facebook": "https://www.facebook.com/fromagerielemaire/",
+   "instagram": "",
+   "menu": "",
+   "openingHours": "Mo-Fr 05:30-20:00; Sa,Su 08:00-20:00",
+   "cuisine": [
+    "burger",
+    "cheese"
+   ],
+   "poutine": "confirmed",
+   "picked": true,
+   "link": "fromagerielemaire"
   },
   {
    "osm": "node/8419650040",
