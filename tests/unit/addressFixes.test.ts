@@ -254,6 +254,8 @@ describe('applyFixes', () => {
     expect(applyFixes([listed, { ...listed, osm: 'node/2' }], { 'node/1': closed })).toHaveLength(
       1,
     );
+    const none: Fix = { name: 'Cantine Trempette', noPoutine: true, source: 'Alex', was: '' };
+    expect(applyFixes([listed], { 'node/1': none })).toEqual([]);
   });
 
   it('lets a pick’s own details win', () => {

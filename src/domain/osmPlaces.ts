@@ -127,7 +127,7 @@ export type DropReason = 'chain' | 'repeated-name' | 'closed' | 'no-position' | 
 
 // Folded names (accents stripped, lowercase). Chains that may lack a brand tag in OpenStreetMap.
 const CHAINS =
-  /ma?c ?donald|tim horton|subway|\ba w\b|burger king|dairy queen|\bkfc\b|kentucky|pizza hut|domino|st hubert|saint hubert|benny|valentine|lafleur|belle province|ashton|\bcora\b|normandin|frites? alors|\bmikes?\b|scores|harvey|wendy|five guys|casa grecque|new york fries|smoke s|poutineville|steak frites st paul|fromagerie victoria|mary brown|popeyes|a w canada|rotisseries? fusee|chung ?chun|costco/;
+  /ma?c ?donald|tim horton|subway|\ba w\b|burger king|dairy queen|\bkfc\b|kentucky|pizza hut|domino|st hubert|saint hubert|benny|valentine|lafleur|belle province|ashton|\bcora\b|normandin|frites? alors|\bmikes?\b|scores|harvey|wendy|five guys|casa grecque|new york fries|smoke s|poutineville|steak frites st paul|fromagerie victoria|mary brown|popeyes|a w canada|rotisseries? fusee|chung ?chun|costco|arirang|aridang/;
 
 const STRONG_NAME = /casse ?croute|cantine|patate|pataterie|poutin|friterie|roulotte/;
 const FRIES_NAME = /\bfrites?\b/;

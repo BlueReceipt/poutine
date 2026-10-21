@@ -21,6 +21,8 @@ export interface Fix {
   postcode?: string;
   /** Closed for good: the place leaves the list (its link stays given, to no other place). */
   closed?: true;
+  /** No poutine there, Alex says: the place leaves the list too. */
+  noPoutine?: true;
   /** The place's own name, when the list has another (its link stays as given). */
   renamed?: string;
   /** Where the pin goes when it stands elsewhere: the address's own point (Adresses Québec). */
@@ -53,7 +55,7 @@ export function applyFixes(
   return places.flatMap((place) => {
     const fix = fixes[place.osm];
     if (!fix) return [place];
-    if (fix.closed) return [];
+    if (fix.closed || fix.noPoutine) return [];
     const housenumber = fix.housenumber ?? place.housenumber;
     const street = fix.street ?? place.street;
     const moved = housenumber !== place.housenumber || street !== place.street;

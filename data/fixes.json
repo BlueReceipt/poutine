@@ -1,5 +1,5 @@
 {
- "about": "Corrections Alex accepted, laid over OpenStreetMap’s details by npm run places (picks’ own details still win), each with its source and what the list said before: addresses proposed by npm run addresses, places he says closed for good (\"closed\": true, left out of the list), and names, details and pins he gives (\"renamed\", phone, pages, lat and lon).",
+ "about": "Corrections Alex accepted, laid over OpenStreetMap’s details by npm run places (picks’ own details still win), each with its source and what the list said before: addresses proposed by npm run addresses, places he says closed for good or without poutine (\"closed\" or \"noPoutine\": true, left out of the list), and names, details and pins he gives (\"renamed\", phone, pages, lat and lon).",
  "fixes": {
   "node/444774762": {
    "name": "Petite boufffe",
@@ -78,6 +78,13 @@
    "housenumber": "2080",
    "street": "Boulevard Sir-Wilfrid-Laurier",
    "postcode": "J3V 4P6"
+  },
+  "node/778707227": {
+   "name": "Casse-Croûte La Bonne Bouffe",
+   "housenumber": "511",
+   "postcode": "J0W 1H0",
+   "source": "Alex, 2026-10-20, in the address sheet: \"511 Bd Saint-François, Lac-des-Écorces, QC J0W 1H0\"",
+   "was": "551 Boulevard Saint-François, Lac-des-Écorces"
   },
   "node/803061251": {
    "name": "Cantine Cartier",
@@ -350,6 +357,18 @@
    "was": "342 Chemin Gosford Ouest, Ste-Agathe de Lotbinière",
    "street": "Chemin Gosford"
   },
+  "node/4414246601": {
+   "name": "Cantine Barberousse",
+   "housenumber": "292",
+   "street": "Boulevard Perron Est",
+   "postcode": "G4V 3A7",
+   "lat": 49.178206,
+   "lon": -66.327476,
+   "phone": "(418) 763-2999",
+   "facebook": "https://www.facebook.com/CantineBarberousse/",
+   "source": "Alex, 2026-10-20, in the address sheet: \"https://www.facebook.com/CantineBarberousse/ (418) 763-2999\", \"Auberge festive le Sea Shack 292 Boulevard Perron St-Anne-des-Monts, Quebec, QC, Canada, G4V3A7\"; the pin moved 41 m to the address (Adresses Québec: boulevard Perron Est)",
+   "was": "Sainte-Anne-des-Monts"
+  },
   "node/4461068853": {
    "name": "Restaurant Mini-Golf",
    "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
@@ -481,6 +500,15 @@
    "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
    "was": "152 Route Bégin, Sainte-Claire",
    "street": "Boulevard Bégin"
+  },
+  "node/5680038731": {
+   "name": "Casse Croute",
+   "renamed": "Casse Croute Chez Grand Mère",
+   "housenumber": "55",
+   "street": "Rue de l'Hôtel-de-Ville",
+   "postcode": "J0T 1W0",
+   "source": "Alex, 2026-10-20, in the address sheet: \"Casse Croute Chez Grand Mère\", \"55 Rue de l'Hôtel-de-Ville, L'Ascension, QC J0T 1W0\"",
+   "was": "Rue de l'Hôtel-de-Ville, L'Ascension"
   },
   "node/5941572785": {
    "name": "bruneau",
@@ -724,9 +752,14 @@
   },
   "node/9334739797": {
    "name": "Casse-Croûte",
-   "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
-   "was": "Chemin de Saint-Gérard, Shawinigan",
-   "housenumber": "256"
+   "renamed": "Casse-Croûte le Gourmand",
+   "housenumber": "260",
+   "street": "Chemin de Saint-Gérard",
+   "postcode": "G9N 6Z3",
+   "lat": 46.577086,
+   "lon": -72.769737,
+   "source": "Alex, 2026-10-20, in the address sheet: \"Casse-Croûte le Gourmand\", \"260, chemin de Saint-Gérard, Shawinigan, QC, Canada, G9N 6Z3\"; the pin moved 44 m to the address (Adresses Québec)",
+   "was": "Chemin de Saint-Gérard, Shawinigan"
   },
   "node/9420080285": {
    "name": "Casse-Croute D'Albertville",
@@ -830,6 +863,17 @@
    "housenumber": "2",
    "street": "Chemin Main",
    "postcode": "G4T 1Z6"
+  },
+  "node/11769609434": {
+   "name": "Birdhouse",
+   "housenumber": "63",
+   "street": "Boulevard Brunswick",
+   "postcode": "H9B 2N4",
+   "lat": 45.482628,
+   "lon": -73.798722,
+   "phone": "+1 514-447-9631",
+   "source": "Alex, 2026-10-20, in the address sheet: \"63 Boulevard Brunswick, Dollard-des-Ormeaux, Quebec, H9B 2N4\", \"+1 514-447-9631\"; the pin moved 78 m to the address (Adresses Québec)",
+   "was": "Dollard-des-Ormeaux"
   },
   "node/11940623403": {
    "name": "Snack bar chez Mimi",
@@ -949,6 +993,12 @@
    "street": "Boulevard Perron Est",
    "postcode": "G0C 1H0"
   },
+  "node/13070810041": {
+   "name": "Bleuetière Goulet",
+   "noPoutine": true,
+   "source": "Alex, 2026-10-20, in the address sheet: \"not sure about poutine. None on website\", then \"some i suggested to disregard\"",
+   "was": "2041 Route 112, Saint-Frédéric"
+  },
   "node/13072363627": {
    "name": "Le Vieux",
    "source": "Adresses Québec (CC BY 4.0): the civic address at the pin, checked 2026-10-20",
@@ -972,6 +1022,18 @@
    "housenumber": "1111",
    "street": "Boulevard Pie-XI Nord",
    "postcode": "G3K 2S8"
+  },
+  "node/13759002010": {
+   "name": "Bière & Frites",
+   "housenumber": "44",
+   "street": "Route du Président-Kennedy",
+   "postcode": "G6V 6C5",
+   "lat": 46.795701,
+   "lon": -71.179361,
+   "phone": "(581) 477-0115",
+   "facebook": "https://www.facebook.com/p/Bières-et-frites-Lévis-100092684115882/",
+   "source": "Alex, 2026-10-20, in the address sheet: \"44 Route du Président-Kennedy, Lévis, QC, Canada, G6V6C5\", \"581) 477-0115\", its Facebook page; the pin moved 67 m to the address (Adresses Québec, which gives G6V 6C4)",
+   "was": "Lévis"
   },
   "node/13901934430": {
    "name": "Mr. Crousty",

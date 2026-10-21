@@ -95,6 +95,7 @@ describe('isChain', () => {
   it('knows chains by brand or by name', () => {
     expect(isChain({ name: 'Anything', brand: 'Benny & Co.' })).toBe(true);
     expect(isChain({ name: 'Pataterie La Belle Province' })).toBe(true);
+    expect(isChain({ name: 'Aridang' })).toBe(true);
     expect(isChain({ name: 'Mac Donald' })).toBe(true);
     expect(isChain({ name: 'Casse-croûte Courteau' })).toBe(false);
   });
