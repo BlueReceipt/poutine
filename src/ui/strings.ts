@@ -564,7 +564,7 @@ const english: Strings = {
   restore: {
     title: 'Your ratings',
     looking: 'Looking for your ratings…',
-    none: 'This link brings back no ratings.',
+    none: 'No ratings found.',
     ask: (linked, here) =>
       `This link brings back ${ratedPlaces(linked)}. This browser has ${ratedPlaces(here)} of its own: join them to the link’s?`,
     join: 'Join them',
@@ -945,7 +945,7 @@ const french: Strings = {
   restore: {
     title: 'Vos notes',
     looking: 'Recherche de vos notes…',
-    none: 'Ce lien ne ramène aucune note.',
+    none: 'Aucune note trouvée.',
     ask: (linked, here) =>
       `Ce lien ramène ${placesNotees(linked)}. Ce navigateur a ${placesNotees(here)} de son côté${NBSP}: les joindre à celles du lien${NBSP}?`,
     join: 'Les joindre',
