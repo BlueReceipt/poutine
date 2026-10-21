@@ -130,9 +130,39 @@ export interface Strings {
      * heading, the line under it (English only), and the picture's words for screen readers.
      */
     scale: { title: string; line: string; alt: string };
+    /**
+     * The backup link (Alex, 2026-10-21: "lets do the link in the secret menu"): what it's for, to
+     * keep it private, copy it or send it to oneself; before any rating, where it will show.
+     */
+    backup: {
+      title: string;
+      text: string;
+      keep: string;
+      copy: string;
+      copied: string;
+      send: string;
+      empty: string;
+    };
+  };
+  /** A backup link opened: its ratings coming back to this browser. */
+  restore: {
+    title: string;
+    looking: string;
+    none: string;
+    /** The link's rated places, and this browser's own: join them? */
+    ask: (linked: number, here: number) => string;
+    join: string;
+    cancel: string;
+    done: (count: number) => string;
+    failed: string;
   };
   hours: HoursWords;
 }
+
+const ratedPlaces = (count: number): string =>
+  count === 1 ? '1 rated place' : `${String(count)} rated places`;
+const placesNotees = (count: number): string =>
+  count === 1 ? '1 place notée' : `${String(count)} places notées`;
 
 /** Sharing a rating: a story picture with the place's link, through the phone's share sheet. */
 export interface ShareWords {
@@ -488,6 +518,26 @@ const english: Strings = {
       line: 'Pootsin, not poo-teen.',
       alt: 'Rating scale. 1 out of 5, Mr. Poo Teen: very bad. 2, poor: barely a poutine. 3, average: does the job. 4, good: solid and tasty. 5, the golden pouts: the ultimate perfection!',
     },
+    backup: {
+      title: 'Your backup link',
+      text: 'Your ratings live in this browser: clearing its history erases them here. Keep this link, in your notes or sent to yourself. Opened in any browser, it brings back your bowls, your count, and the ratings you can change.',
+      keep: 'Keep it to yourself: anyone with it can change your ratings.',
+      copy: 'Copy the link',
+      copied: 'Copied!',
+      send: 'Send it to myself',
+      empty: 'Rate a place, and the link that brings your ratings back shows up here.',
+    },
+  },
+  restore: {
+    title: 'Your ratings',
+    looking: 'Looking for your ratings…',
+    none: 'This link brings back no ratings.',
+    ask: (linked, here) =>
+      `This link brings back ${ratedPlaces(linked)}. This browser has ${ratedPlaces(here)} of its own: join them to the link’s?`,
+    join: 'Join them',
+    cancel: 'Not now',
+    done: (count) => `Your ratings are back: ${ratedPlaces(count)}.`,
+    failed: 'Your ratings couldn’t be brought back. Open the link again in a moment.',
   },
   share: {
     place: 'Share',
@@ -835,6 +885,26 @@ const french: Strings = {
       line: '',
       alt: `Échelle d’évaluation. 1 sur 5, Mr. Poo Teen${NBSP}: le pire du pire. 2, décevant${NBSP}: presque rien dedans. 3, correct${NBSP}: fait la job, sans plus. 4, bon${NBSP}: solide et savoureux. 5, la pouts d’or${NBSP}: la perfection suprême${NBSP}!`,
     },
+    backup: {
+      title: 'Votre lien de sauvegarde',
+      text: `Vos notes vivent dans ce navigateur${NBSP}: vider son historique les efface d’ici. Gardez ce lien, dans vos notes ou envoyé à vous-même. Ouvert dans n’importe quel navigateur, il ramène vos bols, votre compteur et les notes que vous pouvez changer.`,
+      keep: `Gardez-le pour vous${NBSP}: avec lui, n’importe qui peut changer vos notes.`,
+      copy: 'Copier le lien',
+      copied: `Copié${NBSP}!`,
+      send: 'Me l’envoyer',
+      empty: 'Notez une place, et le lien qui ramène vos notes apparaîtra ici.',
+    },
+  },
+  restore: {
+    title: 'Vos notes',
+    looking: 'Recherche de vos notes…',
+    none: 'Ce lien ne ramène aucune note.',
+    ask: (linked, here) =>
+      `Ce lien ramène ${placesNotees(linked)}. Ce navigateur a ${placesNotees(here)} de son côté${NBSP}: les joindre à celles du lien${NBSP}?`,
+    join: 'Les joindre',
+    cancel: 'Pas maintenant',
+    done: (count) => `Vos notes sont revenues${NBSP}: ${placesNotees(count)}.`,
+    failed: `Impossible de ramener vos notes pour l’instant. Rouvrez le lien dans un moment.`,
   },
   share: {
     place: 'Partager',

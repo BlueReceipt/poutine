@@ -10,7 +10,7 @@ import { problem } from './http.ts';
 import { oldPlaceLink, placePage } from './pages.ts';
 import { linkFromPath } from '../src/domain/shortLinks.ts';
 import { addPlace } from './places.ts';
-import { placeReviews, rate, ratingTotals, unrate } from './ratings.ts';
+import { joinRatings, keyRatings, placeReviews, rate, ratingTotals, unrate } from './ratings.ts';
 
 export default {
   async fetch(request, env, ctx): Promise<Response> {
@@ -28,6 +28,8 @@ export default {
     if (method === 'GET' && pathname === '/api/ratings') return ratingTotals(request, env, ctx);
     if (method === 'POST' && pathname === '/api/ratings') return rate(request, env);
     if (method === 'DELETE' && pathname === '/api/ratings') return unrate(request, env);
+    if (method === 'POST' && pathname === '/api/ratings/key') return keyRatings(request, env);
+    if (method === 'POST' && pathname === '/api/ratings/join') return joinRatings(request, env);
     if (method === 'GET' && pathname === '/api/reviews') return placeReviews(request, env);
     if (pathname.startsWith('/api/')) return problem(404, 'not-found');
     if (pathname === '/admin' || pathname.startsWith('/admin/')) {

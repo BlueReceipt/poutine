@@ -1,4 +1,6 @@
-import { useEffect, useRef } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { backupLink } from '../domain/backup.ts';
+import { keepStorage, myRatings, savedRater } from './rater.ts';
 import type { Language, Strings } from './strings.ts';
 
 interface Props {
@@ -26,7 +28,8 @@ const RATING_SCALE = '/examples/rating-scale.webp';
  * pronounced pootsin area. Where people can select french or english, and eventually we can add
  * other things"): opened by the app's name in the search bar. The language: the phone's, French or
  * English, kept on this phone, every word in the menu's own language ("French secret menu
- * shouldn't have English on its tab"). Then what counts as poutine (fries, sauce brune, curds,
+ * shouldn't have English on its tab"). The backup link that brings this browser's ratings back
+ * (2026-10-21). Then what counts as poutine (fries, sauce brune, curds,
  * nothing less), Alex's rating scale with "Pootsin, not poo-teen" back in English, then poutine's
  * history, two articles ("put what counts as poutine, over the history section").
  */
@@ -73,6 +76,8 @@ export function Settings({ strings, chosen, onLanguage, onClose }: Props) {
           </button>
         ))}
       </div>
+      <h3>{words.backup.title}</h3>
+      <BackupLink words={words.backup} />
       <h3>{words.counts.title}</h3>
       <ul class="counts">
         {words.counts.items.map((item) => (
@@ -123,5 +128,64 @@ export function Settings({ strings, chosen, onLanguage, onClose }: Props) {
         ))}
       </ul>
     </section>
+  );
+}
+
+/**
+ * The backup link (Alex, 2026-10-21: "lets do the link in the secret menu"): this browser's key,
+ * whole and selectable, to copy or send to oneself; either asks the browser to keep the site's
+ * data. Before any rating there's no key yet, and the menu says where the link will show.
+ */
+function BackupLink({ words }: { words: Strings['settings']['backup'] }) {
+  const shown = useRef<HTMLElement>(null);
+  const [copied, setCopied] = useState(false);
+  const rater = savedRater();
+  if (!rater || Object.keys(myRatings()).length === 0) return <p class="hint">{words.empty}</p>;
+  const link = backupLink(rater);
+  // Where copying isn't allowed, the link is selected for the visitor to copy.
+  const select = () => {
+    const range = document.createRange();
+    if (!shown.current) return;
+    range.selectNodeContents(shown.current);
+    window.getSelection()?.removeAllRanges();
+    window.getSelection()?.addRange(range);
+  };
+  return (
+    <>
+      <p>{words.text}</p>
+      <p class="key-link">
+        <code ref={shown}>{link}</code>
+      </p>
+      <div class="actions">
+        <button
+          type="button"
+          class="action primary"
+          onClick={() => {
+            keepStorage();
+            navigator.clipboard
+              .writeText(link)
+              .then(() => {
+                setCopied(true);
+              })
+              .catch(select);
+          }}
+        >
+          {copied ? words.copied : words.copy}
+        </button>
+        {'share' in navigator && (
+          <button
+            type="button"
+            class="action"
+            onClick={() => {
+              keepStorage();
+              navigator.share({ title: words.title, url: link }).catch(() => undefined);
+            }}
+          >
+            {words.send}
+          </button>
+        )}
+      </div>
+      <p class="hint">{words.keep}</p>
+    </>
   );
 }

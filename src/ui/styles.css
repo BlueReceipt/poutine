@@ -402,6 +402,17 @@ body,
   right: max(8px, calc((100% - 640px) / 2 - 8px));
 }
 
+/* The backup link, whole and selectable, broken anywhere on a phone. */
+.card .key-link code {
+  display: block;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #f1efe9;
+  font-size: var(--text-secondary);
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
 .card.settings h3 {
   margin: 16px 0 8px;
   font-size: var(--text);

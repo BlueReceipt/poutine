@@ -27,6 +27,46 @@ export function raterId(): string {
   }
 }
 
+/** This browser's random ID if it has one (it rated something once), without making one. */
+export function savedRater(): string | null {
+  try {
+    return localStorage.getItem(RATER);
+  } catch {
+    return visitRater;
+  }
+}
+
+/**
+ * A backup link's key taken as this browser's own, with the ratings it gave and their codes
+ * (the Worker's answer): the bowls, the counter, and the ratings to change or take back.
+ */
+export function adoptRater(
+  key: string,
+  ratings: Record<string, number>,
+  codes: Record<string, string>,
+): void {
+  visitRater = key;
+  try {
+    localStorage.setItem(RATER, key);
+    localStorage.setItem(MINE, JSON.stringify(ratings));
+    localStorage.setItem(CODES, JSON.stringify(codes));
+  } catch {
+    // Storage off: the key serves this visit only.
+  }
+}
+
+/**
+ * Ask the browser to keep this site's data rather than clear it on its own (Safari empties a
+ * site's after seven days away); it may ask the visitor, or say no.
+ */
+export function keepStorage(): void {
+  try {
+    void navigator.storage.persist().catch(() => false);
+  } catch {
+    // An older browser: nothing to ask.
+  }
+}
+
 /** Every place this browser rated, with its stars. */
 export function myRatings(): Record<string, number> {
   try {

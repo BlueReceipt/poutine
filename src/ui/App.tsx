@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import placesUrl from '../../data/places.json?url';
 import { applyFixes, type Fix } from '../domain/addressFixes.ts';
+import { keyFromHash } from '../domain/backup.ts';
 import { groupByAddress } from '../domain/groups.ts';
 import { placeIdFromPath, placePath } from '../domain/links.ts';
 import { linkFromPath, searchFor } from '../domain/shortLinks.ts';
@@ -15,6 +16,7 @@ import { closeWelcome, myRatings, nothingSaved } from './rater.ts';
 import { NearbyList, type NearState } from './NearbyList.tsx';
 import { PlaceCard } from './PlaceCard.tsx';
 import { SearchBar } from './SearchBar.tsx';
+import { Restore } from './Restore.tsx';
 import { Settings } from './Settings.tsx';
 import { chosenLanguage } from './settings.ts';
 import { Tally } from './Tally.tsx';
@@ -70,6 +72,17 @@ export function App({
   const [tally, setTally] = useState(false);
   // The secret menu, behind the app's name.
   const [settings, setSettings] = useState(false);
+  // A backup link opened (#cle=…, the secret menu's): its ratings come back (Restore). The key
+  // leaves the address bar at once, so the browser's own Share never passes it on.
+  const [backupKey, setBackupKey] = useState<string | null>(() => {
+    const key = keyFromHash(window.location.hash);
+    if (key) history.replaceState(null, '', window.location.pathname + window.location.search);
+    return key;
+  });
+  const restored = useCallback(() => {
+    setMine(myRatings());
+    setWelcome(false);
+  }, []);
   const seq = useRef(0);
   const failed = useCallback(() => {
     setState({ kind: 'failed' });
@@ -352,7 +365,16 @@ export function App({
           {strings.mapFailed}
         </p>
       )}
-      {adding && places ? (
+      {backupKey ? (
+        <Restore
+          backupKey={backupKey}
+          strings={strings}
+          onRestored={restored}
+          onClose={() => {
+            setBackupKey(null);
+          }}
+        />
+      ) : adding && places ? (
         <AddPlace
           places={places}
           strings={strings}

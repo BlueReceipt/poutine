@@ -82,6 +82,76 @@ export async function unrate(request: Request, env: Env): Promise<Response> {
   return json({ total: total ?? { count: 0, total: 0 } });
 }
 
+/** Every rating a rater gave, by place, with the code a shared link carries with its stars. */
+async function ratingsOfRater(
+  env: Env,
+  rater: string,
+): Promise<{ ratings: Record<string, number>; codes: Record<string, string> }> {
+  const { results } = await env.DB.prepare('SELECT place, stars FROM ratings WHERE rater = ?')
+    .bind(rater)
+    .all<{ place: string; stars: number }>();
+  const codes = await Promise.all(
+    results.map(
+      async ({ place, stars }) => [place, await friendCode(env.LINK_SECRET, place, stars)] as const,
+    ),
+  );
+  return {
+    ratings: Object.fromEntries(results.map(({ place, stars }) => [place, stars])),
+    codes: Object.fromEntries(codes),
+  };
+}
+
+/** The keys a backup link's request names: each a rater's random ID. */
+async function keysOf(request: Request): Promise<Record<string, unknown> | null> {
+  if (!fromThisSite(request)) return null;
+  const body = await jsonBody(request, 1024);
+  return body && typeof body === 'object' && !Array.isArray(body)
+    ? (body as Record<string, unknown>)
+    : null;
+}
+
+/**
+ * POST /api/ratings/key {key}: the ratings a backup link's key gave (Alex, 2026-10-21: "if i clear
+ * my cache or local browser history, ill erase my data"), for the browser that opens the link. The
+ * key is a rater's random ID: whoever holds it holds its ratings, as the browser that made it did.
+ */
+export async function keyRatings(request: Request, env: Env): Promise<Response> {
+  const body = await keysOf(request);
+  if (!body) return problem(403, 'other-site');
+  if (!isRaterId(body.key)) return problem(400, 'not-a-key');
+  return json(await ratingsOfRater(env, body.key));
+}
+
+/**
+ * POST /api/ratings/join {key, rater}: on the visitor's yes, the ratings this browser gave (its
+ * own random ID, rater) joined to a backup link's key: a place both rated keeps the key's, the rest
+ * move under the key, the places' totals counted again. Only a key that gave ratings takes others
+ * (a made-up key can't gather a stranger's). The key's ratings come back, codes and all.
+ */
+export async function joinRatings(request: Request, env: Env): Promise<Response> {
+  const body = await keysOf(request);
+  if (!body) return problem(403, 'other-site');
+  const { key, rater } = body;
+  if (!isRaterId(key) || !isRaterId(rater) || key === rater) return problem(400, 'not-a-key');
+  const given = await env.DB.prepare('SELECT COUNT(*) AS n FROM ratings WHERE rater = ?')
+    .bind(key)
+    .first<{ n: number }>();
+  if ((given?.n ?? 0) === 0) return problem(404, 'empty-key');
+  const { results: both } = await env.DB.prepare(
+    'SELECT place FROM ratings WHERE rater = ? AND place IN (SELECT place FROM ratings WHERE rater = ?)',
+  )
+    .bind(rater, key)
+    .all<{ place: string }>();
+  await env.DB.batch([
+    env.DB.prepare(
+      'DELETE FROM ratings WHERE rater = ? AND place IN (SELECT place FROM ratings WHERE rater = ?)',
+    ).bind(rater, key),
+    env.DB.prepare('UPDATE ratings SET rater = ? WHERE rater = ?').bind(key, rater),
+    ...both.map(({ place }) => totalsAgain(env, place)),
+  ]);
+  return json(await ratingsOfRater(env, key));
+}
+
 export async function rate(request: Request, env: Env): Promise<Response> {
   if (!fromThisSite(request)) return problem(403, 'other-site');
   const body = await jsonBody(request, 4 * 1024);
