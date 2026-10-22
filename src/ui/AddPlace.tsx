@@ -5,6 +5,7 @@ import { metersBetween, type Place } from '../domain/osmPlaces.ts';
 import { townText } from '../domain/placeText.ts';
 import { checkNewPlace, type PlacedBy, type Problem } from '../domain/submission.ts';
 import { noFixOf, whereAmI } from './location.ts';
+import { raterId } from './rater.ts';
 import type { AddProblem, Strings } from './strings.ts';
 import { useBotCheck } from './useBotCheck.ts';
 
@@ -215,7 +216,8 @@ export function AddPlace(props: Props) {
       const response = await fetch('/api/places', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...fields, botCheck: check }),
+        // The browser's random ID (hashed by the Worker): two visitors on the spot list a place.
+        body: JSON.stringify({ ...fields, botCheck: check, visitor: raterId() }),
       });
       if (response.status === 201) {
         onPick(null);

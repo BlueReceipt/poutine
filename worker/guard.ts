@@ -21,8 +21,8 @@ export async function passedBotCheck(token: unknown, ip: string, secret: string)
   }
 }
 
-/** A keyed hash of the connection's address and the day: the same sender today, never the address. */
-export async function senderKey(ip: string, day: string, secret: string): Promise<string> {
+/** A keyed hash of a text: the same text gives the same key, and the key never gives the text. */
+async function keyedHash(text: string, secret: string): Promise<string> {
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey(
     'raw',
@@ -31,11 +31,28 @@ export async function senderKey(ip: string, day: string, secret: string): Promis
     false,
     ['sign'],
   );
-  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(`${day}|${ip}`));
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(text));
   return [...new Uint8Array(signature)]
     .slice(0, 16)
     .map((byte) => byte.toString(16).padStart(2, '0'))
     .join('');
+}
+
+/** A keyed hash of the connection's address and the day: the same sender today, never the address. */
+export function senderKey(ip: string, day: string, secret: string): Promise<string> {
+  return keyedHash(`${day}|${ip}`, secret);
+}
+
+/**
+ * The same connection whatever the day, and the same browser (its random ID), as keyed hashes: to
+ * tell two visitors on the spot from one person twice (src/domain/onTheSpot.ts).
+ */
+export function connectionKey(ip: string, secret: string): Promise<string> {
+  return keyedHash(`connection|${ip}`, secret);
+}
+
+export function visitorKey(rater: string, secret: string): Promise<string> {
+  return keyedHash(`visitor|${rater}`, secret);
 }
 
 export const KEEP_SENDER_DAYS = 30;

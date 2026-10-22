@@ -6,7 +6,7 @@ import { EmailMessage } from 'cloudflare:email';
 import type { PlaceChange } from '../src/domain/changes.ts';
 import type { Place } from '../src/domain/osmPlaces.ts';
 import type { NewPlace } from '../src/domain/submission.ts';
-import { changeMail, FROM, newPlaceMail } from './mailText.ts';
+import { changeMail, FROM, newPlaceMail, spotMail } from './mailText.ts';
 
 /** Sends it after the visitor's answer has gone; a failure only goes to the Worker's log. */
 export function mailLater(env: Env, ctx: ExecutionContext, id: number, place: NewPlace): void {
@@ -15,6 +15,23 @@ export function mailLater(env: Env, ctx: ExecutionContext, id: number, place: Ne
   ctx.waitUntil(
     env.MAIL.send(new EmailMessage(FROM, env.MAIL_TO, raw)).catch((error: unknown) => {
       console.error('The new-place email was not sent:', error);
+    }),
+  );
+}
+
+/** The same for a place two visitors on the spot listed: what's on the map now, and where to take it off. */
+export function mailSpotLater(
+  env: Env,
+  ctx: ExecutionContext,
+  first: number,
+  second: number,
+  place: NewPlace,
+): void {
+  if (!env.MAIL_TO) return;
+  const raw = spotMail(first, second, place, env.MAIL_TO, new Date());
+  ctx.waitUntil(
+    env.MAIL.send(new EmailMessage(FROM, env.MAIL_TO, raw)).catch((error: unknown) => {
+      console.error('The on-the-spot email was not sent:', error);
     }),
   );
 }

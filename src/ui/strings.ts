@@ -335,6 +335,13 @@ export interface AdminWords {
   confirmHint: string;
   changeApproved: (name: string) => string;
   changeRejected: (name: string) => string;
+  /** The places two visitors on the spot listed, for Alex to take off if he must. */
+  byVisitorsTitle: string;
+  byVisitorsNote: string;
+  listedOn: (when: string) => string;
+  remove: string;
+  removeSure: string;
+  removed: (name: string) => string;
 }
 
 export interface AddWords {
@@ -646,6 +653,13 @@ const english: Strings = {
     changeApproved: (name) =>
       `The change to ${name} is approved: it shows on the map within a minute.`,
     changeRejected: (name) => `The change to ${name} is rejected.`,
+    byVisitorsTitle: 'Listed by two visitors on the spot',
+    byVisitorsNote:
+      'Two visitors sent each of these from where it stands, so it went on the map without you. Remove one that shouldn’t be there.',
+    listedOn: (when) => `On the map since ${when}`,
+    remove: 'Remove',
+    removeSure: 'Tap again to remove',
+    removed: (name) => `${name} is off the map.`,
   },
   edit: {
     open: 'Add info or claim this spot',
@@ -1029,6 +1043,13 @@ const french: Strings = {
     changeApproved: (name) =>
       `Le changement à ${name} est approuvé${NBSP}: il apparaît sur la carte d’ici une minute.`,
     changeRejected: (name) => `Le changement à ${name} est refusé.`,
+    byVisitorsTitle: 'Ajoutées par deux visiteurs sur place',
+    byVisitorsNote:
+      'Deux visiteurs ont envoyé chacune de ces places de l’endroit même : elle est allée sur la carte sans vous. Retirez celle qui ne devrait pas y être.',
+    listedOn: (when) => `Sur la carte depuis le ${when}`,
+    remove: 'Retirer',
+    removeSure: 'Touchez encore pour retirer',
+    removed: (name) => `${name} n’est plus sur la carte.`,
   },
   edit: {
     open: 'Ajouter de l’info ou réclamer ce commerce',

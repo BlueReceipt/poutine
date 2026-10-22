@@ -291,6 +291,11 @@ export function poutineEvidence(
   return EVIDENCE_OF[why];
 }
 
+/** A name that names a chain (McDonald's, La Belle Province…), however it's written. */
+export function isChainName(name: string): boolean {
+  return CHAINS.test(fold(name));
+}
+
 export function isChain(tags: Record<string, string>): boolean {
   return Boolean(tags.brand || tags['brand:wikidata']) || CHAINS.test(fold(tags.name ?? ''));
 }

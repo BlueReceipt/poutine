@@ -2,6 +2,7 @@
 // once, with no push"): the app adds them to the list it ships, until `npm run fold` puts them in
 // data/added.json and data/places.json.
 import type { Place } from '../src/domain/osmPlaces.ts';
+import { linkForNewPlace } from '../src/domain/shortLinks.ts';
 import {
   approvedPlace,
   newPlaceOfRow,
@@ -9,6 +10,7 @@ import {
   type SubmissionRow,
 } from '../src/domain/submission.ts';
 import { json } from './http.ts';
+import { givenLinks, listed } from './list.ts';
 
 /**
  * How long Cloudflare keeps the approved places, in seconds; each approval empties it. Browsers
@@ -40,6 +42,15 @@ export async function approvedPlaces(env: Env, link?: string): Promise<Place[]> 
     ...approvedPlace(row.id, newPlaceOfRow(row)),
     link: row.link ?? undefined,
   }));
+}
+
+/** A short link for a place just approved: one no place has, in the list or approved here. */
+export function linkForApproved(approved: Place, others: readonly Place[]): string {
+  const given = {
+    ...givenLinks,
+    ...Object.fromEntries(others.flatMap((other) => (other.link ? [[other.osm, other.link]] : []))),
+  };
+  return linkForNewPlace(approved, [...listed, ...others], given);
 }
 
 /** GET /api/added: the approved places for the map, kept a minute by Cloudflare only. */

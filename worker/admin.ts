@@ -9,7 +9,6 @@ import {
   fixOfChange,
   type ChangeRow,
 } from '../src/domain/changes.ts';
-import { linkForNewPlace } from '../src/domain/shortLinks.ts';
 import {
   approvedPlace,
   checkNewPlace,
@@ -18,10 +17,9 @@ import {
   type SubmissionRow,
 } from '../src/domain/submission.ts';
 import { signedInAlex } from './access.ts';
-import { ADDED_PATH, approvedPlaces } from './added.ts';
+import { ADDED_PATH, approvedPlaces, linkForApproved } from './added.ts';
 import { CHANGES_PATH, currentPlace } from './changes.ts';
 import { fromThisSite, json, jsonBody, problem } from './http.ts';
-import { givenLinks, listed } from './list.ts';
 
 /** GET /admin: the page itself, only for Alex; never kept by a browser or Cloudflare. */
 export async function adminPage(request: Request, env: Env): Promise<Response> {
@@ -39,16 +37,21 @@ export async function adminPage(request: Request, env: Env): Promise<Response> {
 
 /**
  * GET /api/admin/waiting: the places waiting, and the changes and claims waiting with the place as
- * the map shows it now, oldest first.
+ * the map shows it now, oldest first; then the places two visitors on the spot approved, newest
+ * first, for Alex to take off if he must.
  */
 export async function waitingPlaces(request: Request, env: Env): Promise<Response> {
   if (!(await signedInAlex(request, env))) return problem(403, 'not-signed-in');
-  const [places, changes] = await env.DB.batch([
+  const [places, changes, byVisitors] = await env.DB.batch([
     env.DB.prepare(
       `SELECT ${SUBMISSION_COLUMNS} FROM submissions WHERE status = 'pending' ORDER BY created_at`,
     ),
     env.DB.prepare(
       `SELECT ${CHANGE_COLUMNS} FROM changes WHERE status = 'pending' ORDER BY created_at`,
+    ),
+    env.DB.prepare(
+      `SELECT ${SUBMISSION_COLUMNS}, reviewed_at FROM submissions
+        WHERE status = 'approved' AND approved_by = 'visitors' ORDER BY reviewed_at DESC LIMIT 50`,
     ),
   ]);
   const withPlaces = await Promise.all(
@@ -60,6 +63,7 @@ export async function waitingPlaces(request: Request, env: Env): Promise<Respons
   return json({
     waiting: (places?.results ?? []) as SubmissionRow[],
     changes: withPlaces.filter((row) => row.current !== null),
+    byVisitors: (byVisitors?.results ?? []) as SubmissionRow[],
   });
 }
 
@@ -131,10 +135,11 @@ async function reviewChange(
 }
 
 /**
- * POST /api/admin/review {id, decision: "approve" | "reject", place?}: one place decided (with
- * kind "change" and `change`, one change or claim: reviewChange). On
- * Approve, `place` holds Alex's fixes as the form's fields, checked like a visitor's; the place
- * gets its short link and shows on the map within the minute the approved places are kept.
+ * POST /api/admin/review {id, decision: "approve" | "reject" | "remove", place?}: one place decided
+ * (with kind "change" and `change`, one change or claim: reviewChange). On Approve, `place` holds
+ * Alex's fixes as the form's fields, checked like a visitor's; the place gets its short link and
+ * shows on the map within the minute the approved places are kept. Remove takes off a place two
+ * visitors on the spot approved (its link stays given, opening nothing).
  */
 export async function reviewPlace(
   request: Request,
@@ -149,6 +154,17 @@ export async function reviewPlace(
   if (typeof id !== 'number' || !Number.isInteger(id) || id <= 0)
     return problem(400, 'not-a-review');
   if (kind === 'change') return reviewChange(request, env, ctx, id, decision, change);
+  if (decision === 'remove') {
+    const removed = await env.DB.prepare(
+      `UPDATE submissions SET status = 'removed', reviewed_at = ?
+        WHERE id = ? AND status = 'approved' AND approved_by = 'visitors'`,
+    )
+      .bind(new Date().toISOString(), id)
+      .run();
+    if (removed.meta.changes === 0) return problem(409, 'not-waiting');
+    ctx.waitUntil(caches.default.delete(new Request(new URL(ADDED_PATH, request.url))));
+    return json({ removed: id });
+  }
   const row = await env.DB.prepare(
     `SELECT ${SUBMISSION_COLUMNS} FROM submissions WHERE id = ? AND status = 'pending'`,
   )
@@ -174,16 +190,11 @@ export async function reviewPlace(
     place = checked.place;
   }
   const approved = approvedPlace(id, place);
-  const others = await approvedPlaces(env);
-  const given = {
-    ...givenLinks,
-    ...Object.fromEntries(others.flatMap((other) => (other.link ? [[other.osm, other.link]] : []))),
-  };
-  const link = linkForNewPlace(approved, [...listed, ...others], given);
+  const link = linkForApproved(approved, await approvedPlaces(env));
   await env.DB.prepare(
     `UPDATE submissions SET name = ?, housenumber = ?, street = ?, city = ?, province = ?,
       postcode = ?, lat = ?, lon = ?, placed_by = ?, phone = ?, website = ?,
-      status = 'approved', reviewed_at = ?, link = ?
+      status = 'approved', reviewed_at = ?, link = ?, approved_by = 'alex'
       WHERE id = ? AND status = 'pending'`,
   )
     .bind(

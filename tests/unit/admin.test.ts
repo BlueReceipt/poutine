@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { linkForNewPlace } from '../../src/domain/shortLinks.ts';
 import { formOf, type NewPlace } from '../../src/domain/submission.ts';
 import { signedInAlex } from '../../worker/access.ts';
-import { newPlaceMail } from '../../worker/mailText.ts';
+import { newPlaceMail, spotMail } from '../../worker/mailText.ts';
 
 const sent: NewPlace = {
   name: 'Cantine Trempette',
@@ -74,6 +74,24 @@ describe('the new-place email', () => {
     expect(text).toContain('12 Rue Principale, Saint-Rémi, QC');
     expect(text).toContain('https://poutines.app/admin');
     expect(text).not.toMatch(/approve\?|api\/admin|decision/);
+  });
+});
+
+describe('the email for a place two visitors listed', () => {
+  const raw = spotMail(7, 9, sent, 'alex@example.test', new Date('2026-10-22T03:00:00Z'));
+  const [headers = '', body = ''] = raw.split('\r\n\r\n');
+  const text = Buffer.from(body.replaceAll('\r\n', ''), 'base64').toString('utf8');
+
+  it('says it is on the map already, from both sends, and where to remove it', () => {
+    const subject = /Subject: =\?UTF-8\?B\?([^?]+)\?=/.exec(headers)?.[1] ?? '';
+    expect(Buffer.from(subject, 'base64').toString('utf8')).toBe(
+      'Listed by two visitors: Cantine Trempette (Saint-Rémi)',
+    );
+    expect(text).toContain('#7 and #9');
+    expect(text).toContain('on the map now');
+    expect(text).toContain('12 Rue Principale, Saint-Rémi, QC');
+    expect(text).toContain('remove it here: https://poutines.app/admin');
+    expect(text).not.toMatch(/api\/admin|decision/);
   });
 });
 

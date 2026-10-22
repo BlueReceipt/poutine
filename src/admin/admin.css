@@ -156,3 +156,17 @@ body,
   color: var(--graphite);
   font-weight: 700;
 }
+
+/* A place two visitors listed: its words, then Remove under them. */
+.admin .listed {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 0;
+  border-bottom: 1px solid #d6d6d2;
+}
+
+.admin .listed .action {
+  align-self: flex-start;
+  margin-top: 6px;
+}

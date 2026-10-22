@@ -15,7 +15,7 @@ function telling(name: string): string[] {
 }
 
 /** Two names share a word that says which place it is, or neither has one ("Casse-croûte"). */
-function alike(a: string, b: string): boolean {
+export function alike(a: string, b: string): boolean {
   const left = telling(a);
   const right = telling(b);
   if (left.length === 0 || right.length === 0) return left.length === right.length;

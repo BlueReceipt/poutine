@@ -66,14 +66,46 @@ export function changeMail(
   return mailOf(`${what}: ${place.name}${place.city ? ` (${place.city})` : ''}`, body, to, now);
 }
 
-export function newPlaceMail(id: number, place: NewPlace, to: string, now: Date): string {
-  const where = [
-    [place.housenumber, place.street].filter(Boolean).join(' '),
-    place.city,
-    place.province,
-  ]
+/** A place's address on one line, as far as it was sent. */
+function addressLine(place: NewPlace): string {
+  return [[place.housenumber, place.street].filter(Boolean).join(' '), place.city, place.province]
     .filter(Boolean)
     .join(', ');
+}
+
+/**
+ * A place two visitors on the spot listed (src/domain/onTheSpot.ts): it's on the map already; the
+ * approval page can take it off. Nothing in the email takes it off.
+ */
+export function spotMail(
+  first: number,
+  second: number,
+  place: NewPlace,
+  to: string,
+  now: Date,
+): string {
+  const body = [
+    `Two visitors sent this place from where it stands (#${String(first)} and #${String(second)}), so it is on the map now:`,
+    '',
+    place.name,
+    addressLine(place),
+    ...(place.phone ? [`Phone: ${place.phone}`] : []),
+    ...(place.website ? [`Web: ${place.website}`] : []),
+    '',
+    `If it shouldn't be there, remove it here: ${ADMIN}`,
+    '',
+    'Nothing in this email removes anything.',
+  ].join('\r\n');
+  return mailOf(
+    `Listed by two visitors: ${place.name}${place.city ? ` (${place.city})` : ''}`,
+    body,
+    to,
+    now,
+  );
+}
+
+export function newPlaceMail(id: number, place: NewPlace, to: string, now: Date): string {
+  const where = addressLine(place);
   const body = [
     `A place is waiting for your approval (#${String(id)}):`,
     '',
