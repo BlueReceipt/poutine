@@ -357,17 +357,20 @@ export async function linkPreview(strings: Strings): Promise<Blob> {
 /**
  * The app's home-screen icon (public/icons/, listed in the manifest): the poutine poop of bowl 1 on
  * cream, as on the link previews, in place of the old bowl logo (Alex, 2026-10-20: "this needs to
- * be removed everywhere"). Maskable fills the square and keeps the poop inside the middle 80%,
- * which Android may crop to a circle. Made once in a browser, like the link preview.
+ * be removed everywhere"). Maskable (Android) fills the square, the poop as big as the middle 80%
+ * allows, since Android may crop to a circle that small (Alex, 2026-10-23: "bigger on Android"):
+ * his farthest fry is 0.445 of his width from his middle. Apple (the iPhone's apple-touch-icon,
+ * 180 px) fills the square too, for iPhones round its corners themselves and turn anything
+ * see-through black. Made once in a browser, like the link preview.
  */
-export async function appIcon(size: number, maskable: boolean): Promise<Blob> {
+export async function appIcon(size: number, kind: 'any' | 'maskable' | 'apple'): Promise<Blob> {
   const context = canvasOf(size, size);
   context.fillStyle = CREAM;
   context.beginPath();
-  if (maskable) context.rect(0, 0, size, size);
-  else context.roundRect(0, 0, size, size, size * 0.22);
+  if (kind === 'any') context.roundRect(0, 0, size, size, size * 0.22);
+  else context.rect(0, 0, size, size);
   context.fill();
-  const poop = size * (maskable ? 0.62 : 0.8);
+  const poop = size * (kind === 'maskable' ? 0.88 : 0.8);
   drawBowl(context, 1, 1, (size - poop) / 2, size / 2 - poop * 0.535, poop);
   return blobOf(context);
 }
